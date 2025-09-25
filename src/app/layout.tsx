@@ -32,10 +32,10 @@ export default function RootLayout({
         <footer className="footer">
           <div className="container">
             <div className="footer-content">
-              {/* Row 1: Relight EAL | Quick Links */}
+              {/* Row 1: AL MESBAH ALABYAD LIGHTS TRADING L.L.C | Quick Links */}
               <div className="footer-row">
                 <div className="footer-section">
-                  <h3>Relight EAL</h3>
+                  <h3>AL MESBAH ALABYAD LIGHTS TRADING L.L.C</h3>
                   <p>Premium lighting solutions for your home and business. Quality LED lights and modern fixtures.</p>
                   <div className="footer-contact">
                     <p>📍 International City, Dragon Mart, Near EB2 Gate</p>
@@ -80,7 +80,7 @@ export default function RootLayout({
             </div>
             
             <div className="footer-bottom">
-              <p>&copy; 2024 Relight EAL. All rights reserved.</p>
+              <p>&copy; 2024 AL MESBAH ALABYAD LIGHTS TRADING L.L.C. All rights reserved.</p>
             </div>
           </div>
         </footer>
