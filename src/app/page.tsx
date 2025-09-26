@@ -167,12 +167,9 @@ export default function Home() {
           </div>
 
           {/* Products Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)', // Mobile: 2 columns
-            gap: '1rem',
+          <div className="new-products-grid" style={{
             marginTop: '2rem'
-          }} className="new-products-grid">
+          }}>
             {loading ? (
               <div style={{ 
                 gridColumn: '1 / -1', 
