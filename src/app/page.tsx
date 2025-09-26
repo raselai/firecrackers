@@ -12,6 +12,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'indoor' | 'outdoor'>('indoor');
 
   const heroImages = [
     '/images/hero/hero-1.jpg',
@@ -57,25 +58,18 @@ export default function Home() {
   // Get seasonal sale products (products that are on sale)
   const seasonalProducts = products.filter((product: any) => product.isOnSale).slice(0, 6);
 
-  const categories = [
-    { name: 'Hanging Lights', href: '/categories/hanging-lights', icon: '💎', image: '/images/categories/hanging-light.jpg' },
-    { name: 'Spotlight', href: '/categories/spotlight', icon: '💡', image: '/images/categories/Spot-Lights.jpg' },
-    { name: 'Pendant Lights', href: '/categories/pendant-lights', icon: '✨', image: '/images/categories/pandent-light.jpg' },
-    { name: 'Magnetic Light', href: '/categories/magnetic-light', icon: '🧲', image: '/images/categories/Megnetic-lights.jpg' },
-    { name: 'LED Tube', href: '/categories/led-tube', icon: '📏', image: '/images/categories/Led-tube.jpg' },
-    { name: 'Office Lights', href: '/categories/office-lights', icon: '🏢', image: '/images/categories/Office-lights.jpg' },
-    { name: 'Warehouse Light', href: '/categories/warehouse-light', icon: '🏭', image: '/images/categories/Warehouse-light.jpg' },
-    { name: 'LED Strip', href: '/categories/led-strip', icon: '🌈', image: '/images/categories/Led-strip.jpg' },
-    { name: 'Aluminum Profile', href: '/categories/aluminum-profile', icon: '🔧', image: '/images/categories/aluminumProfile-Lights.jpg' },
-    { name: 'Mirror Light', href: '/categories/mirror-light', icon: '🪞', image: '/images/categories/Mirror-lights.jpg' },
-    { name: 'LED Track Lights', href: '/categories/led-track-lights', icon: '🎯', image: '/images/categories/Led-track-lights.jpg' },
-    { name: 'Wall', href: '/categories/wall', icon: '🏠', image: '/images/categories/Wall-lights.jpg' },
-    { name: 'Stand', href: '/categories/stand', icon: '🛣️', image: '/images/categories/Stand-lights.jpg' },
-    { name: 'Garden Light', href: '/categories/garden-light', icon: '🌿', image: '/images/categories/garden-lights.jpeg' },
-    { name: 'Floodlight', href: '/categories/floodlight', icon: '🔦', image: '/images/categories/flood-lights.jpg' },
-    { name: 'Solar Light', href: '/categories/solar-light', icon: '☀️', image: '/images/categories/Solar-lights.jpg' },
-    { name: 'Others', href: '/categories/others', icon: '✨', image: '/images/categories/ceiling-lights.jpg' }
-  ];
+  // Filter products by category for the new products section
+  const indoorProducts = products.filter((product: any) => 
+    product.category && product.category.toLowerCase().includes('indoor')
+  ).slice(0, 20);
+
+  const outdoorProducts = products.filter((product: any) => 
+    product.category && product.category.toLowerCase().includes('outdoor')
+  ).slice(0, 20);
+
+  // Get current tab products
+  const currentTabProducts = activeTab === 'indoor' ? indoorProducts : outdoorProducts;
+
 
   return (
     <div>
@@ -102,55 +96,157 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Categories */}
+      {/* New Products Section */}
       <section style={{ padding: '4rem 0', backgroundColor: '#f9fafb' }}>
         <div className="container">
-          <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '3rem' }}>
-              Featured Categories
+          <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem' }}>
+            New Products
             </h2>
-          <div className="featured-categories-grid">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                href={category.href}
+          
+          {/* Tabs */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginBottom: '2rem',
+            gap: '1rem'
+          }}>
+            <button
+              onClick={() => setActiveTab('indoor')}
+              style={{
+                padding: '0.75rem 2rem',
+                background: activeTab === 'indoor' ? '#8b5cf6' : 'white',
+                color: activeTab === 'indoor' ? 'white' : '#374151',
+                border: '2px solid #8b5cf6',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'indoor') {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'indoor') {
+                  e.currentTarget.style.background = 'white';
+                }
+              }}
+            >
+              Indoor Lights
+            </button>
+            <button
+              onClick={() => setActiveTab('outdoor')}
                 style={{
-                  backgroundColor: 'white',
-                  padding: '1rem',
+                padding: '0.75rem 2rem',
+                background: activeTab === 'outdoor' ? '#8b5cf6' : 'white',
+                color: activeTab === 'outdoor' ? 'white' : '#374151',
+                border: '2px solid #8b5cf6',
                   borderRadius: '8px',
-                  textAlign: 'center',
-                  border: '1px solid #e5e7eb',
                   cursor: 'pointer',
-                  textDecoration: 'none',
-                  color: 'inherit',
+                fontWeight: '600',
+                fontSize: '1rem',
                   transition: 'all 0.3s ease',
-                  overflow: 'hidden'
+                fontFamily: 'Inter, sans-serif'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
+                if (activeTab !== 'outdoor') {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
+                if (activeTab !== 'outdoor') {
+                  e.currentTarget.style.background = 'white';
+                }
+              }}
+            >
+              Outdoor Lights
+            </button>
+          </div>
+
+          {/* Products Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)', // Mobile: 2 columns
+            gap: '1rem',
+            marginTop: '2rem'
+          }} className="new-products-grid">
+            {loading ? (
+              <div style={{ 
+                gridColumn: '1 / -1', 
+                textAlign: 'center', 
+                padding: '2rem' 
+              }}>
+                <p>Loading products...</p>
+              </div>
+            ) : currentTabProducts.length > 0 ? (
+              currentTabProducts.map((product) => (
+                <div key={product.id} className="product-card">
+                  <Link
+                    href={`/products/${product.id}`}
+                    style={{
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      display: 'block'
                 }}
               >
                 <div style={{ 
-                  height: '120px', 
+                      height: '200px', 
                   position: 'relative', 
+                      borderRadius: '8px',
                   marginBottom: '1rem',
-                  borderRadius: '6px',
                   overflow: 'hidden'
                 }}>
                   <Image
-                    src={category.image}
-                    alt={category.name}
+                        src={getProductImagePath(product, product.category)}
+                        alt={product.name}
                     fill
                     style={{ objectFit: 'cover' }}
                   />
                 </div>
-                <h3 style={{ margin: 0, fontSize: '1rem' }}>{category.name}</h3>
+                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>
+                      {product.name}
+                    </h3>
+                    <p style={{ color: '#6b7280', margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
+                      {product.category}
+                    </p>
+                    <p style={{ color: '#6b7280', margin: '0 0 1rem 0', fontSize: '0.85rem' }}>
+                      {product.description && product.description.length > 80 
+                        ? product.description.substring(0, 80) + '...' 
+                        : product.description}
+                    </p>
               </Link>
-            ))}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center' 
+                  }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#8b5cf6' }}>
+                      AED {product.price.toLocaleString()}
+                    </span>
+                    <WhatsAppIcon 
+                      onClick={() => {
+                        const message = `Hi! I'm interested in the ${product.name} priced at AED ${product.price.toLocaleString()}. Can you provide more details?`;
+                        const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
+                        window.open(whatsappUrl, '_blank');
+                      }}
+                      size={18}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ 
+                gridColumn: '1 / -1', 
+                textAlign: 'center', 
+                padding: '2rem',
+                color: '#6b7280'
+              }}>
+                <p>No {activeTab} products available at the moment.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

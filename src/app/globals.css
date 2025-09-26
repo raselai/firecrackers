@@ -895,16 +895,16 @@ h1, h2, h3 {
   }
 }
 
-/* Featured Categories responsive grid */
-.featured-categories-grid {
+/* New Products Section responsive grid */
+.new-products-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* Mobile: 2 columns */
   gap: 1rem;
 }
 
 @media (min-width: 768px) {
-  .featured-categories-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .new-products-grid {
+    grid-template-columns: repeat(4, 1fr); /* Desktop: 4 columns */
     gap: 1.5rem;
   }
 }
