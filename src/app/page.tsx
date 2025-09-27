@@ -206,13 +206,8 @@ export default function Home() {
                     <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>
                       {product.name}
                     </h3>
-                    <p style={{ color: '#6b7280', margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
+                    <p style={{ color: '#6b7280', margin: '0 0 1rem 0', fontSize: '0.9rem' }}>
                       {product.category}
-                    </p>
-                    <p style={{ color: '#6b7280', margin: '0 0 1rem 0', fontSize: '0.85rem' }}>
-                      {product.description && product.description.length > 80 
-                        ? product.description.substring(0, 80) + '...' 
-                        : product.description}
                     </p>
               </Link>
                   <div style={{ 
