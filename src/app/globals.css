@@ -895,34 +895,52 @@ h1, h2, h3 {
   }
 }
 
-/* New Products Section responsive grid */
+/* New Products Section responsive grid - MOBILE FIRST */
 .new-products-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important; /* Mobile: 2 columns × 10 rows = 20 products */
-  gap: 1rem !important;
+  gap: 0.75rem !important; /* Smaller gap on mobile */
   max-height: none !important;
   width: 100% !important;
-}
-
-@media (min-width: 768px) {
-  .new-products-grid {
-    grid-template-columns: repeat(4, 1fr) !important; /* Desktop: 4 columns × 5 rows = 20 products */
-    gap: 1.5rem !important;
-  }
+  padding: 0 0.5rem !important; /* Add padding to prevent overflow */
 }
 
 /* Ensure product images maintain square aspect ratio */
 .new-products-grid .product-card > div:first-child {
   aspect-ratio: 1 / 1 !important;
   width: 100% !important;
+  max-width: 100% !important;
 }
 
-/* Mobile-specific adjustments for better square images */
+/* Mobile-specific adjustments for better fit */
 @media (max-width: 767px) {
+  .new-products-grid {
+    gap: 0.5rem !important; /* Even smaller gap on very small screens */
+    padding: 0 0.25rem !important;
+  }
+  
   .new-products-grid .product-card > div:first-child {
-    height: 160px !important; /* Slightly smaller on mobile for better fit */
+    height: 120px !important; /* Smaller on mobile to fit properly */
     width: 100% !important;
     aspect-ratio: 1 / 1 !important;
+    max-width: 100% !important;
+  }
+  
+  .new-products-grid .product-card {
+    padding: 0.75rem !important; /* Smaller card padding on mobile */
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+  .new-products-grid {
+    grid-template-columns: repeat(4, 1fr) !important; /* Desktop: 4 columns × 5 rows = 20 products */
+    gap: 1.5rem !important;
+    padding: 0 !important; /* Remove padding on desktop */
+  }
+  
+  .new-products-grid .product-card > div:first-child {
+    height: 180px !important; /* Larger on desktop */
   }
 }
 

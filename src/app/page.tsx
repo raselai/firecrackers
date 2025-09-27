@@ -190,7 +190,7 @@ export default function Home() {
                 }}
               >
                 <div style={{ 
-                      height: '180px', 
+                      height: '140px', 
                       width: '100%',
                       aspectRatio: '1 / 1', // Square aspect ratio
                   position: 'relative', 
