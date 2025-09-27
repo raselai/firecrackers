@@ -39,7 +39,7 @@ export default function RootLayout({
                   <p>Premium lighting solutions for your home and business. Quality LED lights and modern fixtures.</p>
                   <div className="footer-contact">
                     <p>📍 International City, Dragon Mart, Near EB2 Gate</p>
-                    <p>📧 info@relighteal.ae</p>
+                    <p>📧 kingon503@gmail.com</p>
                     <p>📞 +971 50 697 0154</p>
                   </div>
                 </div>

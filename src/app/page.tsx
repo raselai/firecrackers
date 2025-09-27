@@ -242,6 +242,45 @@ export default function Home() {
               </div>
             )}
           </div>
+          
+          {/* See More Button */}
+          {currentTabProducts.length > 0 && (
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '2rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid #e5e7eb'
+            }}>
+              <Link 
+                href={`/categories/${activeTab === 'indoor' ? 'indoor-lights' : 'outdoor-lights'}`}
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 2rem',
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s ease',
+                  fontFamily: 'Inter, sans-serif',
+                  boxShadow: '0 4px 6px rgba(139, 92, 246, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#7c3aed';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#8b5cf6';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(139, 92, 246, 0.3)';
+                }}
+              >
+                See More {activeTab === 'indoor' ? 'Indoor' : 'Outdoor'} Lights
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

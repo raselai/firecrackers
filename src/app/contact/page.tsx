@@ -85,7 +85,7 @@ Message: ${formData.message || 'I would like more information about your lightin
                 </div>
                 <div className="contact-details">
                   <h3>Email</h3>
-                  <p className="contact-value">info@relighteal.ae</p>
+                  <p className="contact-value">kingon503@gmail.com</p>
                   <p className="contact-note">We'll respond within 24 hours</p>
                 </div>
               </div>
