@@ -911,6 +911,21 @@ h1, h2, h3 {
   }
 }
 
+/* Ensure product images maintain square aspect ratio */
+.new-products-grid .product-card > div:first-child {
+  aspect-ratio: 1 / 1 !important;
+  width: 100% !important;
+}
+
+/* Mobile-specific adjustments for better square images */
+@media (max-width: 767px) {
+  .new-products-grid .product-card > div:first-child {
+    height: 160px !important; /* Slightly smaller on mobile for better fit */
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+}
+
 /* Category Page Styles */
 .category-hero {
   position: relative;
