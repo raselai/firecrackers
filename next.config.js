@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    domains: [],
+    domains: ['firebasestorage.googleapis.com'],
     unoptimized: true
   },
   serverExternalPackages: []
