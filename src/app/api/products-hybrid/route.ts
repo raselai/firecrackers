@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
       category: newProduct.category,
       subcategory: newProduct.subcategory,
       image: newProduct.image || newProduct.images?.[0] || '', // Cloudinary URL
-      images: newProduct.images || [], // Cloudinary URLs array
+      images: newProduct.images || [], // Main Cloudinary URLs array
+      galleryImages: newProduct.galleryImages || [], // Additional gallery Cloudinary URLs
       wattage: newProduct.wattage || '',
       material: newProduct.material || '',
       dimensions: newProduct.dimensions || '',
@@ -65,10 +66,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('API: Saving product to Firestore:', firestoreProduct);
+    console.log('API: Main images array:', firestoreProduct.images);
+    console.log('API: Gallery images array:', firestoreProduct.galleryImages);
     
     // Add product to Firestore
     const addedProduct = await addProduct(firestoreProduct);
     console.log('API: Product added successfully to Firestore:', addedProduct);
+    console.log('API: Added product images:', addedProduct.images);
+    console.log('API: Added product galleryImages:', (addedProduct as any).galleryImages);
     
     return NextResponse.json(addedProduct, { status: 201 });
     

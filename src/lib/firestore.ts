@@ -23,6 +23,7 @@ export interface Product {
   subcategory: string;
   image: string;
   images?: string[];
+  galleryImages?: string[]; // Additional gallery images for product detail page
   wattage?: number | string;
   color?: string;
   material?: string;
