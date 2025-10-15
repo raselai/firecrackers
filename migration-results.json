@@ -1,0 +1,23 @@
+{
+  "total_products": 1,
+  "successful_migrations": 1,
+  "failed_migrations": 0,
+  "migrated_products": [
+    {
+      "id": "sample-1",
+      "name": "Sample LED Light",
+      "category": "Indoor Lights",
+      "subcategory": "Ceiling Lights",
+      "price": 150,
+      "description": "Beautiful LED ceiling light",
+      "image": "/images/categories/ceiling-lights.jpg",
+      "images": [
+        "/images/categories/ceiling-lights.jpg"
+      ],
+      "cloudinary_public_ids": [],
+      "migration_status": "success",
+      "migrated_at": "2025-10-15T02:41:12.965Z"
+    }
+  ],
+  "migration_date": "2025-10-15T02:41:13.991Z"
+}

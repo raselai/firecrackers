@@ -2,13 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        pathname: '/**',
-      },
-    ],
+    domains: ['firebasestorage.googleapis.com'],
     unoptimized: true
   },
   serverExternalPackages: []

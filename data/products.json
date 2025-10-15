@@ -1,0 +1,65 @@
+[
+  {
+    "id": "led-ceiling-light-001",
+    "name": "Modern LED Ceiling Light",
+    "category": "Indoor Lights",
+    "subcategory": "Ceiling Lights",
+    "price": 250,
+    "description": "Beautiful modern LED ceiling light with dimmable functionality. Perfect for living rooms and bedrooms.",
+    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "images": [
+      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+    ],
+    "wattage": "12W",
+    "material": "Aluminum",
+    "dimensions": "30cm x 30cm",
+    "inStock": true,
+    "featured": true,
+    "seasonal": false,
+    "isOnSale": false,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "outdoor-floodlight-001",
+    "name": "LED Flood Light 50W",
+    "category": "Outdoor Lights",
+    "subcategory": "Flood Lights",
+    "price": 180,
+    "description": "High-power LED flood light perfect for outdoor security and illumination. Weatherproof design.",
+    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "images": [
+      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+    ],
+    "wattage": "50W",
+    "material": "Aluminum",
+    "dimensions": "25cm x 15cm",
+    "inStock": true,
+    "featured": false,
+    "seasonal": false,
+    "isOnSale": false,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "led-strip-light-001",
+    "name": "RGB LED Strip Light 5M",
+    "category": "Indoor Lights",
+    "subcategory": "LED Strips",
+    "price": 120,
+    "description": "Colorful RGB LED strip light with remote control. Perfect for accent lighting and decoration.",
+    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "images": [
+      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+    ],
+    "wattage": "15W",
+    "material": "Silicone",
+    "dimensions": "5M length",
+    "inStock": true,
+    "featured": true,
+    "seasonal": false,
+    "isOnSale": false,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  }
+]
