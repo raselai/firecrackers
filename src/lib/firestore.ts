@@ -90,9 +90,29 @@ export const getAllProducts = async (): Promise<Product[]> => {
     // Sort by creation date (newest first) in JavaScript
     console.log(`Firestore: Found ${products.length} products, sorting by creation date...`);
     const sortedProducts = products.sort((a, b) => {
-      // Handle products without createdAt field
-      const aDate = a.createdAt ? new Date(a.createdAt.seconds * 1000) : new Date(0);
-      const bDate = b.createdAt ? new Date(b.createdAt.seconds * 1000) : new Date(0);
+      // Handle different createdAt field types (Firestore Timestamp or Date)
+      let aDate: Date;
+      let bDate: Date;
+      
+      if (!a.createdAt) {
+        aDate = new Date(0);
+      } else if (typeof a.createdAt === 'object' && 'seconds' in a.createdAt) {
+        // Firestore Timestamp object
+        aDate = new Date((a.createdAt as any).seconds * 1000);
+      } else {
+        // Regular Date object or string
+        aDate = new Date(a.createdAt as any);
+      }
+      
+      if (!b.createdAt) {
+        bDate = new Date(0);
+      } else if (typeof b.createdAt === 'object' && 'seconds' in b.createdAt) {
+        // Firestore Timestamp object
+        bDate = new Date((b.createdAt as any).seconds * 1000);
+      } else {
+        // Regular Date object or string
+        bDate = new Date(b.createdAt as any);
+      }
       
       console.log(`Firestore: Comparing ${a.name} (${aDate.toISOString()}) vs ${b.name} (${bDate.toISOString()})`);
       return bDate.getTime() - aDate.getTime(); // Descending order (newest first)
