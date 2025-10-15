@@ -3,12 +3,13 @@ import { Product } from '@/types/product';
 // Fetch all products from API
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    console.log('productService: Fetching products from /api/products-vercel');
-    const response = await fetch('/api/products-vercel', {
+    console.log('productService: Fetching products from /api/products-hybrid (Firestore + Cloudinary)');
+    const response = await fetch('/api/products-hybrid', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'no-store', // Prevent caching to always get fresh data
     });
     
     console.log('productService: Response status:', response.status);
@@ -32,7 +33,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<Product 
   try {
     console.log('productService: Adding product:', product);
     
-    const response = await fetch('/api/products-vercel', {
+    const response = await fetch('/api/products-hybrid', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<Product 
 // Update an existing product
 export async function updateProduct(id: string, product: Product): Promise<Product | null> {
   try {
-    const response = await fetch('/api/products-vercel', {
+    const response = await fetch(`/api/products-hybrid/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ export async function updateProduct(id: string, product: Product): Promise<Produ
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
     console.log('productService: Deleting product with ID:', id);
-    const response = await fetch(`/api/products-vercel?id=${id}`, {
+    const response = await fetch(`/api/products-hybrid/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
