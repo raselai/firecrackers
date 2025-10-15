@@ -61,10 +61,8 @@ export async function POST(request: NextRequest) {
                 subcategory: subcategory,
                 original_filename: file.name
               },
-              resource_type: 'auto',
-              transformation: [
-                { quality: 'auto', fetch_format: 'auto' }
-              ]
+              resource_type: 'auto'
+              // No transformations - images are pre-optimized to save credits
             },
             (error, result) => {
               if (error) reject(error);

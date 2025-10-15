@@ -38,10 +38,8 @@ export async function POST(request: NextRequest) {
             category: category || '',
             subcategory: subcategory || ''
           },
-          resource_type: 'auto',
-          transformation: [
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
+          resource_type: 'auto'
+          // No transformations - images are pre-optimized to save credits
         },
         (error, result) => {
           if (error) reject(error);
