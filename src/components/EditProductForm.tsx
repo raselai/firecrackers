@@ -133,6 +133,10 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('EditProductForm: Form data before processing:', formData);
+    console.log('EditProductForm: Original product images:', product.images);
+    console.log('EditProductForm: Original product galleryImages:', product.galleryImages);
+    
     const updatedProduct = {
       ...product, // Keep original ID and other fields
       ...formData,
@@ -146,6 +150,10 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
       image: formData.image || formData.images[0] || '',
       mainImage: formData.mainImage || formData.images[0] || ''
     };
+
+    console.log('EditProductForm: Updated product images:', updatedProduct.images);
+    console.log('EditProductForm: Updated product galleryImages:', updatedProduct.galleryImages);
+    console.log('EditProductForm: Final updated product:', updatedProduct);
 
     onSave(updatedProduct);
     onClose();

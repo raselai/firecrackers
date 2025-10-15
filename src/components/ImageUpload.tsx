@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ImageUploadProps {
   category: string;
@@ -14,6 +14,11 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Update uploadedImages when existingImages change (for editing products)
+  useEffect(() => {
+    setUploadedImages(existingImages);
+  }, [existingImages]);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
