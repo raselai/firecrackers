@@ -80,7 +80,11 @@ export const deleteProduct = async (id: string) => {
 // Get all products
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
-    const querySnapshot = await getDocs(collection(db, "products"));
+    const q = query(
+      collection(db, "products"),
+      orderBy("createdAt", "desc") // Sort by newest first
+    );
+    const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()

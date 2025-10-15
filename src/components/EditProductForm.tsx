@@ -241,14 +241,14 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
             {formData.isOnSale && (
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#dc2626' }}>
-                  Offer Price (AED) *
+                  Offer Price (AED) (Optional)
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.offerPrice}
                   onChange={(e) => handleInputChange('offerPrice', e.target.value)}
-                  placeholder="Enter sale price (must be less than original price)"
+                  placeholder="Enter sale price (optional - must be less than original price)"
                   style={{
                     width: '100%',
                     padding: '0.75rem',
@@ -257,7 +257,6 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                     fontSize: '1rem',
                     backgroundColor: '#fef2f2'
                   }}
-                  required
                 />
                 <small style={{ color: '#dc2626', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
                   Must be less than the original price
