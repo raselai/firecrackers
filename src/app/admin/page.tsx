@@ -55,6 +55,7 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       const products = await fetchProducts();
+      console.log('Admin: Loaded products:', products.map(p => ({ id: p.id, name: p.name })));
       setAdminProducts(products);
     } catch (error) {
       console.error('Error loading products:', error);
@@ -105,16 +106,20 @@ export default function AdminPanel() {
   const handleDeleteProduct = async (productId: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
       try {
+        console.log('Admin: Attempting to delete product with ID:', productId);
         const success = await deleteProduct(productId);
         if (success) {
           setAdminProducts(prev => prev.filter(product => product.id !== productId));
           alert('Product deleted successfully!');
+          // Reload products to ensure consistency
+          loadProducts();
         } else {
           alert('Failed to delete product. Please try again.');
         }
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Failed to delete product. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete product. Please try again.';
+        alert(`Failed to delete product: ${errorMessage}`);
       }
     }
   };

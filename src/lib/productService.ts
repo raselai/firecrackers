@@ -83,6 +83,7 @@ export async function updateProduct(id: string, product: Product): Promise<Produ
 // Delete a product
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
+    console.log('productService: Deleting product with ID:', id);
     const response = await fetch(`/api/products-new?id=${id}`, {
       method: 'DELETE',
       headers: {
@@ -90,13 +91,20 @@ export async function deleteProduct(id: string): Promise<boolean> {
       },
     });
     
+    console.log('productService: Delete response status:', response.status);
+    console.log('productService: Delete response ok:', response.ok);
+    
     if (!response.ok) {
-      throw new Error('Failed to delete product');
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error('productService: Delete error response:', errorData);
+      throw new Error(`Failed to delete product: ${errorData.error || 'Unknown error'}`);
     }
     
+    const result = await response.json();
+    console.log('productService: Delete success response:', result);
     return true;
   } catch (error) {
-    console.error('Error deleting product:', error);
-    return false;
+    console.error('productService: Error deleting product:', error);
+    throw error; // Re-throw to let the calling code handle it
   }
 } 
