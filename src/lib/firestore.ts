@@ -80,15 +80,26 @@ export const deleteProduct = async (id: string) => {
 // Get all products
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
-    const q = query(
-      collection(db, "products"),
-      orderBy("createdAt", "desc") // Sort by newest first
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    // Fetch all products first (without ordering to avoid missing field errors)
+    const querySnapshot = await getDocs(collection(db, "products"));
+    const products = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Product[];
+    
+    // Sort by creation date (newest first) in JavaScript
+    console.log(`Firestore: Found ${products.length} products, sorting by creation date...`);
+    const sortedProducts = products.sort((a, b) => {
+      // Handle products without createdAt field
+      const aDate = a.createdAt ? new Date(a.createdAt.seconds * 1000) : new Date(0);
+      const bDate = b.createdAt ? new Date(b.createdAt.seconds * 1000) : new Date(0);
+      
+      console.log(`Firestore: Comparing ${a.name} (${aDate.toISOString()}) vs ${b.name} (${bDate.toISOString()})`);
+      return bDate.getTime() - aDate.getTime(); // Descending order (newest first)
+    });
+    
+    console.log(`Firestore: Sorted products - first 3:`, sortedProducts.slice(0, 3).map(p => ({ name: p.name, createdAt: p.createdAt })));
+    return sortedProducts;
   } catch (error) {
     console.error("Error getting products: ", error);
     throw error;
