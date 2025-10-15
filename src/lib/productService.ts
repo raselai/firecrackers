@@ -3,8 +3,8 @@ import { Product } from '@/types/product';
 // Fetch all products from API
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    console.log('productService: Fetching products from /api/products-new');
-    const response = await fetch('/api/products-new', {
+    console.log('productService: Fetching products from /api/products-vercel');
+    const response = await fetch('/api/products-vercel', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<Product 
   try {
     console.log('productService: Adding product:', product);
     
-    const response = await fetch('/api/products-new', {
+    const response = await fetch('/api/products-vercel', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<Product 
 // Update an existing product
 export async function updateProduct(id: string, product: Product): Promise<Product | null> {
   try {
-    const response = await fetch('/api/products-new', {
+    const response = await fetch('/api/products-vercel', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export async function updateProduct(id: string, product: Product): Promise<Produ
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
     console.log('productService: Deleting product with ID:', id);
-    const response = await fetch(`/api/products-new?id=${id}`, {
+    const response = await fetch(`/api/products-vercel?id=${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
