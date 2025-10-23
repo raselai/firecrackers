@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cloudinary } from '@/lib/cloudinary';
+import { uploadMultipleImages, generateProductImagePath } from '@/lib/storage';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Upload API called - uploading to Cloudinary');
+    console.log('Upload API called - uploading to Firebase Storage');
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const category = formData.get('category') as string;
@@ -41,55 +41,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No valid image files provided' }, { status: 400 });
     }
 
-    // Upload files to Cloudinary
-    const cloudinaryURLs: string[] = [];
+    // Generate base path for Firebase Storage
+    const basePath = generateProductImagePath(category, subcategory, '');
     
-    for (const file of validFiles) {
-      try {
-        // Convert file to buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        // Upload to Cloudinary
-        const result = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            {
-              public_id: `products/${category.toLowerCase().replace(/\s+/g, '-')}/${subcategory.toLowerCase().replace(/\s+/g, '-')}/${file.name.replace(/\.[^/.]+$/, '')}-${Date.now()}`,
-              folder: 'lighting-products',
-              context: {
-                category: category,
-                subcategory: subcategory,
-                original_filename: file.name
-              },
-              resource_type: 'auto'
-              // No transformations - images are pre-optimized to save credits
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          ).end(buffer);
-        }) as any;
-        
-        cloudinaryURLs.push(result.secure_url);
-        console.log(`Successfully uploaded ${file.name} to Cloudinary:`, result.secure_url);
-        
-      } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
-        // Continue with other files even if one fails
-      }
-    }
-
-    if (cloudinaryURLs.length === 0) {
-      return NextResponse.json({ error: 'Failed to upload any files' }, { status: 500 });
-    }
+    // Upload files to Firebase Storage
+    const firebaseURLs = await uploadMultipleImages(validFiles, basePath);
     
-    console.log('Images uploaded to Cloudinary successfully:', cloudinaryURLs);
+    console.log('Images uploaded to Firebase Storage successfully:', firebaseURLs);
 
     return NextResponse.json({ 
       success: true, 
-      uploadedPaths: cloudinaryURLs,
-      message: `Successfully uploaded ${cloudinaryURLs.length} files to Cloudinary`
+      uploadedPaths: firebaseURLs,
+      message: `Successfully uploaded ${firebaseURLs.length} files to Firebase Storage`
     });
 
   } catch (error) {
