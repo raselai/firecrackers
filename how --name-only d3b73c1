@@ -1,0 +1,30 @@
+[33mcommit d3b73c16935eaeb568a19981c9a3198fc536f26a[m
+Author: raselai <nazmulhoque632@yahoo.com>
+Date:   Wed Oct 15 08:55:18 2025 +0600
+
+    feat: Complete migration from Firebase to Cloudinary + local JSON storage
+    
+    -  Removed Firebase dependency completely
+    -  Created local product management system using JSON files
+    -  Set up Cloudinary integration for image hosting
+    -  Created new API routes (/api/products-new, /api/upload-image)
+    -  Updated frontend to use new local product system
+    -  Added sample products with working Cloudinary images
+    -  Fixed all product loading issues
+    -  Website now fully functional without Firebase
+
+ data/products.json                |  65 [32m++++++++++[m
+ migration-results.json            |  23 [32m++++[m
+ next.config.js                    |   8 [32m+[m[31m-[m
+ package-lock.json                 |  31 [32m+++++[m
+ package.json                      |   1 [32m+[m
+ scripts/fetch-and-migrate.js      | 212 [32m++++++++++++++++++++++++++++++++[m
+ scripts/migrate-all-products.js   | 203 [32m+++++++++++++++++++++++++++++++[m
+ scripts/migrate-to-cloudinary.js  |  91 [32m++++++++++++++[m
+ src/app/api/products-new/route.ts | 249 [32m++++++++++++++++++++++++++++++++++++++[m
+ src/app/api/upload-image/route.ts |  63 [32m++++++++++[m
+ src/lib/cloudinary.ts             |  47 [32m+++++++[m
+ src/lib/productService.ts         |  10 [32m+[m[31m-[m
+ src/lib/utils.ts                  |  40 [32m++++[m[31m--[m
+ test-cloudinary.js                |  49 [32m++++++++[m
+ 14 files changed, 1072 insertions(+), 20 deletions(-)

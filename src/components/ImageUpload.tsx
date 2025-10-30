@@ -9,15 +9,32 @@ interface ImageUploadProps {
   existingImages?: string[];
 }
 
+interface ImageItem {
+  url: string;
+  fileName: string;
+  isUploading: boolean;
+  isUploaded: boolean;
+  uploadError?: string;
+}
+
 export default function ImageUpload({ category, subcategory, onImagesUploaded, existingImages = [] }: ImageUploadProps) {
-  const [uploadedImages, setUploadedImages] = useState<string[]>(existingImages);
+  const [imageItems, setImageItems] = useState<ImageItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Update uploadedImages when existingImages change (for editing products)
+  // Update imageItems when existingImages change (for editing products)
   useEffect(() => {
-    setUploadedImages(existingImages);
+    if (existingImages.length > 0) {
+      // Existing images are already uploaded, so mark them as uploaded
+      const existingItems: ImageItem[] = existingImages.map(url => ({
+        url,
+        fileName: url.split('/').pop() || 'image',
+        isUploading: false,
+        isUploaded: true
+      }));
+      setImageItems(existingItems);
+    }
   }, [existingImages]);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,9 +47,18 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
   };
 
   const removeImage = (index: number) => {
-    const newImages = uploadedImages.filter((_, i) => i !== index);
-    setUploadedImages(newImages);
-    onImagesUploaded(newImages);
+    const item = imageItems[index];
+    // Revoke object URL if it's a local preview
+    if (item && item.url.startsWith('blob:')) {
+      URL.revokeObjectURL(item.url);
+    }
+    
+    const newItems = imageItems.filter((_, i) => i !== index);
+    setImageItems(newItems);
+    
+    // Update parent with only uploaded URLs (not blob URLs)
+    const uploadedUrls = newItems.filter(item => item.isUploaded && !item.url.startsWith('blob:')).map(item => item.url);
+    onImagesUploaded(uploadedUrls);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -43,7 +69,6 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      // Process files directly instead of creating a fake event
       processFiles(files);
     }
   };
@@ -52,20 +77,56 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
     setIsUploading(true);
     setUploadProgress(0);
     
-    const newImages: string[] = [];
+    const currentLength = imageItems.length;
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // Validate file
+    // Step 1: Create immediate previews with object URLs
+    const previewItems: ImageItem[] = files.map(file => {
+      // Validate file first
       if (!file.type.startsWith('image/')) {
-        alert('Please select only image files.');
-        continue;
+        return {
+          url: '',
+          fileName: file.name,
+          isUploading: false,
+          isUploaded: false,
+          uploadError: 'Not an image file'
+        };
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB.');
-        continue;
+        return {
+          url: '',
+          fileName: file.name,
+          isUploading: false,
+          isUploaded: false,
+          uploadError: 'File size must be less than 5MB'
+        };
+      }
+
+      // Create object URL for immediate preview
+      const objectURL = URL.createObjectURL(file);
+      return {
+        url: objectURL,
+        fileName: file.name,
+        isUploading: true,
+        isUploaded: false
+      };
+    });
+
+    // Add preview items to the list immediately
+    setImageItems(prev => [...prev, ...previewItems]);
+
+    // Step 2: Upload files and replace preview URLs with Firebase URLs
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const previewIndex = currentLength + i;
+      
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        continue; // Already handled in preview
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        continue; // Already handled in preview
       }
       
       try {
@@ -82,28 +143,70 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
         if (response.ok) {
           const result = await response.json();
           if (result.uploadedPaths && result.uploadedPaths.length > 0) {
-            // The uploadedPaths now contain base64 data URLs
-            newImages.push(result.uploadedPaths[0]); // Take the first uploaded path
+            const firebaseURL = result.uploadedPaths[0];
+            
+            // Replace preview URL with Firebase URL
+            setImageItems(prev => {
+              const updated = [...prev];
+              const item = updated[previewIndex];
+              if (item) {
+                // Revoke the object URL to free memory
+                if (item.url.startsWith('blob:')) {
+                  URL.revokeObjectURL(item.url);
+                }
+                updated[previewIndex] = {
+                  ...item,
+                  url: firebaseURL,
+                  isUploading: false,
+                  isUploaded: true
+                };
+                
+                // Immediately update parent with all uploaded URLs
+                const uploadedUrls = updated
+                  .filter(item => item.isUploaded && !item.url.startsWith('blob:'))
+                  .map(item => item.url);
+                onImagesUploaded(uploadedUrls);
+              }
+              return updated;
+            });
           }
           setUploadProgress(((i + 1) / files.length) * 100);
         } else {
           const errorData = await response.json();
+          // Update error state
+          setImageItems(prev => {
+            const updated = [...prev];
+            if (updated[previewIndex]) {
+              updated[previewIndex] = {
+                ...updated[previewIndex],
+                isUploading: false,
+                uploadError: errorData.error || 'Upload failed'
+              };
+            }
+            return updated;
+          });
           alert(`Failed to upload ${file.name}: ${errorData.error || 'Unknown error'}`);
         }
       } catch (error) {
         console.error('Upload error:', error);
+        // Update error state
+        setImageItems(prev => {
+          const updated = [...prev];
+          if (updated[previewIndex]) {
+            updated[previewIndex] = {
+              ...updated[previewIndex],
+              isUploading: false,
+              uploadError: 'Upload failed'
+            };
+          }
+          return updated;
+        });
         alert(`Failed to upload ${file.name}`);
       }
     }
     
     setIsUploading(false);
     setUploadProgress(0);
-    
-    if (newImages.length > 0) {
-      const updatedImages = [...uploadedImages, ...newImages];
-      setUploadedImages(updatedImages);
-      onImagesUploaded(updatedImages);
-    }
     
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -158,19 +261,52 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
       </div>
 
       {/* Image Preview */}
-      {uploadedImages.length > 0 && (
+      {imageItems.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {uploadedImages.map((image, index) => (
-            <div key={index} className="relative group">
-              <img
-                src={image}
-                alt={`Product ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg"
-              />
+          {imageItems.map((item, index) => (
+            <div key={index} className="relative group border border-gray-200 rounded-lg overflow-hidden">
+              {item.url ? (
+                <img
+                  src={item.url}
+                  alt={item.fileName}
+                  className="w-full h-32 object-cover"
+                />
+              ) : (
+                <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-400 text-sm">No preview</span>
+                </div>
+              )}
+              
+              {/* Upload Status Overlay */}
+              {item.isUploading && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <div className="text-white text-sm font-semibold">Uploading...</div>
+                </div>
+              )}
+              
+              {item.uploadError && (
+                <div className="absolute inset-0 bg-red-500 bg-opacity-80 flex items-center justify-center">
+                  <div className="text-white text-xs text-center px-2">{item.uploadError}</div>
+                </div>
+              )}
+              
+              {item.isUploaded && !item.isUploading && (
+                <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                  ✓ Uploaded
+                </div>
+              )}
+              
+              {/* File Name */}
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs p-2 truncate">
+                {item.fileName}
+              </div>
+              
+              {/* Remove Button */}
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                title="Remove image"
               >
                 ×
               </button>
@@ -180,4 +316,4 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
       )}
     </div>
   );
-} 
+}
