@@ -12,7 +12,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'indoor' | 'outdoor'>('indoor');
+  const [activeTab, setActiveTab] = useState<'all' | 'indoor' | 'outdoor' | 'others'>('all');
 
   const heroImages = [
     '/images/hero/hero-1.jpg',
@@ -63,12 +63,22 @@ export default function Home() {
     product.category && product.category.toLowerCase().includes('indoor')
   );
 
-  const outdoorProducts = products.filter((product: any) => 
+  const outdoorProducts = products.filter((product: any) =>
     product.category && product.category.toLowerCase().includes('outdoor')
   );
 
+  const othersProducts = products.filter((product: any) =>
+    product.category && product.category.toLowerCase().includes('others')
+  );
+
   // Get current tab products
-  const currentTabProducts = activeTab === 'indoor' ? indoorProducts : outdoorProducts;
+  const currentTabProducts = activeTab === 'all'
+    ? products
+    : activeTab === 'indoor'
+    ? indoorProducts
+    : activeTab === 'outdoor'
+    ? outdoorProducts
+    : othersProducts;
 
 
   return (
@@ -104,12 +114,39 @@ export default function Home() {
             </h2>
           
           {/* Tabs */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
             marginBottom: '2rem',
             gap: '1rem'
           }}>
+            <button
+              onClick={() => setActiveTab('all')}
+              style={{
+                padding: '0.75rem 2rem',
+                background: activeTab === 'all' ? '#8b5cf6' : 'white',
+                color: activeTab === 'all' ? 'white' : '#374151',
+                border: '2px solid #8b5cf6',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'all') {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'all') {
+                  e.currentTarget.style.background = 'white';
+                }
+              }}
+            >
+              All
+            </button>
             <button
               onClick={() => setActiveTab('indoor')}
               style={{
@@ -163,6 +200,33 @@ export default function Home() {
               }}
             >
               Outdoor Lights
+            </button>
+            <button
+              onClick={() => setActiveTab('others')}
+              style={{
+                padding: '0.75rem 2rem',
+                background: activeTab === 'others' ? '#8b5cf6' : 'white',
+                color: activeTab === 'others' ? 'white' : '#374151',
+                border: '2px solid #8b5cf6',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'others') {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'others') {
+                  e.currentTarget.style.background = 'white';
+                }
+              }}
+            >
+              Others
             </button>
           </div>
 
