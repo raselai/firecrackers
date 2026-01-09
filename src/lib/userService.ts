@@ -71,6 +71,10 @@ export async function createUserDocument(
  */
 export async function getUserById(uid: string): Promise<User | null> {
   try {
+    if (!uid) {
+      throw new Error('User ID is required');
+    }
+
     const userDoc = await getDoc(doc(db, 'users', uid));
 
     if (!userDoc.exists()) {
@@ -80,7 +84,9 @@ export async function getUserById(uid: string): Promise<User | null> {
     const data = userDoc.data();
     return {
       ...data,
+      uid: data.uid || userDoc.id,
       cart: data.cart || [],
+      addresses: data.addresses || [],
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date()
     } as User;
