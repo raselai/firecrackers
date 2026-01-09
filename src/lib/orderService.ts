@@ -5,7 +5,6 @@ import {
   query,
   where,
   getDocs,
-  orderBy,
   updateDoc,
   limit
 } from 'firebase/firestore';
@@ -247,13 +246,13 @@ export async function getUserOrders(userId: string): Promise<Order[]> {
 
     const q = query(
       collection(db, 'orders'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
 
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(mapOrderSnapshot);
+    const orders = querySnapshot.docs.map(mapOrderSnapshot);
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('Error getting user orders:', error);
     throw error;
@@ -275,13 +274,13 @@ export async function getUserOrdersByStatus(
     const q = query(
       collection(db, 'orders'),
       where('userId', '==', userId),
-      where('status', '==', status),
-      orderBy('createdAt', 'desc')
+      where('status', '==', status)
     );
 
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(mapOrderSnapshot);
+    const orders = querySnapshot.docs.map(mapOrderSnapshot);
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('Error getting user orders by status:', error);
     throw error;
@@ -309,11 +308,11 @@ export async function getOrdersByStatus(status: Order['status']): Promise<Order[
   try {
     const q = query(
       collection(db, 'orders'),
-      where('status', '==', status),
-      orderBy('createdAt', 'desc')
+      where('status', '==', status)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(mapOrderSnapshot);
+    const orders = querySnapshot.docs.map(mapOrderSnapshot);
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('Error getting orders by status:', error);
     throw error;
