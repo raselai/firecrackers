@@ -134,6 +134,50 @@ export default function ProductContent({ slug }: ProductContentProps) {
                 {product.description}
               </p>
             </div>
+
+            {[
+              { label: 'Effect Type', value: product.effectType },
+              { label: 'Duration', value: product.duration },
+              { label: 'Noise Level', value: product.noiseLevel },
+              { label: 'Shot Count', value: product.shotCount },
+              { label: 'Safety Distance', value: product.safetyDistance },
+              { label: 'Availability', value: product.availability }
+            ].some((spec) => spec.value) && (
+              <div style={{ marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                  Specifications
+                </h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: '0.75rem',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  padding: '1rem'
+                }}>
+                  {[
+                    { label: 'Effect Type', value: product.effectType },
+                    { label: 'Duration', value: product.duration },
+                    { label: 'Noise Level', value: product.noiseLevel },
+                    { label: 'Shot Count', value: product.shotCount },
+                    { label: 'Safety Distance', value: product.safetyDistance },
+                    { label: 'Availability', value: product.availability }
+                  ]
+                    .filter((spec) => spec.value !== undefined && spec.value !== '')
+                    .map((spec) => (
+                      <div key={spec.label} style={{ color: '#374151' }}>
+                        <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280' }}>
+                          {spec.label}
+                        </div>
+                        <div style={{ fontWeight: '600', marginTop: '0.25rem' }}>
+                          {spec.value}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
             
             <button
               onClick={handleAddToCart}
