@@ -26,8 +26,8 @@ This checklist tracks implementation progress for the cart + Touch 'n Go payment
 - [x] Approve/Reject actions with status updates.
 
 ## Phase 5: Notifications
-- [ ] Notification write on order status changes.
-- [ ] User "Notifications" tab UI.
+- [x] Notification write on order status changes.
+- [x] User "Notifications" tab UI.
 
 ## Phase 6: Cleanup
 - [ ] Remove/disable WhatsApp checkout path.

@@ -13,6 +13,7 @@ import { Order, OrderItem } from '@/types/order';
 import { getUserById, useVouchers } from './userService';
 import { Address } from '@/types/user';
 import { nanoid } from 'nanoid';
+import { createOrderStatusNotification } from './notificationService';
 
 /**
  * Voucher validation result
@@ -362,6 +363,20 @@ export async function updateOrderStatus(params: {
     }
 
     await updateDoc(doc(db, 'orders', orderDoc.id), updatePayload);
+
+    try {
+      const orderData = orderDoc.data() as { userId?: string; orderId?: string };
+      if (orderData?.userId) {
+        await createOrderStatusNotification({
+          userId: orderData.userId,
+          orderId: orderData.orderId || params.orderId,
+          status: params.status,
+          rejectionReason: params.rejectionReason
+        });
+      }
+    } catch (notificationError) {
+      console.error('Error creating order status notification:', notificationError);
+    }
   } catch (error) {
     console.error('Error updating order status:', error);
     throw error;
