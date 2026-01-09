@@ -6,18 +6,34 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types/product';
 import { getProductImagePath } from '@/lib/utils';
-import WhatsAppIcon from '@/components/WhatsAppIcon';
+import { useRouter } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
+import { useUser } from '@/contexts/AuthContext';
 
 type ProductCardProps = {
   product: Product;
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const handleWhatsAppInquiry = () => {
+  const router = useRouter();
+  const { addItem } = useCart();
+  const { firebaseUser } = useUser();
+
+  const handleAddToCart = async () => {
+    if (!firebaseUser) {
+      router.push('/login');
+      return;
+    }
+
     const displayPrice = product.isOnSale && product.offerPrice ? product.offerPrice : product.price;
-    const message = `Hi! I'm interested in the ${product.name} priced at AED ${displayPrice.toFixed(2)}. Can you provide more details?`;
-    const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+
+    await addItem({
+      productId: String(product.id),
+      productName: product.name,
+      productImage: product.image || product.images?.[0] || '',
+      quantity: 1,
+      price: displayPrice || 0
+    });
   };
 
   const imagePath = getProductImagePath(product, product.category);
@@ -94,14 +110,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 fontWeight: 'bold', 
                 color: '#dc2626' 
               }}>
-                AED {product.offerPrice.toLocaleString()}
+                RM {product.offerPrice.toLocaleString()}
               </span>
               <span style={{ 
                 fontSize: '0.9rem', 
                 color: '#6b7280', 
                 textDecoration: 'line-through' 
               }}>
-                AED {product.price.toLocaleString()}
+                RM {product.price.toLocaleString()}
               </span>
               <span style={{ 
                 fontSize: '0.8rem', 
@@ -117,14 +133,24 @@ export default function ProductCard({ product }: ProductCardProps) {
             </>
           ) : (
             <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-              {product.price ? `AED ${product.price.toLocaleString()}` : 'Contact for Price'}
+              {product.price ? `RM ${product.price.toLocaleString()}` : 'Contact for Price'}
             </span>
           )}
         </div>
-        <WhatsAppIcon 
-          onClick={handleWhatsAppInquiry}
-          size={20}
-        />
+        <button
+          onClick={handleAddToCart}
+          style={{
+            padding: '0.5rem 0.75rem',
+            background: '#1f2937',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600'
+          }}
+        >
+          Add to Cart
+        </button>
       </div>
     </div>
   );

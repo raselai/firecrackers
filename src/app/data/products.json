@@ -1,63 +1,57 @@
 [
-  {
-    "name": "Wall lamp",
-    "price": 200,
-    "description": "Very good product",
-    "dimensions": "80 CM",
-    "bulbType": "E 14",
-    "wattage": 20,
-    "voltage": "15",
-    "material": "Crome FIle",
-    "category": "Indoor Lights",
-    "subcategory": "Hanging Lights",
-    "room": "Dinning",
-    "lightType": "Flush Mountain",
-    "style": "Modern",
-    "availability": "In Stock",
-    "isFeatured": false,
-    "isOnSale": false,
-    "rating": 4.5,
-    "reviewCount": 0,
-    "images": [
-      "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg"
-    ],
-    "galleryImages": [
-      "/images/products/indoor-lights/hanging-lights/1753927754397-0iayaa.jpg"
-    ],
-    "image": "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
-    "mainImage": "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
-    "imagePath": "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
-    "id": 1
-  },
-  {
-    "name": "Test Light",
-    "price": 100,
-    "description": "Very good light",
-    "dimensions": "50 CM",
-    "bulbType": "E14",
-    "wattage": 30,
-    "voltage": "54",
-    "material": "NA",
-    "category": "Outdoor Lights",
-    "subcategory": "Garden Lights",
-    "room": "Garden",
-    "lightType": "Lamp",
-    "style": "NA",
-    "availability": "In Stock",
-    "isFeatured": true,
-    "isOnSale": true,
-    "rating": 4.5,
-    "reviewCount": 0,
-    "images": [
-      "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg"
-    ],
-    "galleryImages": [
-      "/images/products/outdoor-lights/garden-lights/1753927905834-61scod.jpeg",
-      "/images/products/outdoor-lights/garden-lights/1753927905838-n6rd7f.jpeg"
-    ],
-    "image": "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
-    "mainImage": "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
-    "imagePath": "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
-    "id": 2
-  }
+    {
+        "name":  "Wall lamp",
+        "price":  200,
+        "description":  "Very good product",
+        "bulbType":  "E 14",
+        "wattage":  20,
+        "voltage":  "15",
+        "category":  "Indoor Lights",
+        "subcategory":  "Hanging Lights",
+        "room":  "Dinning",
+        "lightType":  "Flush Mountain",
+        "availability":  "In Stock",
+        "isFeatured":  false,
+        "isOnSale":  false,
+        "rating":  4.5,
+        "reviewCount":  0,
+        "images":  [
+                       "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg"
+                   ],
+        "galleryImages":  [
+                              "/images/products/indoor-lights/hanging-lights/1753927754397-0iayaa.jpg"
+                          ],
+        "image":  "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
+        "mainImage":  "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
+        "imagePath":  "/images/products/indoor-lights/hanging-lights/1753927740273-j3f1ue.jpg",
+        "id":  1
+    },
+    {
+        "name":  "Test Light",
+        "price":  100,
+        "description":  "Very good light",
+        "bulbType":  "E14",
+        "wattage":  30,
+        "voltage":  "54",
+        "category":  "Outdoor Lights",
+        "subcategory":  "Garden Lights",
+        "room":  "Garden",
+        "lightType":  "Lamp",
+        "availability":  "In Stock",
+        "isFeatured":  true,
+        "isOnSale":  true,
+        "rating":  4.5,
+        "reviewCount":  0,
+        "images":  [
+                       "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg"
+                   ],
+        "galleryImages":  [
+                              "/images/products/outdoor-lights/garden-lights/1753927905834-61scod.jpeg",
+                              "/images/products/outdoor-lights/garden-lights/1753927905838-n6rd7f.jpeg"
+                          ],
+        "image":  "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
+        "mainImage":  "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
+        "imagePath":  "/images/products/outdoor-lights/garden-lights/1753927899666-t4b01i.jpeg",
+        "id":  2
+    }
 ]

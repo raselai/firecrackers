@@ -1,4 +1,9 @@
 import { Product } from '@/types/product';
+import {
+  addProduct as addProductToFirestore,
+  updateProduct as updateProductInFirestore,
+  deleteProduct as deleteProductInFirestore
+} from '@/lib/firestore';
 
 // Fetch all products from API
 export async function fetchProducts(): Promise<Product[]> {
@@ -32,27 +37,10 @@ export async function fetchProducts(): Promise<Product[]> {
 export async function addProduct(product: Omit<Product, 'id'>): Promise<Product | null> {
   try {
     console.log('productService: Adding product:', product);
-    
-    const response = await fetch('/api/products', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(product),
-    });
-    
-    console.log('productService: Response status:', response.status);
-    console.log('productService: Response ok:', response.ok);
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('productService: Error response:', errorData);
-      throw new Error(`Failed to add product: ${errorData.error || 'Unknown error'}`);
-    }
-    
-    const result = await response.json();
-    console.log('productService: Success response:', result);
-    return result;
+
+    const result = await addProductToFirestore(product);
+    console.log('productService: Added product directly to Firestore:', result);
+    return result as Product;
   } catch (error) {
     console.error('productService: Error adding product:', error);
     throw error; // Re-throw to let the calling code handle it
@@ -62,19 +50,8 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<Product 
 // Update an existing product
 export async function updateProduct(id: string, product: Product): Promise<Product | null> {
   try {
-    const response = await fetch(`/api/products/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(product),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update product');
-    }
-    
-    return await response.json();
+    const result = await updateProductInFirestore(id, product);
+    return result as Product;
   } catch (error) {
     console.error('Error updating product:', error);
     return null;
@@ -85,23 +62,7 @@ export async function updateProduct(id: string, product: Product): Promise<Produ
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
     console.log('productService: Deleting product with ID:', id);
-    const response = await fetch(`/api/products/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    console.log('productService: Delete response status:', response.status);
-    console.log('productService: Delete response ok:', response.ok);
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('productService: Delete error response:', errorData);
-      throw new Error(`Failed to delete product: ${errorData.error || 'Unknown error'}`);
-    }
-    
-    const result = await response.json();
+    const result = await deleteProductInFirestore(id);
     console.log('productService: Delete success response:', result);
     return true;
   } catch (error) {

@@ -1,56 +1,56 @@
 
 export const categories = [
-  // Indoor Lights
+  // Ground Effects (replacing Indoor Lights)
   {
-    name: 'Chandeliers',
-    image: '/images/categories/chandeliers.jpg',
-    href: '/categories/chandeliers',
-    type: 'indoor'
+    name: 'Sparklers',
+    image: '/images/categories/sparklers.jpg',
+    href: '/categories/sparklers',
+    type: 'ground'
   },
   {
-    name: 'Ceiling Lights',
-    image: '/images/categories/ceiling-lights.jpg',
-    href: '/categories/ceiling-lights',
-    type: 'indoor'
+    name: 'Fountains',
+    image: '/images/categories/fountains.jpg',
+    href: '/categories/fountains',
+    type: 'ground'
   },
   {
-    name: 'Wall Lamps',
-    image: '/images/categories/wall-lamps.jpg',
-    href: '/categories/wall-lamps',
-    type: 'indoor'
+    name: 'Ground Spinners',
+    image: '/images/categories/ground-spinners.jpg',
+    href: '/categories/ground-spinners',
+    type: 'ground'
   },
   {
-    name: 'Pendant Lights',
-    image: '/images/categories/pendant-lights.jpg',
-    href: '/categories/pendant-lights',
-    type: 'indoor'
+    name: 'Wheels',
+    image: '/images/categories/wheels.jpg',
+    href: '/categories/wheels',
+    type: 'ground'
   },
-  // Outdoor Lights
+  // Aerial Effects (replacing Outdoor Lights)
   {
-    name: 'Garden Lights',
-    image: '/images/categories/garden-lights.jpg',
-    href: '/categories/garden-lights',
-    type: 'outdoor'
-  },
-  {
-    name: 'Street Lamps',
-    image: '/images/categories/street-lamps.jpg',
-    href: '/categories/street-lamps',
-    type: 'outdoor'
+    name: 'Rockets',
+    image: '/images/categories/rockets.jpg',
+    href: '/categories/rockets',
+    type: 'aerial'
   },
   {
-    name: 'Flood Lights',
-    image: '/images/categories/flood-lights.jpg',
-    href: '/categories/flood-lights',
-    type: 'outdoor'
+    name: 'Roman Candles',
+    image: '/images/categories/roman-candles.jpg',
+    href: '/categories/roman-candles.jpg',
+    type: 'aerial'
   },
   {
-    name: 'Wall Fixtures',
-    image: '/images/categories/wall-fixtures.jpg',
-    href: '/categories/wall-fixtures',
-    type: 'outdoor'
+    name: 'Aerial Shells',
+    image: '/images/categories/aerial-shells.jpg',
+    href: '/categories/aerial-shells',
+    type: 'aerial'
+  },
+  {
+    name: 'Multi-Shot Cakes',
+    image: '/images/categories/multi-shot-cakes.jpg',
+    href: '/categories/multi-shot-cakes',
+    type: 'aerial'
   },
 ];
 
-export const indoorCategories = categories.filter(cat => cat.type === 'indoor');
-export const outdoorCategories = categories.filter(cat => cat.type === 'outdoor');
+export const groundCategories = categories.filter(cat => cat.type === 'ground');
+export const aerialCategories = categories.filter(cat => cat.type === 'aerial');

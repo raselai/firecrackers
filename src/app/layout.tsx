@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import Navbar from '../components/Navbar';
+import { Providers } from '../components/Providers';
 
 const inter = Inter({ subsets: ['latin'] });
 const poppins = Poppins({ 
@@ -23,10 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} ${poppins.variable}`} suppressHydrationWarning={true}>
-        <Navbar />
-        <main>
-          {children}
-        </main>
+        <Providers>
+          <Navbar />
+          <main>
+            {children}
+          </main>
         
         {/* Footer */}
         <footer className="footer">
@@ -84,6 +86,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        </Providers>
       </body>
     </html>
   );

@@ -9,16 +9,14 @@ export interface Product {
   galleryImages?: string[]; // Additional product images
   imagePath?: string; // Organized path like 'hanging-lights/crystal-chandelier-1.jpg'
   description?: string;
-  dimensions?: string;
-  bulbType?: string;
-  wattage?: number | string;
-  voltage?: string;
-  material?: string;
   category: string;
   subcategory: string;
-  room?: string;
-  lightType?: string;
-  style?: string;
+  // Firecracker-specific fields
+  effectType?: string; // E.g., "Sparkle", "Bang", "Aerial", "Fountain", "Crackle"
+  duration?: string; // E.g., "30 seconds", "2 minutes"
+  noiseLevel?: string; // E.g., "Low", "Medium", "High", "Silent"
+  shotCount?: number; // Number of shots/bursts
+  safetyDistance?: string; // E.g., "5 meters", "10 meters"
   availability?: 'In Stock' | 'Out of Stock' | 'Limited Stock';
   inStock: boolean; // Required for Firestore
   isFeatured?: boolean;

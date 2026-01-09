@@ -51,9 +51,11 @@ export async function POST(request: NextRequest) {
       image: newProduct.image || newProduct.images?.[0] || '', // Cloudinary URL
       images: newProduct.images || [], // Main Cloudinary URLs array
       galleryImages: newProduct.galleryImages || [], // Additional gallery Cloudinary URLs
-      wattage: newProduct.wattage || '',
-      material: newProduct.material || '',
-      dimensions: newProduct.dimensions || '',
+      effectType: newProduct.effectType || '',
+      duration: newProduct.duration || '',
+      noiseLevel: newProduct.noiseLevel || '',
+      shotCount: newProduct.shotCount,
+      safetyDistance: newProduct.safetyDistance || '',
       inStock: newProduct.inStock ?? true,
       featured: newProduct.isFeatured ?? false,
       seasonal: newProduct.isOnSale ?? false,

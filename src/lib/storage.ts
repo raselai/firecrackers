@@ -64,6 +64,11 @@ export const generateProductImagePath = (category: string, subcategory: string, 
   return `products/${category}/${subcategory}/${fileName}`;
 };
 
+// Generate payment proof path
+export const generatePaymentProofPath = (userId: string, orderId: string, fileName: string): string => {
+  return `payments/${userId}/${orderId}/${fileName}`;
+};
+
 // Convert base64 to file (for existing image uploads)
 export const base64ToFile = (base64: string, fileName: string): File => {
   const arr = base64.split(',');

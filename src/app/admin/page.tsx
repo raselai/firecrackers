@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import AddProductForm from '@/components/AddProductForm';
 import EditProductForm from '@/components/EditProductForm';
 import DashboardOverview from '@/components/DashboardOverview';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '@/lib/productService';
-import { useAuth } from '@/hooks/useAuth';
+import { getAllOrders, getOrdersByStatus, updateOrderStatus } from '@/lib/orderService';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useUser } from '@/contexts/AuthContext';
 import { Product } from '@/types/product';
+import { Order } from '@/types/order';
+
+type AdminOrderStatus = 'all' | Order['status'];
 
 export default function AdminPanel() {
-  const { isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, status, authError } = useAdminAuth();
+  const { user } = useUser();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -18,6 +25,12 @@ export default function AdminPanel() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [adminProducts, setAdminProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [ordersFilter, setOrdersFilter] = useState<AdminOrderStatus>('all');
+  const [orderActionLoading, setOrderActionLoading] = useState<string | null>(null);
 
   // Mock data for admin panel
   const inquiries = [
@@ -25,7 +38,7 @@ export default function AdminPanel() {
       id: 1,
       product: 'Crystal Palace Chandelier',
               customer: '+971 50 697 0154',
-      message: 'Hi! I\'m interested in the Crystal Palace Chandelier priced at AED 2,850. Can you provide more details?',
+      message: 'Hi! I\'m interested in the Crystal Palace Chandelier priced at RM 2,850. Can you provide more details?',
       date: '2024-01-15',
       status: 'New'
     },
@@ -33,7 +46,7 @@ export default function AdminPanel() {
       id: 2,
       product: 'Modern Gold Chandelier',
               customer: '+971 50 697 0154',
-      message: 'Hi! I\'m interested in the Modern Gold Chandelier priced at AED 1,950. Can you provide more details?',
+      message: 'Hi! I\'m interested in the Modern Gold Chandelier priced at RM 1,950. Can you provide more details?',
       date: '2024-01-14',
       status: 'Contacted'
     }
@@ -41,15 +54,21 @@ export default function AdminPanel() {
 
   // Check authentication and redirect if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/admin/login');
+    if (status === 'authenticated') {
+      loadProducts();
       return;
     }
-    
-    if (isAuthenticated) {
-      loadProducts();
+
+    if (status === 'unauthenticated') {
+      router.push('/admin/login');
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [status, router]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && activeTab === 'orders') {
+      loadOrders();
+    }
+  }, [status, activeTab, ordersFilter]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -61,6 +80,26 @@ export default function AdminPanel() {
       console.error('Error loading products:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const data = ordersFilter === 'all'
+        ? await getAllOrders()
+        : await getOrdersByStatus(ordersFilter);
+      setOrders(data);
+      if (selectedOrder) {
+        const updated = data.find(order => order.orderId === selectedOrder.orderId) || null;
+        setSelectedOrder(updated);
+      }
+    } catch (error) {
+      console.error('Error loading orders:', error);
+      setOrdersError('Failed to load orders.');
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
@@ -129,8 +168,73 @@ export default function AdminPanel() {
     setShowEditForm(true);
   };
 
+  const getOrderStatusStyle = (statusValue: Order['status']) => {
+    switch (statusValue) {
+      case 'approved':
+        return { background: '#dbeafe', color: '#1d4ed8' };
+      case 'rejected':
+        return { background: '#fee2e2', color: '#b91c1c' };
+      case 'confirmed':
+        return { background: '#ffedd5', color: '#9a3412' };
+      case 'shipped':
+        return { background: '#dbeafe', color: '#1e40af' };
+      case 'delivered':
+        return { background: '#dcfce7', color: '#166534' };
+      case 'cancelled':
+        return { background: '#fee2e2', color: '#991b1b' };
+      case 'pending':
+      default:
+        return { background: '#fef3c7', color: '#92400e' };
+    }
+  };
+
+  const handleApproveOrder = async (order: Order) => {
+    if (!confirm(`Approve order ${order.orderId}?`)) {
+      return;
+    }
+
+    setOrderActionLoading(order.orderId);
+    try {
+      await updateOrderStatus({
+        orderId: order.orderId,
+        status: 'approved',
+        reviewedBy: user?.displayName || user?.email || 'Admin'
+      });
+      await loadOrders();
+    } catch (error) {
+      console.error('Error approving order:', error);
+      alert('Failed to approve order. Please try again.');
+    } finally {
+      setOrderActionLoading(null);
+    }
+  };
+
+  const handleRejectOrder = async (order: Order) => {
+    const reason = window.prompt('Reason for rejection (optional):')?.trim();
+
+    if (!confirm(`Reject order ${order.orderId}?`)) {
+      return;
+    }
+
+    setOrderActionLoading(order.orderId);
+    try {
+      await updateOrderStatus({
+        orderId: order.orderId,
+        status: 'rejected',
+        reviewedBy: user?.displayName || user?.email || 'Admin',
+        rejectionReason: reason || undefined
+      });
+      await loadOrders();
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+      alert('Failed to reject order. Please try again.');
+    } finally {
+      setOrderActionLoading(null);
+    }
+  };
+
   // Show loading while checking authentication
-  if (authLoading) {
+  if (authLoading || status === 'loading') {
     return (
       <div style={{ 
         minHeight: '100vh', 
@@ -148,7 +252,37 @@ export default function AdminPanel() {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#f9fafb',
+        padding: '2rem'
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '420px' }}>
+          <h2 style={{ color: '#111827', marginBottom: '0.75rem' }}>Admin Access Required</h2>
+          <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+            {authError || 'You must sign in with an admin account to access this dashboard.'}
+          </p>
+          <button
+            onClick={() => router.push('/admin/login')}
+            style={{
+              padding: '0.75rem 1.25rem',
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            Go to Admin Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -214,6 +348,20 @@ export default function AdminPanel() {
             }}
           >
             Products
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            style={{
+              padding: '1rem 2rem',
+              background: activeTab === 'orders' ? '#8b5cf6' : 'transparent',
+              color: activeTab === 'orders' ? 'white' : '#374151',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              borderBottom: activeTab === 'orders' ? '3px solid #8b5cf6' : 'none'
+            }}
+          >
+            Orders
           </button>
           <button
             onClick={() => setActiveTab('inquiries')}
@@ -312,7 +460,7 @@ export default function AdminPanel() {
                           </div>
                         </td>
                         <td style={{ padding: '1rem' }}>{product.category}</td>
-                        <td style={{ padding: '1rem' }}>AED {product.price.toLocaleString()}</td>
+                        <td style={{ padding: '1rem' }}>RM {product.price.toLocaleString()}</td>
                         <td style={{ padding: '1rem' }}>
                           <span style={{
                             padding: '0.25rem 0.75rem',
@@ -367,6 +515,269 @@ export default function AdminPanel() {
             </div>
           </div>
         )
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h2 style={{ marginBottom: '0.75rem' }}>Orders</h2>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                {(['all', 'pending', 'approved', 'rejected', 'confirmed', 'shipped', 'delivered', 'cancelled'] as AdminOrderStatus[]).map((statusValue) => (
+                  <button
+                    key={statusValue}
+                    onClick={() => setOrdersFilter(statusValue)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '20px',
+                      border: ordersFilter === statusValue ? '1px solid #8b5cf6' : '1px solid #e5e7eb',
+                      background: ordersFilter === statusValue ? '#ede9fe' : 'white',
+                      color: ordersFilter === statusValue ? '#6d28d9' : '#374151',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {statusValue}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {ordersLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <p>Loading orders...</p>
+              </div>
+            ) : ordersError ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#b91c1c' }}>
+                {ordersError}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 60%', minWidth: '320px' }}>
+                  <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+                  }}>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                        <thead>
+                          <tr style={{ background: '#f9fafb' }}>
+                            <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                              Order
+                            </th>
+                            <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                              Customer
+                            </th>
+                            <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                              Total
+                            </th>
+                            <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                              Status
+                            </th>
+                            <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orders.map((order) => {
+                            const statusStyle = getOrderStatusStyle(order.status);
+                            return (
+                              <tr key={order.orderId} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                <td style={{ padding: '1rem' }}>
+                                  <div style={{ fontWeight: 'bold' }}>#{order.orderId}</div>
+                                  <div style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                                    {new Date(order.createdAt).toLocaleDateString('en-MY')}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <div style={{ fontSize: '0.9rem', color: '#111827' }}>{order.deliveryAddress.fullName}</div>
+                                  <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{order.deliveryAddress.phoneNumber}</div>
+                                </td>
+                                <td style={{ padding: '1rem' }}>RM {order.totalAmount.toFixed(2)}</td>
+                                <td style={{ padding: '1rem' }}>
+                                  <span style={{
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '20px',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                    background: statusStyle.background,
+                                    color: statusStyle.color
+                                  }}>
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '1rem' }}>
+                                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    <button
+                                      onClick={() => setSelectedOrder(order)}
+                                      style={{
+                                        padding: '0.25rem 0.75rem',
+                                        background: '#111827',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        whiteSpace: 'nowrap'
+                                      }}
+                                    >
+                                      View
+                                    </button>
+                                    <button
+                                      onClick={() => handleApproveOrder(order)}
+                                      disabled={orderActionLoading === order.orderId}
+                                      style={{
+                                        padding: '0.25rem 0.75rem',
+                                        background: '#059669',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        whiteSpace: 'nowrap',
+                                        opacity: orderActionLoading === order.orderId ? 0.6 : 1
+                                      }}
+                                    >
+                                      Approve
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectOrder(order)}
+                                      disabled={orderActionLoading === order.orderId}
+                                      style={{
+                                        padding: '0.25rem 0.75rem',
+                                        background: '#dc2626',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        whiteSpace: 'nowrap',
+                                        opacity: orderActionLoading === order.orderId ? 0.6 : 1
+                                      }}
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {orders.length === 0 && (
+                            <tr>
+                              <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>
+                                No orders found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ flex: '1 1 35%', minWidth: '280px' }}>
+                  <div style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                    padding: '1.5rem',
+                    minHeight: '200px'
+                  }}>
+                    {selectedOrder ? (
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                          <div>
+                            <h3 style={{ marginBottom: '0.25rem' }}>Order #{selectedOrder.orderId}</h3>
+                            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
+                              {new Date(selectedOrder.createdAt).toLocaleString('en-MY')}
+                            </p>
+                          </div>
+                          <span style={{
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            ...getOrderStatusStyle(selectedOrder.status)
+                          }}>
+                            {selectedOrder.status}
+                          </span>
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                          <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Customer</p>
+                          <p style={{ margin: 0 }}>{selectedOrder.deliveryAddress.fullName}</p>
+                          <p style={{ margin: 0, color: '#6b7280' }}>{selectedOrder.deliveryAddress.phoneNumber}</p>
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                          <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Delivery</p>
+                          <p style={{ margin: 0 }}>{selectedOrder.deliveryAddress.streetAddress}</p>
+                          <p style={{ margin: 0 }}>{selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state}</p>
+                          <p style={{ margin: 0 }}>{selectedOrder.deliveryAddress.postalCode}</p>
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                          <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Payment</p>
+                          <p style={{ margin: 0 }}>Method: {selectedOrder.paymentMethod || 'touch_n_go'}</p>
+                          {selectedOrder.paymentSubmittedAt && (
+                            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.85rem' }}>
+                              Submitted: {new Date(selectedOrder.paymentSubmittedAt).toLocaleString('en-MY')}
+                            </p>
+                          )}
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Payment Proof</p>
+                          {selectedOrder.paymentProofUrl ? (
+                            <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                              <Image
+                                src={selectedOrder.paymentProofUrl}
+                                alt={`Payment proof for ${selectedOrder.orderId}`}
+                                width={360}
+                                height={360}
+                                style={{ width: '100%', height: 'auto' }}
+                              />
+                            </div>
+                          ) : (
+                            <p style={{ margin: 0, color: '#6b7280' }}>No proof uploaded.</p>
+                          )}
+                        </div>
+
+                        {selectedOrder.rejectionReason && (
+                          <div style={{ marginBottom: '1rem', color: '#b91c1c' }}>
+                            <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>Rejection Reason</p>
+                            <p style={{ margin: 0 }}>{selectedOrder.rejectionReason}</p>
+                          </div>
+                        )}
+
+                        <div>
+                          <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Items</p>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {selectedOrder.items.map((item, index) => (
+                              <div key={`${item.productId}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                <span>{item.productName} x{item.quantity}</span>
+                                <span>RM {(item.price * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '0.75rem', paddingTop: '0.75rem', fontWeight: 'bold' }}>
+                            Total: RM {selectedOrder.totalAmount.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', color: '#6b7280', padding: '2rem 1rem' }}>
+                        Select an order to view details.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Inquiries Tab */}

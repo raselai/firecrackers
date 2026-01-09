@@ -15,16 +15,14 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
     price: '',
     offerPrice: '',
     description: '',
-    dimensions: '',
-    bulbType: '',
-    wattage: '',
-    voltage: '',
-    material: '',
     category: '',
     subcategory: '',
-    room: '',
-    lightType: '',
-    style: '',
+    // Firecracker-specific fields
+    effectType: '',
+    duration: '',
+    noiseLevel: '',
+    shotCount: '',
+    safetyDistance: '',
     availability: 'In Stock',
     isFeatured: false,
     isOnSale: false,
@@ -45,16 +43,14 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
         price: product.price?.toString() || '',
         offerPrice: product.offerPrice?.toString() || '',
         description: product.description || '',
-        dimensions: product.dimensions || '',
-        bulbType: product.bulbType || '',
-        wattage: product.wattage?.toString() || '',
-        voltage: product.voltage || '',
-        material: product.material || '',
         category: product.category || '',
         subcategory: product.subcategory || '',
-        room: product.room || '',
-        lightType: product.lightType || '',
-        style: product.style || '',
+        // Firecracker-specific fields
+        effectType: product.effectType || '',
+        duration: product.duration || '',
+        noiseLevel: product.noiseLevel || '',
+        shotCount: product.shotCount?.toString() || '',
+        safetyDistance: product.safetyDistance || '',
         availability: product.availability || 'In Stock',
         isFeatured: product.isFeatured || false,
         isOnSale: product.isOnSale || false,
@@ -70,34 +66,35 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
   }, [product]);
 
   const categories = [
-    'Indoor Lights',
-    'Outdoor Lights',
+    'Ground Effects',
+    'Aerial Effects',
     'Others'
   ];
 
   const subcategories = {
-    'Indoor Lights': [
-      'Hanging Lights',
-      'Spotlight',
-      'Pendant Lights',
-      'Magnetic Light',
-      'LED Tube',
-      'Office Lights',
-      'Warehouse Light',
-      'LED Strip',
-      'Aluminum Profile',
-      'Mirror Light',
-      'LED Track Lights'
+    'Ground Effects': [
+      'Sparklers',
+      'Fountains',
+      'Ground Spinners',
+      'Wheels',
+      'Snakes',
+      'Smoke Bombs',
+      'Poppers',
+      'Fire Crackers',
+      'Party Crackers',
+      'Confetti Cannons'
     ],
-    'Outdoor Lights': [
-      'Wall Lights',
-      'Stand Lights',
-      'Garden Lights',
-      'Floodlight',
-      'Solar Light'
+    'Aerial Effects': [
+      'Rockets',
+      'Roman Candles',
+      'Aerial Shells',
+      'Multi-Shot Cakes',
+      'Mines'
     ],
     'Others': [
-      'Custom Solutions',
+      'Combo Packs',
+      'Gift Sets',
+      'Custom Assortments',
       'Specialty Lighting',
       'Unique Designs',
       'Miscellaneous'
@@ -142,7 +139,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
       ...formData,
       price: parseFloat(formData.price),
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
-      wattage: formData.wattage === 'N/A' ? 'N/A' : parseInt(formData.wattage),
+      shotCount: formData.shotCount ? parseInt(formData.shotCount) : undefined,
       rating: parseFloat(formData.rating),
       reviewCount: parseInt(formData.reviewCount),
       images: formData.images.filter(img => img.trim() !== ''),
@@ -227,7 +224,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Price (AED) *
+                Price (MYR) *
               </label>
               <input
                 type="number"
@@ -249,7 +246,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
             {formData.isOnSale && (
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#dc2626' }}>
-                  Offer Price (AED) (Optional)
+                  Offer Price (MYR) (Optional)
                 </label>
                 <input
                   type="number"
@@ -322,16 +319,41 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
               </select>
             </div>
 
-            {/* Specifications */}
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Dimensions
+                Effect Type
+              </label>
+              <select
+                value={formData.effectType}
+                onChange={(e) => handleInputChange('effectType', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              >
+                <option value="">Select Effect Type</option>
+                <option value="Sparkle">Sparkle</option>
+                <option value="Bang">Bang</option>
+                <option value="Aerial">Aerial</option>
+                <option value="Fountain">Fountain</option>
+                <option value="Crackle">Crackle</option>
+                <option value="Whistle">Whistle</option>
+                <option value="Mixed Effects">Mixed Effects</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Duration
               </label>
               <input
                 type="text"
-                value={formData.dimensions}
-                onChange={(e) => handleInputChange('dimensions', e.target.value)}
-                placeholder="e.g., 80cm diameter x 100cm height"
+                value={formData.duration}
+                onChange={(e) => handleInputChange('duration', e.target.value)}
+                placeholder="e.g., 30 seconds, 2 minutes"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -344,13 +366,36 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Bulb Type
+                Noise Level
+              </label>
+              <select
+                value={formData.noiseLevel}
+                onChange={(e) => handleInputChange('noiseLevel', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              >
+                <option value="">Select Noise Level</option>
+                <option value="Silent">Silent</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Shot Count
               </label>
               <input
-                type="text"
-                value={formData.bulbType}
-                onChange={(e) => handleInputChange('bulbType', e.target.value)}
-                placeholder="e.g., E14 LED Compatible"
+                type="number"
+                value={formData.shotCount}
+                onChange={(e) => handleInputChange('shotCount', e.target.value)}
+                placeholder="e.g., 25, 100"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -363,108 +408,13 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Wattage
+                Safety Distance
               </label>
               <input
                 type="text"
-                value={formData.wattage}
-                onChange={(e) => handleInputChange('wattage', e.target.value)}
-                placeholder="e.g., 240 or N/A"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Voltage
-              </label>
-              <input
-                type="text"
-                value={formData.voltage}
-                onChange={(e) => handleInputChange('voltage', e.target.value)}
-                placeholder="e.g., 220-240V"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Material
-              </label>
-              <input
-                type="text"
-                value={formData.material}
-                onChange={(e) => handleInputChange('material', e.target.value)}
-                placeholder="e.g., K9 Crystal, Chrome Frame"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Style
-              </label>
-              <input
-                type="text"
-                value={formData.style}
-                onChange={(e) => handleInputChange('style', e.target.value)}
-                placeholder="e.g., Traditional, Modern"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Room
-              </label>
-              <input
-                type="text"
-                value={formData.room}
-                onChange={(e) => handleInputChange('room', e.target.value)}
-                placeholder="e.g., Dining Room, Living Room"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Light Type
-              </label>
-              <input
-                type="text"
-                value={formData.lightType}
-                onChange={(e) => handleInputChange('lightType', e.target.value)}
-                placeholder="e.g., Chandelier, Flush Mount"
+                value={formData.safetyDistance}
+                onChange={(e) => handleInputChange('safetyDistance', e.target.value)}
+                placeholder="e.g., 5 meters, 10 meters"
                 style={{
                   width: '100%',
                   padding: '0.75rem',

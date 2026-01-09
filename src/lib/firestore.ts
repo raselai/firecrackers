@@ -18,16 +18,19 @@ export interface Product {
   name: string;
   price: number;
   offerPrice?: number; // Sale price when isOnSale is true
-  description: string;
+  description?: string;
   category: string;
   subcategory: string;
-  image: string;
+  image?: string;
   images?: string[];
   galleryImages?: string[]; // Additional gallery images for product detail page
-  wattage?: number | string;
+  // Firecracker-specific fields
+  effectType?: string;
+  duration?: string;
+  noiseLevel?: string;
+  shotCount?: number;
+  safetyDistance?: string;
   color?: string;
-  material?: string;
-  dimensions?: string;
   inStock: boolean;
   featured?: boolean;
   seasonal?: boolean;
@@ -36,11 +39,17 @@ export interface Product {
   updatedAt?: Date;
 }
 
+const removeUndefinedFields = <T extends Record<string, unknown>>(data: T): Partial<T> => {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  ) as Partial<T>;
+};
+
 // Add a new product
 export const addProduct = async (product: Omit<Product, 'id'>) => {
   try {
     const docRef = await addDoc(collection(db, "products"), {
-      ...product,
+      ...removeUndefinedFields(product),
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -56,7 +65,7 @@ export const updateProduct = async (id: string, product: Partial<Product>) => {
   try {
     const productRef = doc(db, "products", id);
     await updateDoc(productRef, {
-      ...product,
+      ...removeUndefinedFields(product),
       updatedAt: new Date()
     });
     return { id, ...product };

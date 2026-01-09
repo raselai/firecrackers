@@ -1,6 +1,7 @@
-import { products } from '@/app/data/products';
+import { Product } from '@/types/product';
 
-export const staticProducts = products;
+// Static products array - empty for now, products will come from Firestore
+export const staticProducts: Product[] = [];
 
 export const getStaticProducts = () => {
   return staticProducts;

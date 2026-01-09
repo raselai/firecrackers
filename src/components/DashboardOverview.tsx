@@ -171,7 +171,7 @@ export default function DashboardOverview({ products, inquiries }: DashboardOver
         }}>
           <h3 style={{ marginBottom: '1rem', color: '#1f2937' }}>Inventory Value</h3>
           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#059669', marginBottom: '0.5rem' }}>
-            AED {totalValue.toLocaleString()}
+            RM {totalValue.toLocaleString()}
           </div>
           <div style={{ color: '#6b7280', fontSize: '0.9rem' }}>
             Total value of all products

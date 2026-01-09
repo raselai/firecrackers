@@ -3,26 +3,27 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAdminAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Simple authentication - you can change these credentials
-    if (username === 'admin' && password === 'lighting2024') {
-      // Set authentication token
-      localStorage.setItem('adminAuth', 'true');
+    try {
+      await login(email, password);
       router.push('/admin');
-    } else {
-      setError('Invalid username or password');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(message);
     }
     setLoading(false);
   };
@@ -61,12 +62,12 @@ export default function AdminLogin() {
               fontWeight: '500',
               color: '#374151'
             }}>
-              Username
+              Email
             </label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               style={{
                 width: '100%',
@@ -75,7 +76,7 @@ export default function AdminLogin() {
                 borderRadius: '4px',
                 fontSize: '1rem'
               }}
-              placeholder="Enter username"
+              placeholder="Enter admin email"
             />
           </div>
 

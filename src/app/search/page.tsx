@@ -6,7 +6,6 @@ import { getProductImagePath } from '@/lib/utils';
 import { fetchProducts } from '@/lib/productService';
 import Link from 'next/link';
 import Image from 'next/image';
-import WhatsAppIcon from '@/components/WhatsAppIcon';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -58,8 +57,6 @@ export default function SearchPage() {
       const productCategory = (product.category || '').toLowerCase();
       const productSubcategory = (product.subcategory || '').toLowerCase();
       const productDescription = (product.description || '').toLowerCase();
-      const productStyle = (product.style || '').toLowerCase();
-      const productMaterial = (product.material || '').toLowerCase();
       const productLightType = (product.lightType || '').toLowerCase();
       
       // Split search terms for more flexible matching
@@ -71,12 +68,10 @@ export default function SearchPage() {
         const categoryMatch = productCategory.includes(term);
         const subcategoryMatch = productSubcategory.includes(term);
         const descriptionMatch = productDescription.includes(term);
-        const styleMatch = productStyle.includes(term);
-        const materialMatch = productMaterial.includes(term);
         const lightTypeMatch = productLightType.includes(term);
         
         return nameMatch || categoryMatch || subcategoryMatch || 
-               descriptionMatch || styleMatch || materialMatch || lightTypeMatch;
+               descriptionMatch || lightTypeMatch;
       });
       
       if (isMatch) {
@@ -142,12 +137,6 @@ export default function SearchPage() {
   }, [query, products, selectedCategory, priceRange, availability, sortBy]);
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
-
-  const handleWhatsAppInquiry = (product: any) => {
-    const message = `Hi! I'm interested in the ${product.name} priced at AED ${product.price.toLocaleString()}. Can you provide more details?`;
-    const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <div style={{ padding: '2rem 0' }}>
@@ -218,9 +207,9 @@ export default function SearchPage() {
               }}
             >
               <option value="all">All Prices</option>
-              <option value="0-500">Under AED 500</option>
-              <option value="500-1000">AED 500 - 1000</option>
-              <option value="1000+">Over AED 1000</option>
+              <option value="0-500">Under RM 500</option>
+              <option value="500-1000">RM 500 - 1000</option>
+              <option value="1000+">Over RM 1000</option>
             </select>
           </div>
 
@@ -341,12 +330,8 @@ export default function SearchPage() {
                       alignItems: 'center' 
                     }}>
                       <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        AED {product.price.toLocaleString()}
+                        RM {product.price.toLocaleString()}
                       </span>
-                      <WhatsAppIcon 
-                        onClick={() => handleWhatsAppInquiry(product)}
-                        size={20}
-                      />
                     </div>
                   </div>
                 ))}
