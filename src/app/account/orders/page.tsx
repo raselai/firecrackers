@@ -24,13 +24,14 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (user) {
+      const userId = user?.uid || firebaseUser?.uid;
+      if (userId) {
         try {
           if (selectedStatus === 'all') {
-            const allOrders = await getUserOrders(user.uid);
+            const allOrders = await getUserOrders(userId);
             setOrders(allOrders);
           } else {
-            const filteredOrders = await getUserOrdersByStatus(user.uid, selectedStatus);
+            const filteredOrders = await getUserOrdersByStatus(userId, selectedStatus);
             setOrders(filteredOrders);
           }
         } catch (error) {

@@ -32,7 +32,7 @@ export default function OrderDetailPage() {
 
           if (!orderData) {
             setError('Order not found');
-          } else if (orderData.userId !== user.uid) {
+          } else if (orderData.userId !== (user.uid || firebaseUser?.uid)) {
             setError('Unauthorized access to this order');
           } else {
             setOrder(orderData);

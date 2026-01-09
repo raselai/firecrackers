@@ -133,6 +133,10 @@ export async function createOrder(params: {
       orderId: providedOrderId
     } = params;
 
+    if (!userId) {
+      throw new Error('User ID is required to place an order.');
+    }
+
     // Get user to verify voucher availability
     const user = await getUserById(userId);
     if (!user) {
@@ -237,6 +241,10 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
  */
 export async function getUserOrders(userId: string): Promise<Order[]> {
   try {
+    if (!userId) {
+      return [];
+    }
+
     const q = query(
       collection(db, 'orders'),
       where('userId', '==', userId),
@@ -260,6 +268,10 @@ export async function getUserOrdersByStatus(
   status: Order['status']
 ): Promise<Order[]> {
   try {
+    if (!userId) {
+      return [];
+    }
+
     const q = query(
       collection(db, 'orders'),
       where('userId', '==', userId),
@@ -319,6 +331,10 @@ export async function updateOrderStatus(params: {
   adminNotes?: string;
 }): Promise<void> {
   try {
+    if (!params.orderId) {
+      throw new Error('Order ID is required');
+    }
+
     const orderDoc = await getOrderDocByOrderId(params.orderId);
     if (!orderDoc) {
       throw new Error('Order not found');

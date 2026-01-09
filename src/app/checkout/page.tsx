@@ -75,7 +75,8 @@ export default function CheckoutPage() {
   }, [addresses, selectedAddressId]);
 
   const handleUploadProof = async (file: File) => {
-    if (!user) return;
+    const userId = firebaseUser?.uid || user?.uid;
+    if (!userId) return;
 
     if (!file.type.startsWith('image/')) {
       setError('Please upload an image file.');
@@ -91,7 +92,7 @@ export default function CheckoutPage() {
     setUploading(true);
 
     try {
-      const path = generatePaymentProofPath(user.uid, orderId, file.name);
+      const path = generatePaymentProofPath(userId, orderId, file.name);
       const url = await uploadImage(file, path);
       setPaymentProofUrl(url);
       setPaymentProofPath(path);
@@ -104,7 +105,8 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!user) return;
+    const userId = firebaseUser?.uid || user?.uid;
+    if (!userId || !user) return;
 
     if (items.length === 0) {
       setError('Your cart is empty.');
@@ -138,7 +140,7 @@ export default function CheckoutPage() {
     try {
       await createOrder({
         orderId,
-        userId: user.uid,
+        userId,
         items,
         deliveryAddress: selectedAddress,
         vouchersToUse: voucherCount,
