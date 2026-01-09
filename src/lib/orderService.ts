@@ -292,9 +292,10 @@ export async function getUserOrdersByStatus(
  */
 export async function getAllOrders(): Promise<Order[]> {
   try {
-    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'orders'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(mapOrderSnapshot);
+    const orders = querySnapshot.docs.map(mapOrderSnapshot);
+    return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
     console.error('Error getting all orders:', error);
     throw error;
