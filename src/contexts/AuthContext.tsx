@@ -20,7 +20,27 @@ import {
   getUserById,
   updateUserProfile
 } from '@/lib/userService';
-import { processReferral } from '@/lib/referralService';
+
+const processReferralViaApi = async (
+  firebaseUser: FirebaseUser,
+  referralCode: string
+): Promise<void> => {
+  const token = await firebaseUser.getIdToken();
+  const response = await fetch('/api/referrals/process', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ referralCode })
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    const message = data?.error || 'Failed to process referral';
+    throw new Error(message);
+  }
+};
 
 interface AuthContextType {
   user: User | null;
@@ -89,14 +109,13 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
       await createUserDocument(
         firebaseUser.uid,
         email,
-        displayName,
-        referralCode
+        displayName
       );
 
       // Process referral if code was provided
       if (referralCode) {
         try {
-          await processReferral(firebaseUser.uid, referralCode);
+          await processReferralViaApi(firebaseUser, referralCode);
         } catch (error) {
           console.error('Error processing referral:', error);
           // Don't throw error - user is created successfully
@@ -138,14 +157,13 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
         await createUserDocument(
           firebaseUser.uid,
           firebaseUser.email!,
-          firebaseUser.displayName || 'User',
-          referralCode
+          firebaseUser.displayName || 'User'
         );
 
         // Process referral if code was provided
         if (referralCode) {
           try {
-            await processReferral(firebaseUser.uid, referralCode);
+            await processReferralViaApi(firebaseUser, referralCode);
           } catch (error) {
             console.error('Error processing referral:', error);
           }
@@ -251,3 +269,4 @@ export function useUser() {
   }
   return context;
 }
+

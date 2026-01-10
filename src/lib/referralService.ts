@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Referral, ReferralStats } from '@/types/referral';
-import { getUserById, getUserByReferralCode, awardVoucher } from './userService';
+import { getUserById, getUserByReferralCode, awardVoucher, updateUserProfile } from './userService';
 import QRCode from 'qrcode';
 
 /**
@@ -41,7 +41,9 @@ export async function generateReferralQR(referralCode: string): Promise<string> 
  */
 export async function validateReferralCode(code: string): Promise<boolean> {
   try {
-    const user = await getUserByReferralCode(code);
+    const normalizedCode = code.trim().toUpperCase();
+    if (!normalizedCode) return false;
+    const user = await getUserByReferralCode(normalizedCode);
     return user !== null;
   } catch (error) {
     console.error('Error validating referral code:', error);
@@ -58,8 +60,13 @@ export async function processReferral(
   referralCode: string
 ): Promise<void> {
   try {
+    const normalizedCode = referralCode.trim().toUpperCase();
+    if (!normalizedCode) {
+      throw new Error('Invalid referral code');
+    }
+
     // Get the referrer by referral code
-    const referrer = await getUserByReferralCode(referralCode);
+    const referrer = await getUserByReferralCode(normalizedCode);
 
     if (!referrer) {
       throw new Error('Invalid referral code');
@@ -81,6 +88,8 @@ export async function processReferral(
       console.warn('User already has a referrer, skipping referral processing');
       return;
     }
+
+    await updateUserProfile(newUserId, { referredBy: referrer.uid });
 
     // Create referral record
     const referralData: Omit<Referral, 'id'> = {
@@ -189,3 +198,6 @@ export function getEmailShareLink(referralCode: string, userName?: string): stri
   const body = generateReferralMessage(referralCode, userName);
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
+
+
+

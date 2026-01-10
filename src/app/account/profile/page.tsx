@@ -38,6 +38,12 @@ export default function ProfilePage() {
   }, [firebaseUser, loading, router]);
 
   useEffect(() => {
+    if (!loading && firebaseUser) {
+      refreshUser();
+    }
+  }, [loading, firebaseUser, refreshUser]);
+
+  useEffect(() => {
     if (user) {
       setDisplayName(user.displayName);
       setPhoneNumber(user.phoneNumber || '');
@@ -332,6 +338,19 @@ export default function ProfilePage() {
                         Copy
                       </button>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Available Vouchers
+                    </label>
+                    <input
+                      type="text"
+                      value={`${user.vouchers} (RM${user.vouchers * 20})`}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-mono"
+                      disabled
+                    />
+                    <p className="text-xs text-gray-500 mt-1">RM20 per voucher</p>
                   </div>
                 </div>
 
