@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   calculateMaxVouchers,
   calculateVoucherDiscount,
@@ -24,6 +25,7 @@ export default function CheckoutPage() {
   const { items, loading: cartLoading, subtotal, clearCart } = useCart();
   const { user, firebaseUser, loading: authLoading } = useUser();
   const router = useRouter();
+  const { t } = useI18n();
 
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [voucherCount, setVoucherCount] = useState(0);
@@ -79,12 +81,12 @@ export default function CheckoutPage() {
     if (!userId) return;
 
     if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file.');
+      setError(t('checkout.errors.imageFileOnly'));
       return;
     }
 
     if (file.size > MAX_UPLOAD_SIZE) {
-      setError('Image must be smaller than 5MB.');
+      setError(t('checkout.errors.imageTooLarge'));
       return;
     }
 
@@ -98,7 +100,7 @@ export default function CheckoutPage() {
       setPaymentProofPath(path);
     } catch (uploadError) {
       console.error('Error uploading payment proof:', uploadError);
-      setError('Failed to upload payment proof. Please try again.');
+      setError(t('checkout.errors.uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -109,28 +111,28 @@ export default function CheckoutPage() {
     if (!userId || !user) return;
 
     if (items.length === 0) {
-      setError('Your cart is empty.');
+      setError(t('checkout.errors.cartEmpty'));
       return;
     }
 
     if (addresses.length === 0) {
-      setError('Please add a shipping address before placing the order.');
+      setError(t('checkout.errors.addressRequired'));
       return;
     }
 
     if (!selectedAddress) {
-      setError('Please select a shipping address.');
+      setError(t('checkout.errors.addressSelect'));
       return;
     }
 
     if (!paymentProofUrl) {
-      setError('Please upload your payment screenshot.');
+      setError(t('checkout.errors.proofRequired'));
       return;
     }
 
     const validation = validateVoucherUsage(subtotal, voucherCount, user.vouchers);
     if (!validation.valid) {
-      setError(validation.message || 'Voucher validation failed.');
+      setError(validation.message || t('checkout.errors.voucherValidationFailed'));
       return;
     }
 
@@ -153,7 +155,7 @@ export default function CheckoutPage() {
       router.push('/account/orders');
     } catch (orderError) {
       console.error('Error placing order:', orderError);
-      setError('Failed to place order. Please try again.');
+      setError(t('checkout.errors.orderFailed'));
     } finally {
       setPlacingOrder(false);
     }
@@ -164,7 +166,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading checkout...</p>
+          <p className="mt-4 text-gray-600">{t('checkout.loading')}</p>
         </div>
       </div>
     );
@@ -177,10 +179,10 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="container" style={{ padding: '2rem 0' }}>
-        <h1 style={{ marginBottom: '1rem' }}>Checkout</h1>
-        <p style={{ color: '#6b7280' }}>Your cart is empty.</p>
+        <h1 style={{ marginBottom: '1rem' }}>{t('checkout.title')}</h1>
+        <p style={{ color: '#6b7280' }}>{t('checkout.cartEmpty')}</p>
         <Link href="/" style={{ color: '#3b82f6', textDecoration: 'none' }}>
-          Continue shopping
+          {t('checkout.continueShopping')}
         </Link>
       </div>
     );
@@ -188,7 +190,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container" style={{ padding: '2rem 0' }}>
-      <h1 style={{ marginBottom: '1.5rem' }}>Checkout</h1>
+      <h1 style={{ marginBottom: '1.5rem' }}>{t('checkout.title')}</h1>
 
       {error && (
         <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fef2f2', color: '#b91c1c', borderRadius: '6px' }}>
@@ -199,14 +201,14 @@ export default function CheckoutPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         <div>
           <section style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
-            <h2 style={{ marginBottom: '1rem' }}>Shipping Address</h2>
+            <h2 style={{ marginBottom: '1rem' }}>{t('checkout.shippingAddress')}</h2>
             {addresses.length === 0 ? (
               <div>
                 <p style={{ color: '#6b7280', marginBottom: '0.75rem' }}>
-                  You don’t have any saved addresses yet.
+                  {t('checkout.noAddresses')}
                 </p>
                 <Link href="/account/profile" style={{ color: '#3b82f6', textDecoration: 'none' }}>
-                  Add an address
+                  {t('checkout.addAddress')}
                 </Link>
               </div>
             ) : (
@@ -245,14 +247,14 @@ export default function CheckoutPage() {
           </section>
 
           <section style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
-            <h2 style={{ marginBottom: '1rem' }}>Voucher</h2>
+            <h2 style={{ marginBottom: '1rem' }}>{t('checkout.voucher')}</h2>
             {maxVouchers === 0 ? (
               <p style={{ color: '#6b7280' }}>
-                Spend at least RM100 to apply a voucher.
+                {t('checkout.voucherHint')}
               </p>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <label htmlFor="voucherCount">Vouchers to apply</label>
+                <label htmlFor="voucherCount">{t('checkout.vouchersToApply')}</label>
                 <input
                   id="voucherCount"
                   type="number"
@@ -268,30 +270,30 @@ export default function CheckoutPage() {
                   }}
                 />
                 <span style={{ color: '#6b7280' }}>
-                  {maxVouchers} max (available: {user.vouchers})
+                  {maxVouchers} {t('checkout.voucherMax')} ({t('checkout.availableVouchers')}: {user.vouchers})
                 </span>
               </div>
             )}
           </section>
 
           <section style={{ padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
-            <h2 style={{ marginBottom: '1rem' }}>Payment</h2>
+            <h2 style={{ marginBottom: '1rem' }}>{t('checkout.payment')}</h2>
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
               <div style={{ width: '220px' }}>
                 <Image
                   src="/images/ewallet-qr.jpg"
-                  alt="Touch 'n Go eWallet QR"
+                  alt={t('checkout.paymentMethod')}
                   width={220}
                   height={300}
                   style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
                 />
               </div>
               <div style={{ flex: 1, minWidth: '220px' }}>
-                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>Touch ’n Go eWallet</p>
-                <p style={{ marginBottom: '0.25rem' }}>Name: {WALLET_NAME}</p>
-                <p style={{ marginBottom: '1rem' }}>Wallet No: {WALLET_NUMBER}</p>
+                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
+                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {WALLET_NAME}</p>
+                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {WALLET_NUMBER}</p>
                 <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                  Transfer the total amount and upload your payment screenshot below.
+                  {t('checkout.paymentInstruction')}
                 </p>
 
                 <input
@@ -304,9 +306,9 @@ export default function CheckoutPage() {
                     }
                   }}
                 />
-                {uploading && <p style={{ marginTop: '0.5rem' }}>Uploading proof...</p>}
+                {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
                 {paymentProofUrl && !uploading && (
-                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>Payment proof uploaded.</p>
+                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
                 )}
               </div>
             </div>
@@ -314,17 +316,17 @@ export default function CheckoutPage() {
         </div>
 
         <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '1.5rem', height: 'fit-content' }}>
-          <h2 style={{ marginBottom: '1rem' }}>Order Summary</h2>
+          <h2 style={{ marginBottom: '1rem' }}>{t('checkout.orderSummary')}</h2>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span>Subtotal</span>
+            <span>{t('checkout.subtotal')}</span>
             <span>RM {subtotal.toLocaleString()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span>Voucher discount</span>
+            <span>{t('checkout.voucherDiscount')}</span>
             <span>- RM {voucherDiscount.toLocaleString()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
-            <span>Total</span>
+            <span>{t('checkout.total')}</span>
             <span>RM {totalAmount.toLocaleString()}</span>
           </div>
 
@@ -348,7 +350,7 @@ export default function CheckoutPage() {
               fontWeight: 'bold'
             }}
           >
-            {placingOrder ? 'Placing order...' : 'Place Order'}
+            {placingOrder ? t('checkout.placingOrder') : t('checkout.placeOrder')}
           </button>
         </div>
       </div>

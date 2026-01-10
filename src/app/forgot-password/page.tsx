@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function ForgotPassword() {
   const { resetPassword } = useUser();
+  const { t } = useI18n();
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -19,14 +21,14 @@ export default function ForgotPassword() {
 
     // Validation
     if (!email.trim()) {
-      setError('Please enter your email address');
+      setError(t('forgotPassword.errors.emailRequired'));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
+      setError(t('forgotPassword.errors.emailInvalid'));
       return;
     }
 
@@ -41,13 +43,13 @@ export default function ForgotPassword() {
 
       // Handle specific error messages
       if (error.message.includes('user-not-found')) {
-        setError('No account found with this email address');
+        setError(t('forgotPassword.errors.noAccount'));
       } else if (error.message.includes('invalid-email')) {
-        setError('Invalid email address');
+        setError(t('forgotPassword.errors.invalidEmail'));
       } else if (error.message.includes('too-many-requests')) {
-        setError('Too many requests. Please try again later');
+        setError(t('forgotPassword.errors.tooManyRequests'));
       } else {
-        setError(error.message || 'Failed to send password reset email');
+        setError(error.message || t('forgotPassword.errors.sendFailed'));
       }
     } finally {
       setLoading(false);
@@ -60,9 +62,9 @@ export default function ForgotPassword() {
         <div className="bg-white rounded-lg shadow-md p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Forgot Password</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('forgotPassword.title')}</h1>
             <p className="mt-2 text-gray-600">
-              Enter your email address and we'll send you a link to reset your password
+              {t('forgotPassword.subtitle')}
             </p>
           </div>
 
@@ -77,11 +79,11 @@ export default function ForgotPassword() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-green-800">
-                    Password reset email sent!
+                    {t('forgotPassword.successTitle')}
                   </h3>
                   <div className="mt-2 text-sm text-green-700">
                     <p>
-                      Check your inbox for a password reset link. If you don't see it, check your spam folder.
+                      {t('forgotPassword.successBody')}
                     </p>
                   </div>
                   <div className="mt-4">
@@ -89,7 +91,7 @@ export default function ForgotPassword() {
                       href="/login"
                       className="text-sm font-medium text-green-700 hover:text-green-600"
                     >
-                      Return to login →
+                      {t('forgotPassword.returnToLogin')}
                     </Link>
                   </div>
                 </div>
@@ -110,7 +112,7 @@ export default function ForgotPassword() {
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
+                  {t('forgotPassword.emailLabel')}
                 </label>
                 <input
                   id="email"
@@ -119,7 +121,7 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="you@example.com"
+                  placeholder={t('forgotPassword.emailPlaceholder')}
                   disabled={loading}
                 />
               </div>
@@ -130,7 +132,7 @@ export default function ForgotPassword() {
                 disabled={loading}
                 className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Sending...' : 'Send Reset Link'}
+                {loading ? t('forgotPassword.sending') : t('forgotPassword.sendResetLink')}
               </button>
             </form>
           )}
@@ -142,16 +144,16 @@ export default function ForgotPassword() {
                 href="/login"
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium"
               >
-                ← Back to login
+                {t('forgotPassword.backToLogin')}
               </Link>
             </div>
           )}
 
           {/* Sign Up Link */}
           <p className="mt-6 text-center text-sm text-gray-600 border-t pt-6">
-            Don't have an account?{' '}
+            {t('forgotPassword.noAccount')}{' '}
             <Link href="/signup" className="text-orange-600 hover:text-orange-700 font-medium">
-              Create one
+              {t('forgotPassword.createOne')}
             </Link>
           </p>
         </div>

@@ -9,6 +9,7 @@ import { getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ProductCardProps = {
   product: Product;
@@ -18,6 +19,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
+  const { t } = useI18n();
 
   const handleAddToCart = async () => {
     if (!firebaseUser) {
@@ -43,7 +45,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     return (
       <div className="product-card">
         <div style={{ padding: '1rem', textAlign: 'center' }}>
-          <p>Product information unavailable</p>
+          <p>{t('common.productInfoUnavailable')}</p>
         </div>
       </div>
     );
@@ -128,12 +130,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                 borderRadius: '4px',
                 alignSelf: 'flex-start'
               }}>
-                SALE!
+                {t('common.sale')}
               </span>
             </>
           ) : (
             <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-              {product.price ? `RM ${product.price.toLocaleString()}` : 'Contact for Price'}
+              {product.price ? `RM ${product.price.toLocaleString()}` : t('common.contactForPrice')}
             </span>
           )}
         </div>
@@ -149,7 +151,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             fontWeight: '600'
           }}
         >
-          Add to Cart
+          {t('common.addToCart')}
         </button>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProductCard from '@/app/components/ProductCard';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
+import { useI18n } from '@/i18n/I18nProvider';
 
 // Category data specifically for Others
 const categoryData = {
@@ -25,9 +26,10 @@ type CategoryContentProps = {
 };
 
 export default function CategoryContent({ categorySlug }: CategoryContentProps) {
+  const { t } = useI18n();
   const categoryInfo = categoryData[categorySlug as keyof typeof categoryData] || {
     name: 'Other Products',
-    description: 'Discover our diverse collection of unique lighting solutions.',
+    description: t('category.defaultDescription'),
     featureImage: '/images/categories/ceiling-lights.jpg',
     features: []
   };
@@ -88,7 +90,7 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
         background: '#f9fafb'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <p>Loading Other Products...</p>
+          <p>{t('categoryOthers.loading')}</p>
         </div>
       </div>
     );
@@ -192,7 +194,9 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
             textAlign: 'center',
             color: '#1f2937'
           }}>
-            {otherProducts.length > 0 ? `${otherProducts.length} Products Available` : 'No Products Available'}
+            {otherProducts.length > 0
+              ? `${otherProducts.length} ${t('categoryOthers.productsAvailable')}`
+              : t('categoryOthers.noProductsAvailable')}
           </h2>
 
           {otherProducts.length > 0 ? (
@@ -221,13 +225,13 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
                 marginBottom: '0.5rem',
                 color: '#374151'
               }}>
-                No Products Available
+                {t('categoryOthers.noProductsAvailable')}
               </h3>
               <p style={{
                 color: '#6b7280',
                 fontSize: '1rem'
               }}>
-                Currently no products in this category. Check back soon for new additions!
+                {t('categoryOthers.noProductsBody')}
               </p>
             </div>
           )}
@@ -247,7 +251,7 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
             fontWeight: 'bold',
             marginBottom: '1rem'
           }}>
-            Need Something Special?
+            {t('categoryOthers.contactTitle')}
           </h2>
           <p style={{
             fontSize: '1.1rem',
@@ -255,10 +259,10 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
             maxWidth: '600px',
             margin: '0 auto 2rem'
           }}>
-            Can't find what you're looking for? Contact us for custom lighting solutions tailored to your specific requirements.
+            {t('categoryOthers.contactBody')}
           </p>
           <a
-            href="https://wa.me/971506970154?text=Hi! I'm interested in custom lighting solutions from your Others category."
+            href={`https://wa.me/971506970154?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -284,7 +288,7 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
               e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
-            💬 Contact via WhatsApp
+            💬 {t('categoryOthers.contactWhatsApp')}
           </a>
         </div>
       </section>

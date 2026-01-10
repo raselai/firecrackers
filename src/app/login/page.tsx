@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/account';
   const { signIn, signInWithGoogle, user, loading: authLoading } = useUser();
+  const { t } = useI18n();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -38,12 +40,12 @@ export default function Login() {
     setError('');
 
     if (!formData.email.trim()) {
-      setError('Please enter your email');
+      setError(t('login.errors.emailRequired'));
       return;
     }
 
     if (!formData.password) {
-      setError('Please enter your password');
+      setError(t('login.errors.passwordRequired'));
       return;
     }
 
@@ -54,11 +56,11 @@ export default function Login() {
       router.push(redirectPath);
     } catch (err: any) {
       if (err.message.includes('user-not-found')) {
-        setError('No account found with this email');
+        setError(t('login.errors.noAccount'));
       } else if (err.message.includes('wrong-password')) {
-        setError('Incorrect password');
+        setError(t('login.errors.wrongPassword'));
       } else {
-        setError(err.message || 'Failed to sign in');
+        setError(err.message || t('login.errors.signInFailed'));
       }
     } finally {
       setLoading(false);
@@ -73,7 +75,7 @@ export default function Login() {
       await signInWithGoogle();
       router.push(redirectPath);
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+      setError(err.message || t('login.errors.googleFailed'));
     } finally {
       setLoading(false);
     }
@@ -127,8 +129,8 @@ export default function Login() {
               <div className="logo-wrapper">
                 <div className="logo-icon">🔥</div>
               </div>
-              <h1 className="form-title">Welcome Back</h1>
-              <p className="form-subtitle">Sign in to continue your journey!</p>
+              <h1 className="form-title">{t('login.welcome')}</h1>
+              <p className="form-subtitle">{t('login.subtitle')}</p>
             </div>
 
             {/* Error Message */}
@@ -145,21 +147,21 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="login-form">
               {/* Email */}
               <div className="input-group">
-                <label className="input-label">Email Address</label>
+                <label className="input-label">{t('login.emailLabel')}</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="your@email.com"
+                  placeholder={t('login.emailPlaceholder')}
                   required
                 />
               </div>
 
               {/* Password */}
               <div className="input-group">
-                <label className="input-label">Password</label>
+                <label className="input-label">{t('login.passwordLabel')}</label>
                 <div className="input-with-icon">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -167,14 +169,14 @@ export default function Login() {
                     value={formData.password}
                     onChange={handleChange}
                     className="form-input"
-                    placeholder="Enter your password"
+                    placeholder={t('login.passwordPlaceholder')}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="input-icon-btn"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                   >
                     {showPassword ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -200,11 +202,11 @@ export default function Login() {
                       <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
-                  <span className="checkbox-label">Remember me</span>
+                  <span className="checkbox-label">{t('login.rememberMe')}</span>
                 </label>
 
                 <Link href="/forgot-password" className="forgot-link">
-                  Forgot password?
+                  {t('login.forgotPassword')}
                 </Link>
               </div>
 
@@ -219,11 +221,11 @@ export default function Login() {
                     <svg className="btn-spinner" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" fill="none" strokeWidth="3" />
                     </svg>
-                    Signing In...
+                    {t('login.signingIn')}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {t('login.signIn')}
                     <svg className="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
@@ -235,7 +237,7 @@ export default function Login() {
             {/* Divider */}
             <div className="divider">
               <span className="divider-line"></span>
-              <span className="divider-text">OR</span>
+              <span className="divider-text">{t('login.or')}</span>
               <span className="divider-line"></span>
             </div>
 
@@ -252,21 +254,21 @@ export default function Login() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Continue with Google
+              {t('login.continueWithGoogle')}
             </button>
 
             {/* Signup Link */}
             <p className="footer-text">
-              Don't have an account?{' '}
-              <Link href="/signup" className="link-bold">Create one now</Link>
+              {t('login.noAccount')}{' '}
+              <Link href="/signup" className="link-bold">{t('login.createAccount')}</Link>
             </p>
 
             {/* Promo Badge */}
             <div className="promo-badge">
               <div className="promo-icon">🎁</div>
               <div className="promo-content">
-                <p className="promo-title">New to our platform?</p>
-                <p className="promo-subtitle">Get RM20 voucher for your first referral!</p>
+                <p className="promo-title">{t('login.promoTitle')}</p>
+                <p className="promo-subtitle">{t('login.promoSubtitle')}</p>
               </div>
             </div>
           </div>

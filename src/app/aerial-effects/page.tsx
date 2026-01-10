@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function AerialEffects() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const [availability, setAvailability] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const { t } = useI18n();
 
   const aerialProducts = [
     {
@@ -183,10 +185,10 @@ export default function AerialEffects() {
     <div style={{ padding: '2rem 0' }}>
       <div className="container">
         <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', textAlign: 'center' }}>
-          Aerial Effects
+          {t('categoryPages.aerialTitle')}
         </h1>
         <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '3rem' }}>
-          Explore our spectacular aerial fireworks collection
+          {t('categoryPages.aerialSubtitle')}
         </p>
 
         {/* Filters */}
@@ -200,7 +202,7 @@ export default function AerialEffects() {
           borderRadius: '8px'
         }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Category</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.category')}</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -214,14 +216,14 @@ export default function AerialEffects() {
             >
               {categories.map(category => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('search.options.allCategories') : category}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Price Range</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.priceRange')}</label>
             <select
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
@@ -233,15 +235,15 @@ export default function AerialEffects() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="all">All Prices</option>
-              <option value="0-500">Under RM 500</option>
-              <option value="500-1000">RM 500 - 1000</option>
-              <option value="1000+">Over RM 1000</option>
+              <option value="all">{t('search.options.allPrices')}</option>
+              <option value="0-500">{t('search.options.underRm500')}</option>
+              <option value="500-1000">{t('search.options.rm500to1000')}</option>
+              <option value="1000+">{t('search.options.overRm1000')}</option>
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Availability</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.availability')}</label>
             <select
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
@@ -253,14 +255,14 @@ export default function AerialEffects() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="all">All</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Out of Stock">Out of Stock</option>
+              <option value="all">{t('search.options.allAvailability')}</option>
+              <option value="In Stock">{t('search.options.inStock')}</option>
+              <option value="Out of Stock">{t('search.options.outOfStock')}</option>
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Sort By</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.sortBy')}</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -272,17 +274,18 @@ export default function AerialEffects() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="newest">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
+              <option value="newest">{t('search.options.newest')}</option>
+              <option value="price-low">{t('search.options.priceLow')}</option>
+              <option value="price-high">{t('search.options.priceHigh')}</option>
+              <option value="rating">{t('categoryPages.sortHighestRated')}</option>
             </select>
           </div>
         </div>
 
         {/* Results Count */}
         <p style={{ marginBottom: '2rem', color: '#6b7280' }}>
-          Showing {filteredProducts.length} of {aerialProducts.length} products
+          {t('categoryPages.resultsPrefix')} {filteredProducts.length} {t('categoryPages.resultsOf')}{' '}
+          {aerialProducts.length} {t('categoryPages.resultsSuffix')}
         </p>
 
         {/* Products Grid */}
@@ -314,7 +317,7 @@ export default function AerialEffects() {
                 <span style={{ color: '#f59e0b' }}>★</span>
                 <span style={{ marginLeft: '0.25rem' }}>{product.rating}</span>
                 <span style={{ color: '#6b7280', marginLeft: '0.25rem' }}>
-                  ({product.reviewCount} reviews)
+                  ({product.reviewCount} {product.reviewCount === 1 ? t('common.reviewSingular') : t('common.reviewPlural')})
                 </span>
               </div>
               <div style={{
@@ -347,8 +350,8 @@ export default function AerialEffects() {
 
         {filteredProducts.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <h3>No products found</h3>
-            <p>Try adjusting your filters or search terms</p>
+            <h3>{t('categoryPages.noProductsTitle')}</h3>
+            <p>{t('categoryPages.noProductsSubtitle')}</p>
           </div>
         )}
       </div>

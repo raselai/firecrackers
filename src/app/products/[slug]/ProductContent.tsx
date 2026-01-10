@@ -8,6 +8,7 @@ import { fetchProducts } from '@/lib/productService';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type ProductContentProps = {
   slug: string;
@@ -21,6 +22,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
   const router = useRouter();
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
+  const { t } = useI18n();
 
   // Load products on component mount
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
           <div className="spinner-ring"></div>
           <div className="spinner-ring"></div>
         </div>
-        <p className="loading-text">Loading product...</p>
+        <p className="loading-text">{t('product.loading')}</p>
       </div>
     );
   }
@@ -80,12 +82,12 @@ export default function ProductContent({ slug }: ProductContentProps) {
   };
 
   const specs = [
-    { label: 'Effect Type', value: product.effectType, icon: '✨' },
-    { label: 'Duration', value: product.duration, icon: '⏱️' },
-    { label: 'Noise Level', value: product.noiseLevel, icon: '🔊' },
-    { label: 'Shot Count', value: product.shotCount, icon: '🎯' },
-    { label: 'Safety Distance', value: product.safetyDistance, icon: '⚠️' },
-    { label: 'Availability', value: product.availability, icon: '📦' }
+    { label: t('product.specs.effectType'), value: product.effectType, icon: '✨' },
+    { label: t('product.specs.duration'), value: product.duration, icon: '⏱️' },
+    { label: t('product.specs.noiseLevel'), value: product.noiseLevel, icon: '🔊' },
+    { label: t('product.specs.shotCount'), value: product.shotCount, icon: '🎯' },
+    { label: t('product.specs.safetyDistance'), value: product.safetyDistance, icon: '⚠️' },
+    { label: t('product.specs.availability'), value: product.availability, icon: '📦' }
   ].filter((spec) => spec.value !== undefined && spec.value !== '');
 
   return (
@@ -141,17 +143,17 @@ export default function ProductContent({ slug }: ProductContentProps) {
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                           </svg>
-                          SALE
+                          {t('common.sale')}
                         </span>
                       </div>
                       <span className="original-price">RM {product.price.toFixed(2)}</span>
                       <div className="savings-badge">
-                        Save RM {(product.price - product.offerPrice).toFixed(2)}!
+                        {t('product.savePrefix')} RM {(product.price - product.offerPrice).toFixed(2)}{t('product.saveSuffix')}
                       </div>
                     </>
                   ) : (
                     <span className="regular-price">
-                      {product.price ? `RM ${product.price.toFixed(2)}` : 'Contact for Price'}
+                      {product.price ? `RM ${product.price.toFixed(2)}` : t('common.contactForPrice')}
                     </span>
                   )}
                 </div>
@@ -164,7 +166,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Description
+                    {t('product.description')}
                   </h2>
                   <p className="description-text">{product.description}</p>
                 </div>
@@ -177,7 +179,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    Specifications
+                    {t('product.specifications')}
                   </h2>
                   <div className="specs-grid">
                     {specs.map((spec) => (
@@ -204,14 +206,14 @@ export default function ProductContent({ slug }: ProductContentProps) {
                     <svg className="btn-spinner" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" fill="none" strokeWidth="3" />
                     </svg>
-                    Adding...
+                    {t('product.adding')}
                   </>
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    Add to Cart
+                    {t('common.addToCart')}
                   </>
                 )}
               </button>

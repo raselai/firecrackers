@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ProductCard from '@/app/components/ProductCard';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
+import { useI18n } from '@/i18n/I18nProvider';
 
 // Category data with descriptions and feature images
 const categoryData = {
@@ -201,12 +202,19 @@ type CategoryContentProps = {
 };
 
 export default function CategoryContent({ categorySlug }: CategoryContentProps) {
-  const categoryInfo = categoryData[categorySlug as keyof typeof categoryData] || {
+  const { t } = useI18n();
+  const fallbackCategoryInfo = {
     name: categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    description: 'Discover our premium collection of lighting solutions.',
+    description: t('category.defaultDescription'),
     featureImage: '/images/products/crystal-palace-chandelier.jpg',
     features: []
   };
+  const categoryInfo = categoryData[categorySlug as keyof typeof categoryData] || fallbackCategoryInfo;
+  const categoryName = categoryInfo?.name || fallbackCategoryInfo.name;
+  const aboutTitle = `${t('category.aboutPrefix')} ${categoryName}`.replace(/\s+/g, ' ').trim();
+  const collectionTitle = `${t('category.collectionPrefix')} ${categoryName} ${t('category.collectionSuffix')}`
+    .replace(/\s+/g, ' ')
+    .trim();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -307,7 +315,7 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
         <div className="category-hero-image">
           <Image
             src={categoryInfo?.featureImage || '/images/products/crystal-palace-chandelier.jpg'}
-            alt={categoryInfo?.name || 'Category'}
+            alt={categoryInfo?.name || t('category.imageAlt')}
             fill
             style={{ objectFit: 'cover' }}
           />
@@ -326,12 +334,12 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
         <div className="container">
           <div className="category-content">
             <div className="category-text">
-              <h2>About {categoryInfo?.name || categorySlug.replace(/-/g, ' ')}</h2>
-              <p>{categoryInfo?.description || 'Discover our premium collection of lighting solutions.'}</p>
+              <h2>{aboutTitle}</h2>
+              <p>{categoryInfo?.description || t('category.defaultDescription')}</p>
               
               {categoryInfo?.features && (
                 <div className="category-features">
-                  <h3>Key Features:</h3>
+                  <h3>{t('category.keyFeatures')}</h3>
                   <ul>
                     {categoryInfo.features.map((feature, index) => (
                       <li key={index}>{feature}</li>
@@ -347,11 +355,11 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
       {/* Products Section */}
       <section className="category-products">
         <div className="container">
-          <h2>Our {categoryInfo?.name || categorySlug.replace(/-/g, ' ')} Collection</h2>
+          <h2>{collectionTitle}</h2>
           <div className="product-grid">
             {loading ? (
               <div style={{ textAlign: 'center', padding: '2rem' }}>
-                <p>Loading products...</p>
+                <p>{t('category.loadingProducts')}</p>
               </div>
             ) : categoryProducts.length > 0 ? (
               categoryProducts.map((product: any) => (
@@ -359,8 +367,8 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
               ))
             ) : (
               <div style={{ textAlign: 'center', padding: '2rem', gridColumn: '1 / -1' }}>
-                <p>No products found in this category.</p>
-                <p>Please check back later or contact us for more information.</p>
+                <p>{t('category.noProducts')}</p>
+                <p>{t('category.noProductsHint')}</p>
               </div>
             )}
           </div>

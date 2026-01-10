@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/AuthContext';
 import { addToWishlist, removeFromWishlist } from '@/lib/userService';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface WishlistButtonProps {
   productId: string;
@@ -18,6 +19,7 @@ export default function WishlistButton({
 }: WishlistButtonProps) {
   const { user, refreshUser } = useUser();
   const router = useRouter();
+  const { t } = useI18n();
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -52,19 +54,19 @@ export default function WishlistButton({
         // Remove from wishlist
         await removeFromWishlist(user.uid, productId);
         setIsInWishlist(false);
-        showNotification('Removed from wishlist');
+        showNotification(t('wishlist.removed'));
       } else {
         // Add to wishlist
         await addToWishlist(user.uid, productId);
         setIsInWishlist(true);
-        showNotification('Added to wishlist');
+        showNotification(t('wishlist.added'));
       }
 
       // Refresh user data
       await refreshUser();
     } catch (error) {
       console.error('Error updating wishlist:', error);
-      showNotification('Failed to update wishlist');
+      showNotification(t('wishlist.failed'));
     } finally {
       setLoading(false);
     }
@@ -99,7 +101,7 @@ export default function WishlistButton({
           disabled:cursor-not-allowed
           ${className}
         `}
-        title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+        title={isInWishlist ? t('wishlist.removeTitle') : t('wishlist.addTitle')}
       >
         {loading ? (
           <svg

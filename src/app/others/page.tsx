@@ -4,10 +4,12 @@ import ProductCard from '@/app/components/ProductCard';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function OthersPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   // Load products on component mount
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function OthersPage() {
 
   const pageData = {
     name: 'Other Products',
-    description: 'Discover our diverse collection of unique lighting solutions that don\'t fit into traditional categories. From custom designs to specialty lighting, find the perfect solution for your specific needs.',
+    description: t('category.defaultDescription'),
     featureImage: '/images/categories/ceiling-lights.jpg', // Using a generic image
     features: [
       'Custom lighting solutions',
@@ -143,7 +145,7 @@ export default function OthersPage() {
               marginBottom: '1rem',
               color: '#1f2937'
             }}>
-              Available Products
+              {t('categoryOthers.availableProductsTitle')}
             </h2>
             <p style={{
               fontSize: '1.1rem',
@@ -151,13 +153,13 @@ export default function OthersPage() {
               maxWidth: '600px',
               margin: '0 auto'
             }}>
-              Browse our collection of unique lighting solutions
+              {t('categoryOthers.availableProductsSubtitle')}
             </p>
           </div>
 
                                 {loading ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }}>
-                          <p>Loading products...</p>
+                          <p>{t('category.loadingProducts')}</p>
                         </div>
                       ) : otherProducts.length > 0 ? (
                         <div style={{
@@ -185,13 +187,13 @@ export default function OthersPage() {
                 marginBottom: '0.5rem',
                 color: '#374151'
               }}>
-                No Products Available
+                {t('categoryOthers.noProductsAvailable')}
               </h3>
               <p style={{
                 color: '#6b7280',
                 fontSize: '1rem'
               }}>
-                Currently no products in this category. Check back soon for new additions!
+                {t('categoryOthers.noProductsBody')}
               </p>
             </div>
           )}
@@ -211,7 +213,7 @@ export default function OthersPage() {
             fontWeight: 'bold',
             marginBottom: '1rem'
           }}>
-            Need Something Special?
+            {t('categoryOthers.contactTitle')}
           </h2>
           <p style={{
             fontSize: '1.1rem',
@@ -219,10 +221,10 @@ export default function OthersPage() {
             maxWidth: '600px',
             margin: '0 auto 2rem'
           }}>
-            Can't find what you're looking for? Contact us for custom lighting solutions tailored to your specific requirements.
+            {t('categoryOthers.contactBody')}
           </p>
           <a
-                            href="https://wa.me/971506970154?text=Hi! I'm interested in custom lighting solutions from your Others category."
+                            href={`https://wa.me/971506970154?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -248,7 +250,7 @@ export default function OthersPage() {
               e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
-            💬 Contact via WhatsApp
+            💬 {t('categoryOthers.contactWhatsApp')}
           </a>
         </div>
       </section>

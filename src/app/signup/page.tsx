@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function SignUp() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signUp, signInWithGoogle, user, loading: authLoading } = useUser();
+  const { t } = useI18n();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -55,27 +57,27 @@ export default function SignUp() {
     setError('');
 
     if (!formData.fullName.trim()) {
-      setError('Please enter your full name');
+      setError(t('signup.errors.fullNameRequired'));
       return;
     }
 
     if (!formData.email.trim()) {
-      setError('Please enter your email');
+      setError(t('signup.errors.emailRequired'));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('signup.errors.passwordLength'));
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('signup.errors.passwordMismatch'));
       return;
     }
 
     if (!acceptedTerms) {
-      setError('Please accept the terms and conditions');
+      setError(t('signup.errors.acceptTerms'));
       return;
     }
 
@@ -90,7 +92,7 @@ export default function SignUp() {
       );
       router.push('/account');
     } catch (err: any) {
-      setError(err.message || 'Failed to create account');
+      setError(err.message || t('signup.errors.createFailed'));
     } finally {
       setLoading(false);
     }
@@ -104,7 +106,7 @@ export default function SignUp() {
       await signInWithGoogle(formData.referralCode || undefined);
       router.push('/account');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+      setError(err.message || t('signup.errors.googleFailed'));
     } finally {
       setLoading(false);
     }
@@ -117,9 +119,9 @@ export default function SignUp() {
   };
 
   const getStrengthLabel = () => {
-    if (passwordStrength < 40) return 'Weak';
-    if (passwordStrength < 70) return 'Medium';
-    return 'Strong';
+    if (passwordStrength < 40) return t('signup.strengthWeak');
+    if (passwordStrength < 70) return t('signup.strengthMedium');
+    return t('signup.strengthStrong');
   };
 
   if (authLoading) {
@@ -170,8 +172,8 @@ export default function SignUp() {
               <div className="logo-wrapper">
                 <div className="logo-icon">✨</div>
               </div>
-              <h1 className="form-title">Create Account</h1>
-              <p className="form-subtitle">Join us and start your journey today!</p>
+              <h1 className="form-title">{t('signup.title')}</h1>
+              <p className="form-subtitle">{t('signup.subtitle')}</p>
             </div>
 
             {/* Error Message */}
@@ -188,35 +190,35 @@ export default function SignUp() {
             <form onSubmit={handleSubmit} className="signup-form">
               {/* Full Name */}
               <div className="input-group">
-                <label className="input-label">Full Name</label>
+                <label className="input-label">{t('signup.fullNameLabel')}</label>
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="Enter your full name"
+                  placeholder={t('signup.fullNamePlaceholder')}
                   required
                 />
               </div>
 
               {/* Email */}
               <div className="input-group">
-                <label className="input-label">Email Address</label>
+                <label className="input-label">{t('signup.emailLabel')}</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   className="form-input"
-                  placeholder="your@email.com"
+                  placeholder={t('signup.emailPlaceholder')}
                   required
                 />
               </div>
 
               {/* Password */}
               <div className="input-group">
-                <label className="input-label">Password</label>
+                <label className="input-label">{t('signup.passwordLabel')}</label>
                 <div className="input-with-icon">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -224,14 +226,14 @@ export default function SignUp() {
                     value={formData.password}
                     onChange={handleChange}
                     className="form-input"
-                    placeholder="Create a strong password"
+                    placeholder={t('signup.passwordPlaceholder')}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="input-icon-btn"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('signup.hidePassword') : t('signup.showPassword')}
                   >
                     {showPassword ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -268,7 +270,7 @@ export default function SignUp() {
 
               {/* Confirm Password */}
               <div className="input-group">
-                <label className="input-label">Confirm Password</label>
+                <label className="input-label">{t('signup.confirmPasswordLabel')}</label>
                 <div className="input-with-icon">
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -276,14 +278,14 @@ export default function SignUp() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="form-input"
-                    placeholder="Confirm your password"
+                    placeholder={t('signup.confirmPasswordPlaceholder')}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="input-icon-btn"
-                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showConfirmPassword ? t('signup.hidePassword') : t('signup.showPassword')}
                   >
                     {showConfirmPassword ? (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -303,7 +305,7 @@ export default function SignUp() {
               {/* Referral Code */}
               <div className="input-group">
                 <label className="input-label">
-                  Referral Code <span className="optional-text">(Optional)</span>
+                  {t('signup.referralLabel')} <span className="optional-text">({t('signup.optional')})</span>
                 </label>
                 <input
                   type="text"
@@ -311,14 +313,14 @@ export default function SignUp() {
                   value={formData.referralCode}
                   onChange={handleChange}
                   className="form-input referral-input"
-                  placeholder="FW-XXXXXX"
+                  placeholder={t('signup.referralPlaceholder')}
                 />
                 {formData.referralCode && (
                   <p className="referral-info">
                     <svg viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Your referrer will receive RM20!
+                    {t('signup.referralReward')}
                   </p>
                 )}
               </div>
@@ -339,10 +341,10 @@ export default function SignUp() {
                     </svg>
                   </span>
                   <span className="checkbox-label">
-                    I agree to the{' '}
-                    <Link href="/terms" className="link">Terms and Conditions</Link>
-                    {' '}and{' '}
-                    <Link href="/privacy" className="link">Privacy Policy</Link>
+                    {t('signup.termsPrefix')}{' '}
+                    <Link href="/terms" className="link">{t('signup.termsLabel')}</Link>{' '}
+                    {t('signup.termsAnd')}{' '}
+                    <Link href="/privacy" className="link">{t('signup.privacyLabel')}</Link>
                   </span>
                 </label>
               </div>
@@ -358,11 +360,11 @@ export default function SignUp() {
                     <svg className="btn-spinner" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" fill="none" strokeWidth="3" />
                     </svg>
-                    Creating Account...
+                    {t('signup.creatingAccount')}
                   </>
                 ) : (
                   <>
-                    Create Account
+                    {t('signup.createAccount')}
                     <svg className="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
@@ -374,7 +376,7 @@ export default function SignUp() {
             {/* Divider */}
             <div className="divider">
               <span className="divider-line"></span>
-              <span className="divider-text">OR</span>
+              <span className="divider-text">{t('signup.or')}</span>
               <span className="divider-line"></span>
             </div>
 
@@ -391,13 +393,13 @@ export default function SignUp() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Continue with Google
+              {t('signup.continueWithGoogle')}
             </button>
 
             {/* Login Link */}
             <p className="footer-text">
-              Already have an account?{' '}
-              <Link href="/login" className="link-bold">Sign in here</Link>
+              {t('signup.haveAccount')}{' '}
+              <Link href="/login" className="link-bold">{t('signup.signInHere')}</Link>
             </p>
           </div>
         </div>

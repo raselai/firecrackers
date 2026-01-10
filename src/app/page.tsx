@@ -5,12 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
 import { getProductImagePath } from '@/lib/utils';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'indoor' | 'outdoor' | 'others'>('all');
   const [mounted, setMounted] = useState(false);
+  const { t } = useI18n();
 
   // Load products on component mount
   useEffect(() => {
@@ -58,6 +60,15 @@ export default function Home() {
     : othersProducts;
 
 
+  const tabLabel =
+    activeTab === 'all'
+      ? t('home.tabs.all')
+      : activeTab === 'indoor'
+      ? t('home.tabs.groundEffects')
+      : activeTab === 'outdoor'
+      ? t('home.tabs.aerialEffects')
+      : t('home.tabs.others');
+
   return (
     <div className="homepage-wrapper">
       {/* Hero Section with Video Background */}
@@ -79,17 +90,17 @@ export default function Home() {
         <div className={`hero-content ${mounted ? 'hero-content-animate' : ''}`}>
           <div className="hero-inner">
             <p className="hero-eyebrow">
-              Spark the Celebration
+              {t('home.heroEyebrow')}
             </p>
             <h1 className="hero-title">
-              Refer a friend and earn{' '}
+              {t('home.heroTitlePrefix')}{' '}
               <span className="hero-highlight">
-                RM20
+                {t('home.heroTitleHighlight')}
               </span>{' '}
-              in fireworks joy
+              {t('home.heroTitleSuffix')}
             </h1>
             <p className="hero-subtitle">
-              Share your code, light up their first order, and celebrate together.
+              {t('home.heroSubtitle')}
             </p>
           </div>
         </div>
@@ -99,8 +110,8 @@ export default function Home() {
       <section className="new-products-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">New Arrivals</h2>
-            <p className="section-subtitle">Discover our latest explosive selections</p>
+            <h2 className="section-title">{t('home.newArrivalsTitle')}</h2>
+            <p className="section-subtitle">{t('home.newArrivalsSubtitle')}</p>
           </div>
 
           {/* Tabs */}
@@ -109,25 +120,25 @@ export default function Home() {
               onClick={() => setActiveTab('all')}
               className={`category-tab ${activeTab === 'all' ? 'category-tab-active' : ''}`}
             >
-              All
+              {t('home.tabs.all')}
             </button>
             <button
               onClick={() => setActiveTab('indoor')}
               className={`category-tab ${activeTab === 'indoor' ? 'category-tab-active' : ''}`}
             >
-              Ground Effects
+              {t('home.tabs.groundEffects')}
             </button>
             <button
               onClick={() => setActiveTab('outdoor')}
               className={`category-tab ${activeTab === 'outdoor' ? 'category-tab-active' : ''}`}
             >
-              Aerial Effects
+              {t('home.tabs.aerialEffects')}
             </button>
             <button
               onClick={() => setActiveTab('others')}
               className={`category-tab ${activeTab === 'others' ? 'category-tab-active' : ''}`}
             >
-              Others
+              {t('home.tabs.others')}
             </button>
           </div>
 
@@ -136,7 +147,7 @@ export default function Home() {
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading products...</p>
+                <p>{t('common.loadingProducts')}</p>
               </div>
             ) : currentTabProducts.length > 0 ? (
               currentTabProducts.map((product, index) => (
@@ -164,7 +175,7 @@ export default function Home() {
               ))
             ) : (
               <div className="empty-state">
-                <p>No {activeTab} products available at the moment.</p>
+                <p>{`${t('home.noProductsPrefix')} ${tabLabel} ${t('home.noProductsSuffix')}`}</p>
               </div>
             )}
           </div>
@@ -175,14 +186,14 @@ export default function Home() {
       <section className="featured-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Featured Selections</h2>
-            <p className="section-subtitle">Handpicked for maximum impact</p>
+            <h2 className="section-title">{t('home.featuredTitle')}</h2>
+            <p className="section-subtitle">{t('home.featuredSubtitle')}</p>
           </div>
           <div className="featured-grid">
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading products...</p>
+                <p>{t('common.loadingProducts')}</p>
               </div>
             ) : (
               featuredProducts.map((product, index) => (
@@ -192,7 +203,7 @@ export default function Home() {
                   className="featured-card"
                   style={{ animationDelay: `${index * 0.08}s` }}
                 >
-                  <div className="featured-badge">Featured</div>
+                  <div className="featured-badge">{t('home.featuredBadge')}</div>
                   <div className="featured-image-wrapper">
                     <Image
                       src={getProductImagePath(product, product.category)}
@@ -220,14 +231,14 @@ export default function Home() {
         <div className="sales-background-glow"></div>
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title sales-title">Limited Time Offers</h2>
-            <p className="section-subtitle">Explosive deals for the season</p>
+            <h2 className="section-title sales-title">{t('home.limitedTimeTitle')}</h2>
+            <p className="section-subtitle">{t('home.limitedTimeSubtitle')}</p>
           </div>
           <div className="sales-grid">
             {loading ? (
               <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Loading products...</p>
+                <p>{t('common.loadingProducts')}</p>
               </div>
             ) : (
               seasonalProducts.map((product, index) => (
@@ -238,7 +249,7 @@ export default function Home() {
                   style={{ animationDelay: `${index * 0.06}s` }}
                 >
                   <div className="sale-badge">
-                    <span className="sale-badge-text">SALE</span>
+                    <span className="sale-badge-text">{t('common.sale')}</span>
                   </div>
                   <div className="sale-image-wrapper">
                     <Image
@@ -269,7 +280,7 @@ export default function Home() {
       <div
         className="whatsapp-float"
         onClick={() => {
-          const message = "Hi! I'm interested in your fireworks products. Can you help me?";
+          const message = t('home.whatsappMessage');
           const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
         }}

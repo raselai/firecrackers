@@ -6,6 +6,7 @@ import { getProductImagePath } from '@/lib/utils';
 import { fetchProducts } from '@/lib/productService';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -18,6 +19,7 @@ export default function SearchPage() {
   const [availability, setAvailability] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   // Load products on component mount
   useEffect(() => {
@@ -144,20 +146,21 @@ export default function SearchPage() {
         {/* Search Header */}
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-            Search Results
+            {t('search.title')}
           </h1>
           {query && (
             <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-              Showing results for "{query}"
+              {t('search.showingResultsPrefix')} "{query}"
             </p>
           )}
           <p style={{ color: '#6b7280' }}>
-            Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+            {t('search.foundPrefix')} {filteredProducts.length}{' '}
+            {filteredProducts.length !== 1 ? t('search.productPlural') : t('search.productSingular')}
           </p>
           {/* Debug info - remove this after fixing */}
           {process.env.NODE_ENV === 'development' && (
             <p style={{ color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.5rem' }}>
-              Debug: {products.length} total products loaded
+              {t('search.debugPrefix')}: {products.length} {t('search.debugTotalProducts')}
             </p>
           )}
         </div>
@@ -173,7 +176,7 @@ export default function SearchPage() {
           borderRadius: '8px'
         }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Category</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.category')}</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -187,14 +190,14 @@ export default function SearchPage() {
             >
               {categories.map(category => (
                 <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                  {category === 'all' ? t('search.options.allCategories') : category}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Price Range</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.priceRange')}</label>
             <select
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
@@ -206,15 +209,15 @@ export default function SearchPage() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="all">All Prices</option>
-              <option value="0-500">Under RM 500</option>
-              <option value="500-1000">RM 500 - 1000</option>
-              <option value="1000+">Over RM 1000</option>
+              <option value="all">{t('search.options.allPrices')}</option>
+              <option value="0-500">{t('search.options.underRm500')}</option>
+              <option value="500-1000">{t('search.options.rm500to1000')}</option>
+              <option value="1000+">{t('search.options.overRm1000')}</option>
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Availability</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.availability')}</label>
             <select
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
@@ -226,15 +229,15 @@ export default function SearchPage() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="all">All Availability</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Limited Stock">Limited Stock</option>
-              <option value="Out of Stock">Out of Stock</option>
+              <option value="all">{t('search.options.allAvailability')}</option>
+              <option value="In Stock">{t('search.options.inStock')}</option>
+              <option value="Limited Stock">{t('search.options.limitedStock')}</option>
+              <option value="Out of Stock">{t('search.options.outOfStock')}</option>
             </select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Sort By</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>{t('search.filters.sortBy')}</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -246,11 +249,11 @@ export default function SearchPage() {
                 fontSize: '0.9rem'
               }}
             >
-              <option value="relevance">Relevance</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Rating</option>
-              <option value="newest">Newest</option>
+              <option value="relevance">{t('search.options.relevance')}</option>
+              <option value="price-low">{t('search.options.priceLow')}</option>
+              <option value="price-high">{t('search.options.priceHigh')}</option>
+              <option value="rating">{t('search.options.rating')}</option>
+              <option value="newest">{t('search.options.newest')}</option>
             </select>
           </div>
         </div>
@@ -273,7 +276,7 @@ export default function SearchPage() {
                 fontSize: '0.9rem'
               }}
             >
-              Clear Filters
+              {t('search.clearFilters')}
             </button>
           </div>
         )}
@@ -287,8 +290,8 @@ export default function SearchPage() {
                 padding: '3rem 0',
                 color: '#6b7280'
               }}>
-                <h3 style={{ marginBottom: '1rem' }}>Loading products...</h3>
-                <p>Please wait while we search for your products</p>
+                <h3 style={{ marginBottom: '1rem' }}>{t('search.loadingTitle')}</h3>
+                <p>{t('search.loadingSubtitle')}</p>
               </div>
             ) : filteredProducts.length > 0 ? (
               <div className="product-grid">
@@ -342,8 +345,8 @@ export default function SearchPage() {
                 padding: '3rem 0',
                 color: '#6b7280'
               }}>
-                <h3 style={{ marginBottom: '1rem' }}>No products found</h3>
-                <p>Try adjusting your search terms or filters</p>
+                <h3 style={{ marginBottom: '1rem' }}>{t('search.noResultsTitle')}</h3>
+                <p>{t('search.noResultsSubtitle')}</p>
                 <Link 
                   href="/"
                   style={{
@@ -357,7 +360,7 @@ export default function SearchPage() {
                     fontWeight: 'bold'
                   }}
                 >
-                  Browse All Products
+                  {t('search.browseAll')}
                 </Link>
               </div>
             )}
@@ -371,8 +374,8 @@ export default function SearchPage() {
             padding: '3rem 0',
             color: '#6b7280'
           }}>
-            <h3 style={{ marginBottom: '1rem' }}>Search for products</h3>
-            <p>Enter a search term to find lighting products</p>
+            <h3 style={{ marginBottom: '1rem' }}>{t('search.noQueryTitle')}</h3>
+            <p>{t('search.noQuerySubtitle')}</p>
           </div>
         )}
       </div>

@@ -6,12 +6,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function CartPage() {
   const { items, loading, subtotal, updateQuantity, removeItem } = useCart();
   const { firebaseUser, loading: authLoading } = useUser();
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (authLoading) return;
@@ -30,7 +32,7 @@ export default function CartPage() {
           <div className="spinner-ring"></div>
           <div className="spinner-ring"></div>
         </div>
-        <p className="loading-text">Loading your cart...</p>
+        <p className="loading-text">{t('cart.loading')}</p>
       </div>
     );
   }
@@ -66,13 +68,13 @@ export default function CartPage() {
 
           <div className="empty-cart">
             <div className="empty-cart-icon">🛒</div>
-            <h1 className="empty-cart-title">Your Cart is Empty</h1>
-            <p className="empty-cart-text">Start adding items to your cart!</p>
+            <h1 className="empty-cart-title">{t('cart.emptyTitle')}</h1>
+            <p className="empty-cart-text">{t('cart.emptyText')}</p>
             <Link href="/" className="continue-shopping-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
-              Continue Shopping
+              {t('cart.continueShopping')}
             </Link>
           </div>
         </div>
@@ -353,8 +355,10 @@ export default function CartPage() {
 
         <div className="cart-container">
           <div className="cart-header">
-            <h1 className="cart-title">Shopping Cart</h1>
-            <p className="cart-subtitle">{items.length} {items.length === 1 ? 'item' : 'items'} in your cart</p>
+            <h1 className="cart-title">{t('cart.title')}</h1>
+            <p className="cart-subtitle">
+              {items.length} {items.length === 1 ? t('cart.itemSingular') : t('cart.itemPlural')} {t('cart.inYourCart')}
+            </p>
           </div>
 
           <div className="cart-content">
@@ -385,7 +389,7 @@ export default function CartPage() {
 
                     <div className="item-actions">
                       <div className="quantity-control">
-                        <label htmlFor={`qty-${item.productId}`} className="qty-label">Qty</label>
+                        <label htmlFor={`qty-${item.productId}`} className="qty-label">{t('cart.qty')}</label>
                         <input
                           id={`qty-${item.productId}`}
                           type="number"
@@ -403,7 +407,7 @@ export default function CartPage() {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Remove
+                        {t('cart.remove')}
                       </button>
                     </div>
                   </div>
@@ -417,22 +421,22 @@ export default function CartPage() {
 
             {/* Cart Summary */}
             <div className="cart-summary">
-              <h2 className="summary-title">Order Summary</h2>
+              <h2 className="summary-title">{t('cart.orderSummary')}</h2>
 
               <div className="summary-row">
-                <span>Subtotal</span>
+                <span>{t('cart.subtotal')}</span>
                 <span>RM {subtotal.toLocaleString()}</span>
               </div>
 
               <div className="summary-row">
-                <span>Shipping</span>
-                <span className="free-tag">FREE</span>
+                <span>{t('cart.shipping')}</span>
+                <span className="free-tag">{t('cart.free')}</span>
               </div>
 
               <div className="summary-divider"></div>
 
               <div className="summary-row total-row">
-                <span>Total</span>
+                <span>{t('cart.total')}</span>
                 <span>RM {subtotal.toLocaleString()}</span>
               </div>
 
@@ -440,7 +444,7 @@ export default function CartPage() {
                 onClick={() => router.push('/checkout')}
                 className="checkout-btn"
               >
-                Proceed to Checkout
+                {t('cart.proceedToCheckout')}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
@@ -450,7 +454,7 @@ export default function CartPage() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
-                Continue Shopping
+                {t('cart.continueShopping')}
               </Link>
             </div>
           </div>
