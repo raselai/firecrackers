@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useUser } from '@/contexts/AuthContext';
 
 export default function AerialEffects() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -11,6 +12,7 @@ export default function AerialEffects() {
   const [availability, setAvailability] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const { t } = useI18n();
+  const { firebaseUser } = useUser();
 
   const aerialProducts = [
     {
@@ -327,7 +329,7 @@ export default function AerialEffects() {
                 marginBottom: '1rem'
               }}>
                 <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                  RM {product.price.toLocaleString()}
+                  {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
                 </span>
                 <span style={{
                   color: product.availability === 'In Stock' ? '#059669' : '#dc2626',

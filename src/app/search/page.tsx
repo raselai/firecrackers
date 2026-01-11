@@ -7,6 +7,7 @@ import { fetchProducts } from '@/lib/productService';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useUser } from '@/contexts/AuthContext';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ export default function SearchPage() {
   const [sortBy, setSortBy] = useState('relevance');
   const [loading, setLoading] = useState(true);
   const { t } = useI18n();
+  const { firebaseUser } = useUser();
 
   // Load products on component mount
   useEffect(() => {
@@ -333,7 +335,7 @@ export default function SearchPage() {
                       alignItems: 'center' 
                     }}>
                       <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        RM {product.price.toLocaleString()}
+                        {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
                       </span>
                     </div>
                   </div>

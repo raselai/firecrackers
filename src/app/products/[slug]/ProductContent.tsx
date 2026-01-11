@@ -135,26 +135,30 @@ export default function ProductContent({ slug }: ProductContentProps) {
 
                 {/* Price Section */}
                 <div className="price-section">
-                  {product.isOnSale && product.offerPrice ? (
-                    <>
-                      <div className="price-row">
-                        <span className="sale-price">RM {product.offerPrice.toFixed(2)}</span>
-                        <span className="sale-badge">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                          </svg>
-                          {t('common.sale')}
-                        </span>
-                      </div>
-                      <span className="original-price">RM {product.price.toFixed(2)}</span>
-                      <div className="savings-badge">
-                        {t('product.savePrefix')} RM {(product.price - product.offerPrice).toFixed(2)}{t('product.saveSuffix')}
-                      </div>
-                    </>
+                  {firebaseUser ? (
+                    product.isOnSale && product.offerPrice ? (
+                      <>
+                        <div className="price-row">
+                          <span className="sale-price">RM {product.offerPrice.toFixed(2)}</span>
+                          <span className="sale-badge">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
+                            {t('common.sale')}
+                          </span>
+                        </div>
+                        <span className="original-price">RM {product.price.toFixed(2)}</span>
+                        <div className="savings-badge">
+                          {t('product.savePrefix')} RM {(product.price - product.offerPrice).toFixed(2)}{t('product.saveSuffix')}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="regular-price">
+                        {product.price ? `RM ${product.price.toFixed(2)}` : t('common.contactForPrice')}
+                      </span>
+                    )
                   ) : (
-                    <span className="regular-price">
-                      {product.price ? `RM ${product.price.toFixed(2)}` : t('common.contactForPrice')}
-                    </span>
+                    <span className="regular-price">{t('common.loginToSeePrice')}</span>
                   )}
                 </div>
               </div>

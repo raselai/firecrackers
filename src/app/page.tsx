@@ -6,12 +6,14 @@ import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
 import { getProductImagePath } from '@/lib/utils';
 import { useI18n } from '@/i18n/I18nProvider';
+import { useUser } from '@/contexts/AuthContext';
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const { t } = useI18n();
+  const { firebaseUser } = useUser();
 
   // Load products on component mount
   useEffect(() => {
@@ -110,7 +112,9 @@ export default function Home() {
                   <div className="product-info">
                     <h3 className="product-name">{product.name}</h3>
                     <p className="product-category">{product.category}</p>
-                    <div className="product-price">RM {product.price.toLocaleString()}</div>
+                    <div className="product-price">
+                      {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                    </div>
                   </div>
                 </Link>
               ))
@@ -158,7 +162,9 @@ export default function Home() {
                     <div className="featured-category">{product.category}</div>
                     <h3 className="featured-name">{product.name}</h3>
                     <p className="featured-description">{product.description}</p>
-                    <div className="featured-price">RM {product.price.toLocaleString()}</div>
+                    <div className="featured-price">
+                      {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                    </div>
                   </div>
                 </Link>
               ))
@@ -206,8 +212,14 @@ export default function Home() {
                     <h3 className="sale-name">{product.name}</h3>
                     <p className="sale-description">{product.description}</p>
                     <div className="sale-pricing">
-                      <span className="sale-price">RM {product.price.toLocaleString()}</span>
-                      <span className="sale-original-price">RM {(product.price * 1.2).toLocaleString()}</span>
+                      {firebaseUser ? (
+                        <>
+                          <span className="sale-price">RM {product.price.toLocaleString()}</span>
+                          <span className="sale-original-price">RM {(product.price * 1.2).toLocaleString()}</span>
+                        </>
+                      ) : (
+                        <span className="sale-price">{t('common.loginToSeePrice')}</span>
+                      )}
                     </div>
                   </div>
                 </Link>

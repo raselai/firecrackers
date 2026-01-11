@@ -105,37 +105,43 @@ export default function ProductCard({ product }: ProductCardProps) {
         alignItems: 'center' 
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          {product.isOnSale && product.offerPrice ? (
-            <>
-              <span style={{ 
-                fontSize: '1.2rem', 
-                fontWeight: 'bold', 
-                color: '#dc2626' 
-              }}>
-                RM {product.offerPrice.toLocaleString()}
+          {firebaseUser ? (
+            product.isOnSale && product.offerPrice ? (
+              <>
+                <span style={{ 
+                  fontSize: '1.2rem', 
+                  fontWeight: 'bold', 
+                  color: '#dc2626' 
+                }}>
+                  RM {product.offerPrice.toLocaleString()}
+                </span>
+                <span style={{ 
+                  fontSize: '0.9rem', 
+                  color: '#6b7280', 
+                  textDecoration: 'line-through' 
+                }}>
+                  RM {product.price.toLocaleString()}
+                </span>
+                <span style={{ 
+                  fontSize: '0.8rem', 
+                  color: '#dc2626', 
+                  fontWeight: '600',
+                  backgroundColor: '#fef2f2',
+                  padding: '0.125rem 0.5rem',
+                  borderRadius: '4px',
+                  alignSelf: 'flex-start'
+                }}>
+                  {t('common.sale')}
+                </span>
+              </>
+            ) : (
+              <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                {product.price ? `RM ${product.price.toLocaleString()}` : t('common.contactForPrice')}
               </span>
-              <span style={{ 
-                fontSize: '0.9rem', 
-                color: '#6b7280', 
-                textDecoration: 'line-through' 
-              }}>
-                RM {product.price.toLocaleString()}
-              </span>
-              <span style={{ 
-                fontSize: '0.8rem', 
-                color: '#dc2626', 
-                fontWeight: '600',
-                backgroundColor: '#fef2f2',
-                padding: '0.125rem 0.5rem',
-                borderRadius: '4px',
-                alignSelf: 'flex-start'
-              }}>
-                {t('common.sale')}
-              </span>
-            </>
+            )
           ) : (
-            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-              {product.price ? `RM ${product.price.toLocaleString()}` : t('common.contactForPrice')}
+            <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#6b7280' }}>
+              {t('common.loginToSeePrice')}
             </span>
           )}
         </div>
