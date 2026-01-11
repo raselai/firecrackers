@@ -12,6 +12,7 @@ interface ImageGalleryProps {
 export default function ImageGallery({ product, className = '' }: ImageGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
   // Get all available images for the product
   const getAllImages = () => {
@@ -51,6 +52,14 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
   const images = getAllImages();
   const currentImage = images[currentImageIndex];
 
+  const isVideoUrl = (url: string) => {
+    if (url.startsWith('data:video/')) return true;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return videoExtensions.some((ext) => cleanUrl.endsWith(`.${ext}`));
+  };
+
+  const isVideoCurrent = isVideoUrl(currentImage);
+
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
@@ -79,12 +88,18 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
             borderRadius: '12px',
             border: '2px solid #e5e7eb',
             overflow: 'hidden',
-            cursor: isZoomed ? 'zoom-out' : 'zoom-in'
+            cursor: isVideoCurrent ? 'default' : isZoomed ? 'zoom-out' : 'zoom-in'
           }}
-          onClick={toggleZoom}
+          onClick={isVideoCurrent ? undefined : toggleZoom}
         >
-          {currentImage.startsWith('data:') ? (
-            // For base64 data URLs, use regular img tag
+          {isVideoCurrent ? (
+            <video
+              src={currentImage}
+              className="w-full h-full object-cover"
+              controls
+              playsInline
+            />
+          ) : currentImage.startsWith('data:') ? (
             <img
               src={currentImage}
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
@@ -95,7 +110,6 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
               }}
             />
           ) : (
-            // For regular URLs, use Next.js Image component
             <Image
               src={currentImage}
               alt={`${product.name} - Image ${currentImageIndex + 1}`}
@@ -185,19 +199,21 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
         </div>
         
         {/* Zoom Indicator */}
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          zIndex: 10
-        }}>
-          {isZoomed ? 'Click to zoom out' : 'Click to zoom'}
-        </div>
+        {!isVideoCurrent && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            zIndex: 10
+          }}>
+            {isZoomed ? 'Click to zoom out' : 'Click to zoom'}
+          </div>
+        )}
       </div>
 
       {/* Thumbnail Navigation */}
@@ -225,7 +241,14 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
                 padding: 0
               }}
             >
-              {image.startsWith('data:') ? (
+              {isVideoUrl(image) ? (
+                <video
+                  src={image}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                />
+              ) : image.startsWith('data:') ? (
                 <img
                   src={image}
                   alt={`${product.name} thumbnail ${index + 1}`}
@@ -249,7 +272,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
       )}
 
       {/* Zoom Modal */}
-      {isZoomed && (
+      {isZoomed && !isVideoCurrent && (
         <div
           style={{
             position: 'fixed',

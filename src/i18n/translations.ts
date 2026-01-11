@@ -24,9 +24,19 @@ export const translations = {
       newArrivalsSubtitle: 'Discover our latest explosive selections',
       tabs: {
         all: 'All',
-        groundEffects: 'Ground Effects',
-        aerialEffects: 'Aerial Effects',
-        others: 'Others'
+        redCrackersSeries: 'Red crackers series',
+        kidsSeries: 'Kids series',
+        handleSeries: 'Handle series',
+        fountainSeries: 'Fountain series',
+        firework4InchSeries: '4inch firework series',
+        firework6InchSeries: '6inch firework series',
+        firework7InchSeries: '7inch firework series',
+        firework8InchSeries: '8inch firework series',
+        firework10InchSeries: '10inch firework series',
+        firework11InchSeries: '11inch firework series',
+        firework12InchSeries: '12inch firework series',
+        bigHoleFireworkSeries: 'Big hole firework series',
+        giftBasket: 'Gift basket'
       },
       noProductsPrefix: 'No',
       noProductsSuffix: 'products available at the moment.',
@@ -428,9 +438,7 @@ export const translations = {
     },
     nav: {
       home: 'Home',
-      groundEffects: 'Ground Effects',
-      aerialEffects: 'Aerial Effects',
-      others: 'Others',
+      categories: 'Categories',
       cart: 'Cart',
       myAccount: 'My Account',
       referralsRewards: 'Referrals & Rewards',
@@ -449,24 +457,20 @@ export const translations = {
       voucherLower: 'voucher',
       vouchersLower: 'vouchers',
       user: 'User',
-      groundCategories: {
-        sparklers: 'Sparklers',
-        fountains: 'Fountains',
-        groundSpinners: 'Ground Spinners',
-        wheels: 'Wheels',
-        snakes: 'Snakes',
-        smokeBombs: 'Smoke Bombs',
-        poppers: 'Poppers',
-        fireCrackers: 'Fire Crackers',
-        partyCrackers: 'Party Crackers',
-        confettiCannons: 'Confetti Cannons'
-      },
-      aerialCategories: {
-        rockets: 'Rockets',
-        romanCandles: 'Roman Candles',
-        aerialShells: 'Aerial Shells',
-        multiShotCakes: 'Multi-Shot Cakes',
-        mines: 'Mines'
+      categorySeries: {
+        redCrackersSeries: 'Red crackers series',
+        kidsSeries: 'Kids series',
+        handleSeries: 'Handle series',
+        fountainSeries: 'Fountain series',
+        firework4InchSeries: '4inch firework series',
+        firework6InchSeries: '6inch firework series',
+        firework7InchSeries: '7inch firework series',
+        firework8InchSeries: '8inch firework series',
+        firework10InchSeries: '10inch firework series',
+        firework11InchSeries: '11inch firework series',
+        firework12InchSeries: '12inch firework series',
+        bigHoleFireworkSeries: 'Big hole firework series',
+        giftBasket: 'Gift basket'
       }
     },
     product: {
@@ -708,10 +712,20 @@ export const translations = {
       newArrivalsTitle: '新品上架',
       newArrivalsSubtitle: '探索我们的最新爆款精选',
       tabs: {
-        all: '全部',
-        groundEffects: '地面效果',
-        aerialEffects: '空中效果',
-        others: '其他'
+        all: '??',
+        redCrackersSeries: '????',
+        kidsSeries: '????',
+        handleSeries: '????',
+        fountainSeries: '????',
+        firework4InchSeries: '4?????',
+        firework6InchSeries: '6?????',
+        firework7InchSeries: '7?????',
+        firework8InchSeries: '8?????',
+        firework10InchSeries: '10?????',
+        firework11InchSeries: '11?????',
+        firework12InchSeries: '12?????',
+        bigHoleFireworkSeries: '??????',
+        giftBasket: '???'
       },
       noProductsPrefix: '当前没有',
       noProductsSuffix: '产品可用。',
@@ -946,6 +960,22 @@ export const translations = {
       copyright: '© 2024 FireCrackers ML。保留所有权利。'
     },
     nav: {
+      categories: '??',
+      categorySeries: {
+        redCrackersSeries: '????',
+        kidsSeries: '????',
+        handleSeries: '????',
+        fountainSeries: '????',
+        firework4InchSeries: '4?????',
+        firework6InchSeries: '6?????',
+        firework7InchSeries: '7?????',
+        firework8InchSeries: '8?????',
+        firework10InchSeries: '10?????',
+        firework11InchSeries: '11?????',
+        firework12InchSeries: '12?????',
+        bigHoleFireworkSeries: '??????',
+        giftBasket: '???'
+      },
       home: '首页',
       groundEffects: '地面效果',
       aerialEffects: '空中效果',
@@ -1041,3 +1071,4 @@ export const translations = {
     }
   }
 } as const;
+

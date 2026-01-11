@@ -10,7 +10,6 @@ import { useI18n } from '@/i18n/I18nProvider';
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'all' | 'indoor' | 'outdoor' | 'others'>('all');
   const [mounted, setMounted] = useState(false);
   const { t } = useI18n();
 
@@ -37,37 +36,7 @@ export default function Home() {
   // Get seasonal sale products (products that are on sale)
   const seasonalProducts = products.filter((product: any) => product.isOnSale).slice(0, 6);
 
-  // Filter products by category for the new products section
-  const indoorProducts = products.filter((product: any) =>
-    product.category && product.category.toLowerCase().includes('indoor')
-  );
-
-  const outdoorProducts = products.filter((product: any) =>
-    product.category && product.category.toLowerCase().includes('outdoor')
-  );
-
-  const othersProducts = products.filter((product: any) =>
-    product.category && product.category.toLowerCase().includes('others')
-  );
-
-  // Get current tab products
-  const currentTabProducts = activeTab === 'all'
-    ? products
-    : activeTab === 'indoor'
-    ? indoorProducts
-    : activeTab === 'outdoor'
-    ? outdoorProducts
-    : othersProducts;
-
-
-  const tabLabel =
-    activeTab === 'all'
-      ? t('home.tabs.all')
-      : activeTab === 'indoor'
-      ? t('home.tabs.groundEffects')
-      : activeTab === 'outdoor'
-      ? t('home.tabs.aerialEffects')
-      : t('home.tabs.others');
+  const currentTabProducts = products;
 
   return (
     <div className="homepage-wrapper">
@@ -114,34 +83,6 @@ export default function Home() {
             <p className="section-subtitle">{t('home.newArrivalsSubtitle')}</p>
           </div>
 
-          {/* Tabs */}
-          <div className="category-tabs">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`category-tab ${activeTab === 'all' ? 'category-tab-active' : ''}`}
-            >
-              {t('home.tabs.all')}
-            </button>
-            <button
-              onClick={() => setActiveTab('indoor')}
-              className={`category-tab ${activeTab === 'indoor' ? 'category-tab-active' : ''}`}
-            >
-              {t('home.tabs.groundEffects')}
-            </button>
-            <button
-              onClick={() => setActiveTab('outdoor')}
-              className={`category-tab ${activeTab === 'outdoor' ? 'category-tab-active' : ''}`}
-            >
-              {t('home.tabs.aerialEffects')}
-            </button>
-            <button
-              onClick={() => setActiveTab('others')}
-              className={`category-tab ${activeTab === 'others' ? 'category-tab-active' : ''}`}
-            >
-              {t('home.tabs.others')}
-            </button>
-          </div>
-
           {/* Products Grid */}
           <div className="products-grid">
             {loading ? (
@@ -175,7 +116,7 @@ export default function Home() {
               ))
             ) : (
               <div className="empty-state">
-                <p>{`${t('home.noProductsPrefix')} ${tabLabel} ${t('home.noProductsSuffix')}`}</p>
+                <p>{`${t('home.noProductsPrefix')} ${t('home.noProductsSuffix')}`}</p>
               </div>
             )}
           </div>

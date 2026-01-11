@@ -35,38 +35,20 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
   });
 
   const categories = [
-    'Ground Effects',
-    'Aerial Effects',
-    'Others'
+    'Red crackers series',
+    'Kids series',
+    'Handle series',
+    'Fountain series',
+    '4inch firework series',
+    '6inch firework series',
+    '7inch firework series',
+    '8inch firework series',
+    '10inch firework series',
+    '11inch firework series',
+    '12inch firework series',
+    'Big hole firework series',
+    'Gift basket'
   ];
-
-  const subcategories = {
-    'Ground Effects': [
-      'Sparklers',
-      'Fountains',
-      'Ground Spinners',
-      'Wheels',
-      'Snakes',
-      'Smoke Bombs',
-      'Poppers',
-      'Fire Crackers',
-      'Party Crackers',
-      'Confetti Cannons'
-    ],
-    'Aerial Effects': [
-      'Rockets',
-      'Roman Candles',
-      'Aerial Shells',
-      'Multi-Shot Cakes',
-      'Mines'
-    ],
-    'Others': [
-      'Combo Packs',
-      'Gift Sets',
-      'Custom Assortments',
-      'Miscellaneous'
-    ]
-  };
 
   const availabilityOptions = ['In Stock', 'Out of Stock', 'Limited Stock'];
 
@@ -126,18 +108,13 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
       return;
     }
     
-    if (!formData.subcategory) {
-      alert('Subcategory is required');
-      return;
-    }
-    
     // Check if at least one image is provided
     const hasImage = formData.image || 
                     (formData.images && formData.images.length > 0) ||
                     (formData.galleryImages && formData.galleryImages.length > 0);
     
     if (!hasImage) {
-      alert('At least one image is required');
+      alert('At least one media file is required');
       return;
     }
     
@@ -148,7 +125,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
       description: formData.description || '',
       category: formData.category,
-      subcategory: formData.subcategory,
+      subcategory: formData.category,
       // Firecracker-specific fields
       effectType: formData.effectType || '',
       duration: formData.duration || '',
@@ -181,10 +158,10 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
       bottom: 0,
       background: 'rgba(0, 0, 0, 0.8)',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'center',
       zIndex: 1000,
-      padding: '2rem'
+      padding: '6rem 2rem 2rem'
     }}>
       <div style={{
         background: 'white',
@@ -204,6 +181,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
           <h2 style={{ margin: 0, color: '#1f2937' }}>Add New Product</h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             style={{
               background: 'none',
               border: 'none',
@@ -212,7 +190,10 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
               color: '#6b7280'
             }}
           >
-            ×
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M6 6L18 18" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
 
@@ -293,7 +274,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
                 value={formData.category}
                 onChange={(e) => {
                   handleInputChange('category', e.target.value);
-                  handleInputChange('subcategory', '');
+                  handleInputChange('subcategory', e.target.value);
                 }}
                 style={{
                   width: '100%',
@@ -307,30 +288,6 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
                 <option value="">Select Category</option>
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Subcategory *
-              </label>
-              <select
-                value={formData.subcategory}
-                onChange={(e) => handleInputChange('subcategory', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-                required
-                disabled={!formData.category}
-              >
-                <option value="">Select Subcategory</option>
-                {formData.category && subcategories[formData.category as keyof typeof subcategories]?.map(sub => (
-                  <option key={sub} value={sub}>{sub}</option>
                 ))}
               </select>
             </div>
@@ -525,23 +482,23 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
           </div>
 
           {/* Image Upload - Full Width */}
-          {formData.category && formData.subcategory && (
+          {formData.category && (
             <ImageUpload
               category={formData.category}
-              subcategory={formData.subcategory}
+              subcategory={formData.category}
               onImagesUploaded={handleImagesUploaded}
             />
           )}
 
           {/* Gallery Images Upload */}
-          {formData.category && formData.subcategory && (
+          {formData.category && (
             <div style={{ marginTop: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
                 Gallery Images (Additional Images)
               </label>
               <ImageUpload
                 category={formData.category}
-                subcategory={formData.subcategory}
+                subcategory={formData.category}
                 onImagesUploaded={handleGalleryImagesUploaded}
               />
             </div>

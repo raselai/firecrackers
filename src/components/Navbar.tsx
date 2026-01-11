@@ -14,32 +14,27 @@ export default function Navbar() {
   const { items: cartItems } = useCart();
   const { locale, toggleLocale, t } = useI18n();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isGroundDropdownOpen, setIsGroundDropdownOpen] = useState(false);
-  const [isAerialDropdownOpen, setIsAerialDropdownOpen] = useState(false);
+  const [isCategoriesDropdownOpen, setIsCategoriesDropdownOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
-  const groundCategories = [
-    { key: 'sparklers', slug: 'sparklers' },
-    { key: 'fountains', slug: 'fountains' },
-    { key: 'groundSpinners', slug: 'ground-spinners' },
-    { key: 'wheels', slug: 'wheels' },
-    { key: 'snakes', slug: 'snakes' },
-    { key: 'smokeBombs', slug: 'smoke-bombs' },
-    { key: 'poppers', slug: 'poppers' },
-    { key: 'fireCrackers', slug: 'fire-crackers' },
-    { key: 'partyCrackers', slug: 'party-crackers' },
-    { key: 'confettiCannons', slug: 'confetti-cannons' }
+  const categories = [
+    { key: 'redCrackersSeries', slug: 'red-crackers-series' },
+    { key: 'kidsSeries', slug: 'kids-series' },
+    { key: 'handleSeries', slug: 'handle-series' },
+    { key: 'fountainSeries', slug: 'fountain-series' },
+    { key: 'firework4InchSeries', slug: '4inch-firework-series' },
+    { key: 'firework6InchSeries', slug: '6inch-firework-series' },
+    { key: 'firework7InchSeries', slug: '7inch-firework-series' },
+    { key: 'firework8InchSeries', slug: '8inch-firework-series' },
+    { key: 'firework10InchSeries', slug: '10inch-firework-series' },
+    { key: 'firework11InchSeries', slug: '11inch-firework-series' },
+    { key: 'firework12InchSeries', slug: '12inch-firework-series' },
+    { key: 'bigHoleFireworkSeries', slug: 'big-hole-firework-series' },
+    { key: 'giftBasket', slug: 'gift-basket' }
   ];
 
-  const aerialCategories = [
-    { key: 'rockets', slug: 'rockets' },
-    { key: 'romanCandles', slug: 'roman-candles' },
-    { key: 'aerialShells', slug: 'aerial-shells' },
-    { key: 'multiShotCakes', slug: 'multi-shot-cakes' },
-    { key: 'mines', slug: 'mines' }
-  ];
 
   const handleSignOut = async () => {
     try {
@@ -77,14 +72,11 @@ export default function Navbar() {
     setIsMobileMenuOpen(false); // Close mobile menu when any link is clicked
   };
 
-  const handleDropdownToggle = (dropdownType: 'ground' | 'aerial') => {
-    if (dropdownType === 'ground') {
-      setIsGroundDropdownOpen(!isGroundDropdownOpen);
-    } else {
-      setIsAerialDropdownOpen(!isAerialDropdownOpen);
-    }
+  const handleCategoriesToggle = () => {
+    setIsCategoriesDropdownOpen(!isCategoriesDropdownOpen);
     // Don't close mobile menu when toggling dropdowns
   };
+
 
   return (
     <nav className="navbar-premium">
@@ -107,76 +99,37 @@ export default function Navbar() {
           <Link href="/" className="navbar-link-premium">
             {t('nav.home')}
           </Link>
-
-          {/* Ground Effects Dropdown */}
           <div className="navbar-dropdown-premium">
             <button
               className="navbar-dropdown-btn-premium"
-              onMouseEnter={() => setIsGroundDropdownOpen(true)}
-              onMouseLeave={() => setIsGroundDropdownOpen(false)}
+              onMouseEnter={() => setIsCategoriesDropdownOpen(true)}
+              onMouseLeave={() => setIsCategoriesDropdownOpen(false)}
             >
-              {t('nav.groundEffects')}
+              {t('nav.categories')}
               <svg className="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </button>
-            {isGroundDropdownOpen && (
+            {isCategoriesDropdownOpen && (
               <div
                 className="navbar-dropdown-menu-premium"
-                onMouseEnter={() => setIsGroundDropdownOpen(true)}
-                onMouseLeave={() => setIsGroundDropdownOpen(false)}
+                onMouseEnter={() => setIsCategoriesDropdownOpen(true)}
+                onMouseLeave={() => setIsCategoriesDropdownOpen(false)}
               >
                 <div className="dropdown-glow"></div>
-                {groundCategories.map((category) => (
+                {categories.map((category) => (
                   <Link
                     key={category.key}
                     href={`/categories/${category.slug}`}
                     className="dropdown-item-premium"
                   >
-                    <span className="dropdown-item-icon">→</span>
-                    {t(`nav.groundCategories.${category.key}`)}
+                    <span className="dropdown-item-icon">&gt;</span>
+                    {t(`nav.categorySeries.${category.key}`)}
                   </Link>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Aerial Effects Dropdown */}
-          <div className="navbar-dropdown-premium">
-            <button
-              className="navbar-dropdown-btn-premium"
-              onMouseEnter={() => setIsAerialDropdownOpen(true)}
-              onMouseLeave={() => setIsAerialDropdownOpen(false)}
-            >
-              {t('nav.aerialEffects')}
-              <svg className="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-            {isAerialDropdownOpen && (
-              <div
-                className="navbar-dropdown-menu-premium"
-                onMouseEnter={() => setIsAerialDropdownOpen(true)}
-                onMouseLeave={() => setIsAerialDropdownOpen(false)}
-              >
-                <div className="dropdown-glow"></div>
-                {aerialCategories.map((category) => (
-                  <Link
-                    key={category.key}
-                    href={`/categories/${category.slug}`}
-                    className="dropdown-item-premium"
-                  >
-                    <span className="dropdown-item-icon">→</span>
-                    {t(`nav.aerialCategories.${category.key}`)}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <Link href="/categories/others" className="navbar-link-premium">
-            {t('nav.others')}
-          </Link>
 
           <Link href="/cart" className="navbar-link-premium navbar-cart-link">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -367,64 +320,32 @@ export default function Navbar() {
           <Link href="/" className="mobile-link-premium" onClick={handleMobileMenuClick}>
             {t('nav.home')}
           </Link>
-
           <div className="mobile-dropdown-premium">
             <button
               className="mobile-dropdown-btn-premium"
-              onClick={() => handleDropdownToggle('ground')}
+              onClick={handleCategoriesToggle}
             >
-              {t('nav.groundEffects')}
-              <svg className={`dropdown-icon ${isGroundDropdownOpen ? 'open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
+              {t('nav.categories')}
+              <svg className={`dropdown-icon ${isCategoriesDropdownOpen ? 'open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </button>
-            {isGroundDropdownOpen && (
+            {isCategoriesDropdownOpen && (
               <div className="mobile-dropdown-content-premium">
-                {groundCategories.map((category) => (
+                {categories.map((category) => (
                   <Link
                     key={category.key}
                     href={`/categories/${category.slug}`}
                     className="mobile-dropdown-item-premium"
                     onClick={handleMobileMenuClick}
                   >
-                    <span className="dropdown-item-icon">→</span>
-                    {t(`nav.groundCategories.${category.key}`)}
+                    <span className="dropdown-item-icon">&gt;</span>
+                    {t(`nav.categorySeries.${category.key}`)}
                   </Link>
                 ))}
               </div>
             )}
           </div>
-
-          <div className="mobile-dropdown-premium">
-            <button
-              className="mobile-dropdown-btn-premium"
-              onClick={() => handleDropdownToggle('aerial')}
-            >
-              {t('nav.aerialEffects')}
-              <svg className={`dropdown-icon ${isAerialDropdownOpen ? 'open' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-            {isAerialDropdownOpen && (
-              <div className="mobile-dropdown-content-premium">
-                {aerialCategories.map((category) => (
-                  <Link
-                    key={category.key}
-                    href={`/categories/${category.slug}`}
-                    className="mobile-dropdown-item-premium"
-                    onClick={handleMobileMenuClick}
-                  >
-                    <span className="dropdown-item-icon">→</span>
-                    {t(`nav.aerialCategories.${category.key}`)}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <Link href="/categories/others" className="mobile-link-premium" onClick={handleMobileMenuClick}>
-            {t('nav.others')}
-          </Link>
 
           <Link href="/cart" className="mobile-link-premium mobile-cart-link" onClick={handleMobileMenuClick}>
             {t('nav.cart')} {cartItems.length > 0 && `(${cartItems.length})`}

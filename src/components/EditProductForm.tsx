@@ -44,7 +44,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
         offerPrice: product.offerPrice?.toString() || '',
         description: product.description || '',
         category: product.category || '',
-        subcategory: product.subcategory || '',
+        subcategory: product.subcategory || product.category || '',
         // Firecracker-specific fields
         effectType: product.effectType || '',
         duration: product.duration || '',
@@ -66,40 +66,20 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
   }, [product]);
 
   const categories = [
-    'Ground Effects',
-    'Aerial Effects',
-    'Others'
+    'Red crackers series',
+    'Kids series',
+    'Handle series',
+    'Fountain series',
+    '4inch firework series',
+    '6inch firework series',
+    '7inch firework series',
+    '8inch firework series',
+    '10inch firework series',
+    '11inch firework series',
+    '12inch firework series',
+    'Big hole firework series',
+    'Gift basket'
   ];
-
-  const subcategories = {
-    'Ground Effects': [
-      'Sparklers',
-      'Fountains',
-      'Ground Spinners',
-      'Wheels',
-      'Snakes',
-      'Smoke Bombs',
-      'Poppers',
-      'Fire Crackers',
-      'Party Crackers',
-      'Confetti Cannons'
-    ],
-    'Aerial Effects': [
-      'Rockets',
-      'Roman Candles',
-      'Aerial Shells',
-      'Multi-Shot Cakes',
-      'Mines'
-    ],
-    'Others': [
-      'Combo Packs',
-      'Gift Sets',
-      'Custom Assortments',
-      'Specialty Lighting',
-      'Unique Designs',
-      'Miscellaneous'
-    ]
-  };
 
   const availabilityOptions = ['In Stock', 'Out of Stock', 'Limited Stock'];
 
@@ -142,6 +122,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
       shotCount: formData.shotCount ? parseInt(formData.shotCount) : undefined,
       rating: parseFloat(formData.rating),
       reviewCount: parseInt(formData.reviewCount),
+      subcategory: formData.category,
       images: formData.images.filter(img => img.trim() !== ''),
       galleryImages: formData.galleryImages.filter(img => img.trim() !== ''),
       image: formData.image || formData.images[0] || '',
@@ -277,7 +258,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                 value={formData.category}
                 onChange={(e) => {
                   handleInputChange('category', e.target.value);
-                  handleInputChange('subcategory', '');
+                  handleInputChange('subcategory', e.target.value);
                 }}
                 style={{
                   width: '100%',
@@ -291,30 +272,6 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                 <option value="">Select Category</option>
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Subcategory *
-              </label>
-              <select
-                value={formData.subcategory}
-                onChange={(e) => handleInputChange('subcategory', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '1rem'
-                }}
-                required
-                disabled={!formData.category}
-              >
-                <option value="">Select Subcategory</option>
-                {formData.category && subcategories[formData.category as keyof typeof subcategories]?.map(sub => (
-                  <option key={sub} value={sub}>{sub}</option>
                 ))}
               </select>
             </div>
@@ -509,24 +466,24 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
           </div>
 
           {/* Image Upload - Full Width */}
-          {formData.category && formData.subcategory && (
+          {formData.category && (
             <ImageUpload
               category={formData.category}
-              subcategory={formData.subcategory}
+              subcategory={formData.category}
               onImagesUploaded={handleImagesUploaded}
               existingImages={formData.images}
             />
           )}
 
           {/* Gallery Images Upload */}
-          {formData.category && formData.subcategory && (
+          {formData.category && (
             <div style={{ marginTop: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
                 Gallery Images (Additional Images)
               </label>
               <ImageUpload
                 category={formData.category}
-                subcategory={formData.subcategory}
+                subcategory={formData.category}
                 onImagesUploaded={handleGalleryImagesUploaded}
                 existingImages={formData.galleryImages}
               />

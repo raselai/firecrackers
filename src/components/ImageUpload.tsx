@@ -9,13 +9,29 @@ interface ImageUploadProps {
   existingImages?: string[];
 }
 
+type MediaKind = 'image' | 'video' | 'file';
+
 interface ImageItem {
   url: string;
   fileName: string;
+  kind: MediaKind;
   isUploading: boolean;
   isUploaded: boolean;
   uploadError?: string;
 }
+
+const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
+
+const getFileKind = (fileName: string, mimeType?: string): MediaKind => {
+  if (mimeType?.startsWith('image/')) return 'image';
+  if (mimeType?.startsWith('video/')) return 'video';
+
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  if (imageExtensions.includes(extension)) return 'image';
+  if (videoExtensions.includes(extension)) return 'video';
+  return 'file';
+};
 
 export default function ImageUpload({ category, subcategory, onImagesUploaded, existingImages = [] }: ImageUploadProps) {
   const [imageItems, setImageItems] = useState<ImageItem[]>([]);
@@ -29,7 +45,8 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
       // Existing images are already uploaded, so mark them as uploaded
       const existingItems: ImageItem[] = existingImages.map(url => ({
         url,
-        fileName: url.split('/').pop() || 'image',
+        fileName: url.split('/').pop() || 'media',
+        kind: getFileKind(url),
         isUploading: false,
         isUploaded: true
       }));
@@ -81,32 +98,12 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
     
     // Step 1: Create immediate previews with object URLs
     const previewItems: ImageItem[] = files.map(file => {
-      // Validate file first
-      if (!file.type.startsWith('image/')) {
-        return {
-          url: '',
-          fileName: file.name,
-          isUploading: false,
-          isUploaded: false,
-          uploadError: 'Not an image file'
-        };
-      }
-      
-      if (file.size > 5 * 1024 * 1024) {
-        return {
-          url: '',
-          fileName: file.name,
-          isUploading: false,
-          isUploaded: false,
-          uploadError: 'File size must be less than 5MB'
-        };
-      }
-
       // Create object URL for immediate preview
       const objectURL = URL.createObjectURL(file);
       return {
         url: objectURL,
         fileName: file.name,
+        kind: getFileKind(file.name, file.type),
         isUploading: true,
         isUploaded: false
       };
@@ -119,15 +116,6 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const previewIndex = currentLength + i;
-      
-      // Validate file
-      if (!file.type.startsWith('image/')) {
-        continue; // Already handled in preview
-      }
-      
-      if (file.size > 5 * 1024 * 1024) {
-        continue; // Already handled in preview
-      }
       
       try {
         const formData = new FormData();
@@ -216,14 +204,14 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Product Images *</h3>
+        <h3 className="text-lg font-semibold">Product Media *</h3>
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          {isUploading ? 'Uploading...' : 'Add Images'}
+          {isUploading ? 'Uploading...' : 'Add Media'}
         </button>
       </div>
 
@@ -231,7 +219,7 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
         ref={fileInputRef}
         type="file"
         multiple
-        accept="image/*"
+        accept="image/*,video/*"
         onChange={handleFileSelect}
         className="hidden"
       />
@@ -253,10 +241,10 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
         className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
       >
         <p className="text-gray-600">
-          Drag and drop images here, or click "Add Images" to select files
+          Drag and drop media here, or click "Add Media" to select files
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          Supported formats: JPG, PNG, WEBP (max 5MB each) - <strong>At least one image is required</strong>
+          Supported formats: images and videos - <strong>At least one file is required</strong>
         </p>
       </div>
 
@@ -265,11 +253,18 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {imageItems.map((item, index) => (
             <div key={index} className="relative group border border-gray-200 rounded-lg overflow-hidden">
-              {item.url ? (
+              {item.url && item.kind === 'image' ? (
                 <img
                   src={item.url}
                   alt={item.fileName}
                   className="w-full h-32 object-cover"
+                />
+              ) : item.url && item.kind === 'video' ? (
+                <video
+                  src={item.url}
+                  className="w-full h-32 object-cover"
+                  controls
+                  playsInline
                 />
               ) : (
                 <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
@@ -292,7 +287,7 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
               
               {item.isUploaded && !item.isUploading && (
                 <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                  ✓ Uploaded
+                  Uploaded
                 </div>
               )}
               
@@ -306,9 +301,9 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
                 type="button"
                 onClick={() => removeImage(index)}
                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                title="Remove image"
+                title="Remove file"
               >
-                ×
+                X
               </button>
             </div>
           ))}

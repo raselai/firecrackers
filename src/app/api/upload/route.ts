@@ -24,28 +24,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Category and subcategory are required' }, { status: 400 });
     }
 
-    // Filter valid image files
-    const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
-        console.log(`Skipping non-image file: ${file.name}`);
-        return false;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        console.log(`Skipping large file: ${file.name} (${file.size} bytes)`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length === 0) {
-      return NextResponse.json({ error: 'No valid image files provided' }, { status: 400 });
-    }
-
     // Generate base path for Firebase Storage
     const basePath = generateProductImagePath(category, subcategory, '');
     
     // Upload files to Firebase Storage
-    const firebaseURLs = await uploadMultipleImages(validFiles, basePath);
+    const firebaseURLs = await uploadMultipleImages(files, basePath);
     
     console.log('Images uploaded to Firebase Storage successfully:', firebaseURLs);
 
