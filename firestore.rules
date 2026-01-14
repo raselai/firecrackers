@@ -53,5 +53,11 @@ service cloud.firestore {
                        (request.resource.data.userId == request.auth.uid || isAdmin());
       allow delete: if false;
     }
+
+    // Settings - Public read (payment), Admin write
+    match /settings/{docId} {
+      allow read: if docId == 'payment';
+      allow write: if isAdmin();
+    }
   }
 }

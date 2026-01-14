@@ -8,6 +8,8 @@ import { nanoid } from 'nanoid';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
 import { useI18n } from '@/i18n/I18nProvider';
+import { getPaymentSettings } from '@/lib/paymentSettingsService';
+import { PaymentSettings } from '@/types/paymentSettings';
 import {
   calculateMaxVouchers,
   calculateVoucherDiscount,
@@ -35,6 +37,9 @@ export default function CheckoutPage() {
   const [placingOrder, setPlacingOrder] = useState(false);
   const [error, setError] = useState('');
   const [orderId] = useState(() => `ORD-${nanoid(10).toUpperCase()}`);
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
+  const [paymentSettingsError, setPaymentSettingsError] = useState('');
+  const [paymentSettingsLoading, setPaymentSettingsLoading] = useState(true);
 
   const addresses = user?.addresses || [];
 
@@ -44,6 +49,34 @@ export default function CheckoutPage() {
       router.push('/login?redirect=/checkout');
     }
   }, [authLoading, firebaseUser, router]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPaymentSettings = async () => {
+      try {
+        const settings = await getPaymentSettings();
+        if (isMounted) {
+          setPaymentSettings(settings);
+        }
+      } catch (error) {
+        console.error('Error loading payment settings:', error);
+        if (isMounted) {
+          setPaymentSettingsError('Failed to load payment settings. Using defaults.');
+        }
+      } finally {
+        if (isMounted) {
+          setPaymentSettingsLoading(false);
+        }
+      }
+    };
+
+    loadPaymentSettings();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (addresses.length === 0) {
@@ -71,6 +104,10 @@ export default function CheckoutPage() {
   }, [voucherCount]);
 
   const totalAmount = Math.max(subtotal - voucherDiscount, 0);
+
+  const paymentQrUrl = paymentSettings?.qrImageUrl || '/images/ewallet-qr.jpg';
+  const paymentWalletName = paymentSettings?.walletName || WALLET_NAME;
+  const paymentWalletNumber = paymentSettings?.walletNumber || WALLET_NUMBER;
 
   const selectedAddress = useMemo<Address | undefined>(() => {
     return addresses.find(addr => addr.id === selectedAddressId);
@@ -278,10 +315,16 @@ export default function CheckoutPage() {
 
           <section style={{ padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
             <h2 style={{ marginBottom: '1rem' }}>{t('checkout.payment')}</h2>
+            {paymentSettingsLoading && (
+              <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
+            )}
+            {paymentSettingsError && (
+              <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
+            )}
             <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
               <div style={{ width: '220px' }}>
                 <Image
-                  src="/images/ewallet-qr.jpg"
+                  src={paymentQrUrl}
                   alt={t('checkout.paymentMethod')}
                   width={220}
                   height={300}
@@ -290,8 +333,8 @@ export default function CheckoutPage() {
               </div>
               <div style={{ flex: 1, minWidth: '220px' }}>
                 <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
-                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {WALLET_NAME}</p>
-                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {WALLET_NUMBER}</p>
+                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
+                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
                 <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
                   {t('checkout.paymentInstruction')}
                 </p>
