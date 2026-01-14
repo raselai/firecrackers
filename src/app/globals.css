@@ -2870,7 +2870,7 @@ h1, h2, h3 {
 
 @media (min-width: 768px) {
   .footer-grid-premium {
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 3fr;
     gap: 2rem;
   }
 }
@@ -2996,6 +2996,24 @@ h1, h2, h3 {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+}
+
+.footer-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-categories-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .footer-link-premium {

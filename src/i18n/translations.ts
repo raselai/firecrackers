@@ -407,7 +407,7 @@ export const translations = {
       emptyBody: 'Start sharing your referral code to earn vouchers!'
     },
     footer: {
-      brandName: 'FireCrackers ML',
+      brandName: 'BBOOM88',
       tagline: 'Spark the celebration with premium fireworks',
       description:
         'Your trusted source for spectacular fireworks displays. From ground effects to aerial shows, we bring joy to every celebration.',
@@ -435,7 +435,7 @@ export const translations = {
         shippingInfo: 'Shipping Info',
         trackOrder: 'Track Order'
       },
-      copyright: '© 2024 FireCrackers ML. All rights reserved.'
+      copyright: '© 2026 Bboom88. All rights reserved.'
     },
     nav: {
       home: 'Home',
@@ -931,7 +931,7 @@ export const translations = {
       failed: '更新心愿单失败'
     },
     footer: {
-      brandName: 'FireCrackers ML',
+      brandName: 'BBOOM88',
       tagline: '用高品质烟花点亮庆典',
       description:
         '您可信赖的烟花供应商。从地面效果到空中礼花，为每一次庆祝带来欢乐。',

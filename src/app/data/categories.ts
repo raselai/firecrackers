@@ -1,56 +1,16 @@
 
 export const categories = [
-  // Ground Effects (replacing Indoor Lights)
-  {
-    name: 'Sparklers',
-    image: '/images/categories/sparklers.jpg',
-    href: '/categories/sparklers',
-    type: 'ground'
-  },
-  {
-    name: 'Fountains',
-    image: '/images/categories/fountains.jpg',
-    href: '/categories/fountains',
-    type: 'ground'
-  },
-  {
-    name: 'Ground Spinners',
-    image: '/images/categories/ground-spinners.jpg',
-    href: '/categories/ground-spinners',
-    type: 'ground'
-  },
-  {
-    name: 'Wheels',
-    image: '/images/categories/wheels.jpg',
-    href: '/categories/wheels',
-    type: 'ground'
-  },
-  // Aerial Effects (replacing Outdoor Lights)
-  {
-    name: 'Rockets',
-    image: '/images/categories/rockets.jpg',
-    href: '/categories/rockets',
-    type: 'aerial'
-  },
-  {
-    name: 'Roman Candles',
-    image: '/images/categories/roman-candles.jpg',
-    href: '/categories/roman-candles.jpg',
-    type: 'aerial'
-  },
-  {
-    name: 'Aerial Shells',
-    image: '/images/categories/aerial-shells.jpg',
-    href: '/categories/aerial-shells',
-    type: 'aerial'
-  },
-  {
-    name: 'Multi-Shot Cakes',
-    image: '/images/categories/multi-shot-cakes.jpg',
-    href: '/categories/multi-shot-cakes',
-    type: 'aerial'
-  },
+  { name: 'Red crackers series', href: '/categories/red-crackers-series' },
+  { name: 'Kids series', href: '/categories/kids-series' },
+  { name: 'Handle series', href: '/categories/handle-series' },
+  { name: 'Fountain series', href: '/categories/fountain-series' },
+  { name: '4inch firework series', href: '/categories/4inch-firework-series' },
+  { name: '6inch firework series', href: '/categories/6inch-firework-series' },
+  { name: '7inch firework series', href: '/categories/7inch-firework-series' },
+  { name: '8inch firework series', href: '/categories/8inch-firework-series' },
+  { name: '10inch firework series', href: '/categories/10inch-firework-series' },
+  { name: '11inch firework series', href: '/categories/11inch-firework-series' },
+  { name: '12inch firework series', href: '/categories/12inch-firework-series' },
+  { name: 'Big hole firework series', href: '/categories/big-hole-firework-series' },
+  { name: 'Gift basket', href: '/categories/gift-basket' },
 ];
-
-export const groundCategories = categories.filter(cat => cat.type === 'ground');
-export const aerialCategories = categories.filter(cat => cat.type === 'aerial');

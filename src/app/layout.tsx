@@ -13,8 +13,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Relight EAL - Premium Lighting Solutions',
-  description: 'Premium lighting solutions for indoor and outdoor spaces. Quality LED lights, chandeliers, and modern lighting fixtures.',
+  title: 'BBOOM88',
+  description: 'BBOOM88',
 };
 
 export default function RootLayout({
