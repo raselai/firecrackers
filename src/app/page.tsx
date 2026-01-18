@@ -14,6 +14,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const { t } = useI18n();
   const { firebaseUser } = useUser();
+  const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
   // Load products on component mount
   useEffect(() => {
@@ -39,6 +40,49 @@ export default function Home() {
   const seasonalProducts = products.filter((product: any) => product.isOnSale).slice(0, 6);
 
   const currentTabProducts = products;
+
+  const isVideoUrl = (url: string) => {
+    if (!url) return false;
+    if (url.startsWith('data:video/')) return true;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return videoExtensions.some((ext) => cleanUrl.endsWith(`.${ext}`));
+  };
+
+  const AutoplayVideo = ({ src, className }: { src: string; className: string }) => {
+    const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
+    React.useEffect(() => {
+      const videoEl = videoRef.current;
+      if (!videoEl) return;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            videoEl.play().catch(() => undefined);
+          } else {
+            videoEl.pause();
+            videoEl.currentTime = 0;
+          }
+        },
+        { threshold: 0.5 }
+      );
+
+      observer.observe(videoEl);
+      return () => observer.disconnect();
+    }, [src]);
+
+    return (
+      <video
+        ref={videoRef}
+        src={src}
+        className={className}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+      />
+    );
+  };
 
   return (
     <div className="homepage-wrapper">
@@ -101,12 +145,19 @@ export default function Home() {
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <div className="product-image-wrapper">
-                    <Image
-                      src={getProductImagePath(product, product.category)}
-                      alt={product.name}
-                      fill
-                      className="product-image"
-                    />
+                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                      <AutoplayVideo
+                        src={getProductImagePath(product, product.category)}
+                        className="product-image"
+                      />
+                    ) : (
+                      <Image
+                        src={getProductImagePath(product, product.category)}
+                        alt={product.name}
+                        fill
+                        className="product-image"
+                      />
+                    )}
                     <div className="product-glow"></div>
                   </div>
                   <div className="product-info">
@@ -150,12 +201,19 @@ export default function Home() {
                 >
                   <div className="featured-badge">{t('home.featuredBadge')}</div>
                   <div className="featured-image-wrapper">
-                    <Image
-                      src={getProductImagePath(product, product.category)}
-                      alt={product.name}
-                      fill
-                      className="featured-image"
-                    />
+                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                      <AutoplayVideo
+                        src={getProductImagePath(product, product.category)}
+                        className="featured-image"
+                      />
+                    ) : (
+                      <Image
+                        src={getProductImagePath(product, product.category)}
+                        alt={product.name}
+                        fill
+                        className="featured-image"
+                      />
+                    )}
                     <div className="featured-overlay"></div>
                   </div>
                   <div className="featured-info">
@@ -199,12 +257,19 @@ export default function Home() {
                     <span className="sale-badge-text">{t('common.sale')}</span>
                   </div>
                   <div className="sale-image-wrapper">
-                    <Image
-                      src={getProductImagePath(product, product.category)}
-                      alt={product.name}
-                      fill
-                      className="sale-image"
-                    />
+                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                      <AutoplayVideo
+                        src={getProductImagePath(product, product.category)}
+                        className="sale-image"
+                      />
+                    ) : (
+                      <Image
+                        src={getProductImagePath(product, product.category)}
+                        alt={product.name}
+                        fill
+                        className="sale-image"
+                      />
+                    )}
                     <div className="sale-image-overlay"></div>
                   </div>
                   <div className="sale-info">

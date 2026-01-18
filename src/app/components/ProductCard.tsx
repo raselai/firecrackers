@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types/product';
@@ -20,6 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
   const { t } = useI18n();
+  const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
   const handleAddToCart = async () => {
     if (!firebaseUser) {
@@ -39,6 +40,34 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const imagePath = getProductImagePath(product, product.category);
+  const isVideoUrl = (url: string) => {
+    if (!url) return false;
+    if (url.startsWith('data:video/')) return true;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return videoExtensions.some((ext) => cleanUrl.endsWith(`.${ext}`));
+  };
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (!isVideoUrl(imagePath)) return;
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => undefined);
+        } else {
+          videoEl.pause();
+          videoEl.currentTime = 0;
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(videoEl);
+    return () => observer.disconnect();
+  }, [imagePath]);
 
   // Add error handling for missing product data
   if (!product || !product.name) {
@@ -68,7 +97,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           marginBottom: '1rem',
           overflow: 'hidden'
         }}>
-          {imagePath.startsWith('data:') ? (
+          {isVideoUrl(imagePath) ? (
+            <video
+              ref={videoRef}
+              src={imagePath}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+          ) : imagePath.startsWith('data:') ? (
             // For base64 data URLs, use regular img tag
             <img
               src={imagePath}
