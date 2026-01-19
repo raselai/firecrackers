@@ -133,33 +133,58 @@ export default function ProductContent({ slug }: ProductContentProps) {
               <div className="detail-card title-card">
                 <h1 className="product-title">{product.name}</h1>
 
-                {/* Price Section */}
-                <div className="price-section">
-                  {firebaseUser ? (
-                    product.isOnSale && product.offerPrice ? (
+                <div className="title-card-row">
+                  {/* Price Section */}
+                  <div className="price-section">
+                    {firebaseUser ? (
+                      product.isOnSale && product.offerPrice ? (
+                        <>
+                          <div className="price-row">
+                            <span className="sale-price">RM {product.offerPrice.toFixed(2)}</span>
+                            <span className="sale-badge">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                              </svg>
+                              {t('common.sale')}
+                            </span>
+                          </div>
+                          <span className="original-price">RM {product.price.toFixed(2)}</span>
+                          <div className="savings-badge">
+                            {t('product.savePrefix')} RM {(product.price - product.offerPrice).toFixed(2)}{t('product.saveSuffix')}
+                          </div>
+                        </>
+                      ) : (
+                        <span className="regular-price">
+                          {product.price ? `RM ${product.price.toFixed(2)}` : t('common.contactForPrice')}
+                        </span>
+                      )
+                    ) : (
+                      <span className="regular-price">{t('common.loginToSeePrice')}</span>
+                    )}
+                  </div>
+
+                  {/* Add to Cart Button */}
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={addingToCart}
+                    className="add-to-cart-btn add-to-cart-compact"
+                  >
+                    {addingToCart ? (
                       <>
-                        <div className="price-row">
-                          <span className="sale-price">RM {product.offerPrice.toFixed(2)}</span>
-                          <span className="sale-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                            </svg>
-                            {t('common.sale')}
-                          </span>
-                        </div>
-                        <span className="original-price">RM {product.price.toFixed(2)}</span>
-                        <div className="savings-badge">
-                          {t('product.savePrefix')} RM {(product.price - product.offerPrice).toFixed(2)}{t('product.saveSuffix')}
-                        </div>
+                        <svg className="btn-spinner" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" fill="none" strokeWidth="3" />
+                        </svg>
+                        {t('product.adding')}
                       </>
                     ) : (
-                      <span className="regular-price">
-                        {product.price ? `RM ${product.price.toFixed(2)}` : t('common.contactForPrice')}
-                      </span>
-                    )
-                  ) : (
-                    <span className="regular-price">{t('common.loginToSeePrice')}</span>
-                  )}
+                      <>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {t('common.addToCart')}
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -199,28 +224,6 @@ export default function ProductContent({ slug }: ProductContentProps) {
                 </div>
               )}
 
-              {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={addingToCart}
-                className="add-to-cart-btn"
-              >
-                {addingToCart ? (
-                  <>
-                    <svg className="btn-spinner" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" fill="none" strokeWidth="3" />
-                    </svg>
-                    {t('product.adding')}
-                  </>
-                ) : (
-                  <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    {t('common.addToCart')}
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
@@ -384,6 +387,14 @@ export default function ProductContent({ slug }: ProductContentProps) {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
+          flex: 1 1 auto;
+        }
+
+        .title-card-row {
+          display: flex;
+          gap: 1.5rem;
+          align-items: flex-start;
+          justify-content: space-between;
         }
 
         .price-row {
@@ -531,6 +542,13 @@ export default function ProductContent({ slug }: ProductContentProps) {
           animation: slide-up 0.6s ease-out 0.4s backwards;
         }
 
+        .add-to-cart-compact {
+          width: auto;
+          min-width: 200px;
+          align-self: flex-start;
+          animation: none;
+        }
+
         .add-to-cart-btn:hover:not(:disabled) {
           transform: translateY(-4px);
           box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
@@ -674,6 +692,14 @@ export default function ProductContent({ slug }: ProductContentProps) {
 
           .specs-grid {
             grid-template-columns: 1fr;
+          }
+
+          .title-card-row {
+            flex-direction: column;
+          }
+
+          .add-to-cart-compact {
+            width: 100%;
           }
         }
       `}</style>

@@ -48,41 +48,15 @@ export default function Home() {
     return videoExtensions.some((ext) => cleanUrl.endsWith(`.${ext}`));
   };
 
-  const AutoplayVideo = ({ src, className }: { src: string; className: string }) => {
-    const videoRef = React.useRef<HTMLVideoElement | null>(null);
-
-    React.useEffect(() => {
-      const videoEl = videoRef.current;
-      if (!videoEl) return;
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            videoEl.play().catch(() => undefined);
-          } else {
-            videoEl.pause();
-            videoEl.currentTime = 0;
-          }
-        },
-        { threshold: 0.5 }
-      );
-
-      observer.observe(videoEl);
-      return () => observer.disconnect();
-    }, [src]);
-
-    return (
-      <video
-        ref={videoRef}
-        src={src}
-        className={className}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-      />
-    );
-  };
+  const VideoPreview = ({ src, className }: { src: string; className: string }) => (
+    <video
+      src={src}
+      className={className}
+      muted
+      playsInline
+      preload="metadata"
+    />
+  );
 
   return (
     <div className="homepage-wrapper">
@@ -146,7 +120,7 @@ export default function Home() {
                 >
                   <div className="product-image-wrapper">
                     {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <AutoplayVideo
+                      <VideoPreview
                         src={getProductImagePath(product, product.category)}
                         className="product-image"
                       />
@@ -202,7 +176,7 @@ export default function Home() {
                   <div className="featured-badge">{t('home.featuredBadge')}</div>
                   <div className="featured-image-wrapper">
                     {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <AutoplayVideo
+                      <VideoPreview
                         src={getProductImagePath(product, product.category)}
                         className="featured-image"
                       />
@@ -258,7 +232,7 @@ export default function Home() {
                   </div>
                   <div className="sale-image-wrapper">
                     {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <AutoplayVideo
+                      <VideoPreview
                         src={getProductImagePath(product, product.category)}
                         className="sale-image"
                       />
