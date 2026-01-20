@@ -2012,7 +2012,15 @@ h1, h2, h3 {
   }
 
   .hero-section {
-    min-height: 70vh;
+    min-height: 45vh;
+  }
+
+  .hero-content {
+    padding-bottom: 0;
+  }
+
+  .new-products-section {
+    padding: 2rem 0;
   }
 
   .products-grid {

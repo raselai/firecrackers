@@ -82,7 +82,7 @@ export default function AccountDashboard() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
-          <aside className="lg:w-64 flex-shrink-0">
+          <aside className="hidden lg:block lg:w-64 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto">
