@@ -10,9 +10,12 @@ export interface Order {
   subtotal: number;              // Total before voucher discount
   vouchersApplied: number;       // Number of vouchers used
   voucherDiscount: number;       // vouchersApplied * 20 (RM)
-  totalAmount: number;           // subtotal - voucherDiscount
+  totalAmount: number;           // subtotal - voucherDiscount + deliveryFee
 
   // Delivery
+  deliveryArea: string;          // Area ID (e.g., 'kuala-lumpur')
+  deliveryAreaName: string;      // Display name (e.g., 'Kuala Lumpur (city center)')
+  deliveryFee: number;           // Delivery fee amount
   deliveryAddress: Address;
 
   // Payment

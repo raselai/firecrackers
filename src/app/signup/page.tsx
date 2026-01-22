@@ -29,7 +29,7 @@ export default function SignUp() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/account');
+      router.push('/');
     }
   }, [user, authLoading, router]);
 
@@ -90,7 +90,7 @@ export default function SignUp() {
         formData.fullName,
         formData.referralCode || undefined
       );
-      router.push('/account');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || t('signup.errors.createFailed'));
     } finally {
@@ -104,7 +104,7 @@ export default function SignUp() {
 
     try {
       await signInWithGoogle(formData.referralCode || undefined);
-      router.push('/account');
+      router.push('/');
     } catch (err: any) {
       setError(err.message || t('signup.errors.googleFailed'));
     } finally {

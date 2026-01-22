@@ -115,6 +115,9 @@ export async function createOrder(params: {
   userId: string;
   items: OrderItem[];
   deliveryAddress: Address;
+  deliveryArea: string;
+  deliveryAreaName: string;
+  deliveryFee: number;
   vouchersToUse?: number;
   paymentProofUrl?: string;
   paymentProofPath?: string;
@@ -126,6 +129,9 @@ export async function createOrder(params: {
       userId,
       items,
       deliveryAddress,
+      deliveryArea,
+      deliveryAreaName,
+      deliveryFee,
       vouchersToUse = 0,
       paymentProofUrl,
       paymentProofPath,
@@ -155,7 +161,7 @@ export async function createOrder(params: {
 
     // Calculate pricing
     const voucherDiscount = calculateVoucherDiscount(vouchersToUse);
-    const totalAmount = subtotal - voucherDiscount;
+    const totalAmount = subtotal - voucherDiscount + deliveryFee;
 
     // Generate order ID
     const orderId = providedOrderId || `ORD-${nanoid(10).toUpperCase()}`;
@@ -169,6 +175,9 @@ export async function createOrder(params: {
       vouchersApplied: vouchersToUse,
       voucherDiscount,
       totalAmount,
+      deliveryArea,
+      deliveryAreaName,
+      deliveryFee,
       deliveryAddress,
       status: 'pending',
       paymentMethod,

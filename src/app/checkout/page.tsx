@@ -18,6 +18,7 @@ import {
 } from '@/lib/orderService';
 import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
 import { Address } from '@/types/user';
+import { deliveryAreas, getDeliveryFee, getDeliveryAreaName } from '@/app/data/deliveryAreas';
 
 const WALLET_NAME = 'Low Chee tong';
 const WALLET_NUMBER = '160836785359';
@@ -40,8 +41,11 @@ export default function CheckoutPage() {
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
   const [paymentSettingsError, setPaymentSettingsError] = useState('');
   const [paymentSettingsLoading, setPaymentSettingsLoading] = useState(true);
+  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState<string>('');
 
   const addresses = user?.addresses || [];
+  const deliveryFee = getDeliveryFee(selectedDeliveryArea);
+  const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
 
   useEffect(() => {
     if (authLoading) return;
@@ -49,6 +53,14 @@ export default function CheckoutPage() {
       router.push('/login?redirect=/checkout');
     }
   }, [authLoading, firebaseUser, router]);
+
+  // Load delivery area from localStorage
+  useEffect(() => {
+    const savedArea = localStorage.getItem('selectedDeliveryArea');
+    if (savedArea) {
+      setSelectedDeliveryArea(savedArea);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -103,7 +115,7 @@ export default function CheckoutPage() {
     return calculateVoucherDiscount(voucherCount);
   }, [voucherCount]);
 
-  const totalAmount = Math.max(subtotal - voucherDiscount, 0);
+  const totalAmount = Math.max(subtotal - voucherDiscount + deliveryFee, 0);
 
   const paymentQrUrl = paymentSettings?.qrImageUrl || '/images/ewallet-qr.jpg';
   const paymentWalletName = paymentSettings?.walletName || WALLET_NAME;
@@ -182,12 +194,17 @@ export default function CheckoutPage() {
         userId,
         items,
         deliveryAddress: selectedAddress,
+        deliveryArea: selectedDeliveryArea,
+        deliveryAreaName,
+        deliveryFee,
         vouchersToUse: voucherCount,
         paymentMethod: 'touch_n_go',
         paymentProofUrl,
         paymentProofPath
       });
 
+      // Clear delivery area from localStorage after successful order
+      localStorage.removeItem('selectedDeliveryArea');
       await clearCart();
       router.push('/account/orders');
     } catch (orderError) {
@@ -368,6 +385,12 @@ export default function CheckoutPage() {
             <span>{t('checkout.voucherDiscount')}</span>
             <span>- RM {voucherDiscount.toLocaleString()}</span>
           </div>
+          {selectedDeliveryArea && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>
+              <span>RM {deliveryFee.toLocaleString()}</span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
             <span>{t('checkout.total')}</span>
             <span>RM {totalAmount.toLocaleString()}</span>

@@ -1348,30 +1348,38 @@ export default function AdminPanel() {
                         paddingTop: '1rem',
                         marginTop: '0.5rem'
                       }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '0.8rem',
+                          color: '#64748b',
+                          marginBottom: '0.375rem'
+                        }}>
+                          <span>Subtotal</span>
+                          <span>RM {selectedOrder.subtotal.toFixed(2)}</span>
+                        </div>
                         {selectedOrder.voucherDiscount > 0 && (
-                          <>
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              fontSize: '0.8rem',
-                              color: '#64748b',
-                              marginBottom: '0.375rem'
-                            }}>
-                              <span>Subtotal</span>
-                              <span>RM {selectedOrder.subtotal.toFixed(2)}</span>
-                            </div>
-                            <div style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              fontSize: '0.8rem',
-                              color: '#16a34a',
-                              marginBottom: '0.5rem'
-                            }}>
-                              <span>Voucher ({selectedOrder.vouchersApplied}x)</span>
-                              <span>-RM {selectedOrder.voucherDiscount.toFixed(2)}</span>
-                            </div>
-                          </>
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            fontSize: '0.8rem',
+                            color: '#16a34a',
+                            marginBottom: '0.375rem'
+                          }}>
+                            <span>Voucher ({selectedOrder.vouchersApplied}x)</span>
+                            <span>-RM {selectedOrder.voucherDiscount.toFixed(2)}</span>
+                          </div>
                         )}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          fontSize: '0.8rem',
+                          color: '#64748b',
+                          marginBottom: '0.5rem'
+                        }}>
+                          <span>Delivery ({selectedOrder.deliveryAreaName || 'N/A'})</span>
+                          <span>RM {(selectedOrder.deliveryFee || 0).toFixed(2)}</span>
+                        </div>
                         <div style={{
                           display: 'flex',
                           justifyContent: 'space-between',

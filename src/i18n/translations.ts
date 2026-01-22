@@ -103,7 +103,10 @@ export const translations = {
       shipping: 'Shipping',
       free: 'FREE',
       total: 'Total',
-      proceedToCheckout: 'Proceed to Checkout'
+      proceedToCheckout: 'Proceed to Checkout',
+      deliveryArea: 'Delivery Area',
+      deliveryFee: 'Delivery Fee',
+      selectDeliveryArea: 'Select delivery area'
     },
     checkout: {
       loading: 'Loading checkout...',
@@ -128,6 +131,8 @@ export const translations = {
       orderSummary: 'Order Summary',
       subtotal: 'Subtotal',
       voucherDiscount: 'Voucher discount',
+      deliveryArea: 'Delivery Area',
+      deliveryFee: 'Delivery Fee',
       total: 'Total',
       placingOrder: 'Placing order...',
       placeOrder: 'Place Order',
@@ -793,7 +798,10 @@ export const translations = {
       shipping: '运费',
       free: '免费',
       total: '合计',
-      proceedToCheckout: '前往结账'
+      proceedToCheckout: '前往结账',
+      deliveryArea: '配送区域',
+      deliveryFee: '配送费',
+      selectDeliveryArea: '选择配送区域'
     },
     checkout: {
       loading: '正在加载结账...',
@@ -818,6 +826,8 @@ export const translations = {
       orderSummary: '订单摘要',
       subtotal: '小计',
       voucherDiscount: '代金券折扣',
+      deliveryArea: '配送区域',
+      deliveryFee: '配送费',
       total: '合计',
       placingOrder: '正在下单...',
       placeOrder: '提交订单',

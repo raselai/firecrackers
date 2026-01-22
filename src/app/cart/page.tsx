@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
 import { useI18n } from '@/i18n/I18nProvider';
+import { deliveryAreas, getDeliveryFee } from '@/app/data/deliveryAreas';
 
 export default function CartPage() {
   const { items, loading, subtotal, updateQuantity, removeItem } = useCart();
@@ -14,6 +15,10 @@ export default function CartPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
   const { t } = useI18n();
+  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
+
+  const deliveryFee = getDeliveryFee(selectedDeliveryArea);
+  const total = subtotal + deliveryFee;
 
   useEffect(() => {
     if (authLoading) return;
@@ -22,7 +27,18 @@ export default function CartPage() {
       return;
     }
     setCheckingAuth(false);
+    // Restore saved delivery area from localStorage
+    const savedArea = localStorage.getItem('selectedDeliveryArea');
+    if (savedArea) {
+      setSelectedDeliveryArea(savedArea);
+    }
   }, [firebaseUser, authLoading, router]);
+
+  const handleProceedToCheckout = () => {
+    // Save delivery area to localStorage for checkout page
+    localStorage.setItem('selectedDeliveryArea', selectedDeliveryArea);
+    router.push('/checkout');
+  };
 
   if (checkingAuth || authLoading || loading) {
     return (
@@ -428,21 +444,41 @@ export default function CartPage() {
                 <span>RM {subtotal.toLocaleString()}</span>
               </div>
 
-              <div className="summary-row">
-                <span>{t('cart.shipping')}</span>
-                <span className="free-tag">{t('cart.free')}</span>
+              <div className="delivery-area-section">
+                <label htmlFor="delivery-area" className="delivery-label">{t('cart.deliveryArea')}</label>
+                <select
+                  id="delivery-area"
+                  value={selectedDeliveryArea}
+                  onChange={(e) => setSelectedDeliveryArea(e.target.value)}
+                  className="delivery-select"
+                >
+                  <option value="">{t('cart.selectDeliveryArea')}</option>
+                  {deliveryAreas.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.name} - RM {area.fee}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {selectedDeliveryArea && (
+                <div className="summary-row">
+                  <span>{t('cart.deliveryFee')}</span>
+                  <span>RM {deliveryFee.toLocaleString()}</span>
+                </div>
+              )}
 
               <div className="summary-divider"></div>
 
               <div className="summary-row total-row">
                 <span>{t('cart.total')}</span>
-                <span>RM {subtotal.toLocaleString()}</span>
+                <span>RM {total.toLocaleString()}</span>
               </div>
 
               <button
-                onClick={() => router.push('/checkout')}
+                onClick={handleProceedToCheckout}
                 className="checkout-btn"
+                disabled={!selectedDeliveryArea}
               >
                 {t('cart.proceedToCheckout')}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -753,6 +789,47 @@ export default function CartPage() {
           color: #1f2937;
         }
 
+        .delivery-area-section {
+          margin-bottom: 1rem;
+        }
+
+        .delivery-label {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.5rem;
+        }
+
+        .delivery-select {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border: 2px solid #e5e7eb;
+          border-radius: 10px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: #1f2937;
+          background: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 0.75rem center;
+          background-size: 1.25rem;
+        }
+
+        .delivery-select:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .delivery-select:hover {
+          border-color: #667eea;
+        }
+
         .free-tag {
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
@@ -806,9 +883,15 @@ export default function CartPage() {
           margin-bottom: 1rem;
         }
 
-        .checkout-btn:hover {
+        .checkout-btn:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .checkout-btn:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+          box-shadow: none;
         }
 
         .checkout-btn svg {

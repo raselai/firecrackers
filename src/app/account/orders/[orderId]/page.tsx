@@ -253,6 +253,10 @@ export default function OrderDetailPage() {
                     <span className="font-medium">-RM{order.voucherDiscount.toFixed(2)}</span>
                   </div>
                 )}
+                <div className="flex justify-between text-gray-700">
+                  <span>Delivery Fee ({order.deliveryAreaName || 'N/A'})</span>
+                  <span className="font-medium">RM{(order.deliveryFee || 0).toFixed(2)}</span>
+                </div>
                 <div className="border-t-2 border-gray-200 pt-3 flex justify-between text-xl font-bold text-gray-900">
                   <span>Total</span>
                   <span>RM{order.totalAmount.toFixed(2)}</span>

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ImageGallery from '@/components/ImageGallery';
 import { fetchProducts } from '@/lib/productService';
+import { getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
@@ -72,7 +73,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
       await addItem({
         productId: String(product.id),
         productName: product.name,
-        productImage: product.image || product.images?.[0] || '',
+        productImage: getProductImagePath(product, product.category),
         quantity: 1,
         price: displayPrice || 0
       });

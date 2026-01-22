@@ -33,7 +33,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     await addItem({
       productId: String(product.id),
       productName: product.name,
-      productImage: product.image || product.images?.[0] || '',
+      productImage: getProductImagePath(product, product.category),
       quantity: 1,
       price: displayPrice || 0
     });
