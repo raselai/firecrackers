@@ -3,7 +3,7 @@
 export default function AboutPage() {
   const handleWhatsAppContact = () => {
     const message = "Hi! I'd like to learn more about your lighting solutions and services.";
-    const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/0122150334?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

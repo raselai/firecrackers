@@ -416,9 +416,8 @@ export const translations = {
       tagline: 'Spark the celebration with premium fireworks',
       description:
         'Your trusted source for spectacular fireworks displays. From ground effects to aerial shows, we bring joy to every celebration.',
-      address: 'International City, Dragon Mart, Near EB2 Gate',
-      email: 'kingon503@gmail.com',
-      phone: '+971 50 697 0154',
+      address: 'Taman Sungai Besi Indah, Serdang 43300',
+      phone: '0122150334',
       quickLinks: {
         title: 'Quick Links',
         home: 'Home',
@@ -945,9 +944,8 @@ export const translations = {
       tagline: '用高品质烟花点亮庆典',
       description:
         '您可信赖的烟花供应商。从地面效果到空中礼花，为每一次庆祝带来欢乐。',
-      address: '国际城，龙城市场，EB2 门附近',
-      email: 'kingon503@gmail.com',
-      phone: '+971 50 697 0154',
+      address: 'Taman Sungai Besi Indah, Serdang 43300',
+      phone: '0122150334',
       quickLinks: {
         title: '快速链接',
         home: '首页',

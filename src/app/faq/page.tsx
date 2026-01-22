@@ -75,7 +75,7 @@ export default function FAQPage() {
 
   const handleWhatsAppContact = () => {
     const message = "Hi! I have a question that's not covered in your FAQ. Can you help me?";
-    const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/0122150334?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

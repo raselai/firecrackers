@@ -273,7 +273,7 @@ export default function Home() {
         className="whatsapp-float"
         onClick={() => {
           const message = t('home.whatsappMessage');
-          const whatsappUrl = `https://wa.me/971506970154?text=${encodeURIComponent(message)}`;
+          const whatsappUrl = `https://wa.me/0122150334?text=${encodeURIComponent(message)}`;
           window.open(whatsappUrl, '_blank');
         }}
       >

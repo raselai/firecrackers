@@ -224,7 +224,7 @@ export default function OthersPage() {
             {t('categoryOthers.contactBody')}
           </p>
           <a
-                            href={`https://wa.me/971506970154?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
+                            href={`https://wa.me/0122150334?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
