@@ -1,4 +1,4 @@
-export type Locale = 'en' | 'zh-CN';
+﻿export type Locale = 'en' | 'zh-CN';
 
 export const defaultLocale: Locale = 'en';
 export const supportedLocales: Locale[] = ['en', 'zh-CN'];
@@ -445,6 +445,7 @@ export const translations = {
       home: 'Home',
       categories: 'Categories',
       cart: 'Cart',
+      menu: 'Menu',
       myAccount: 'My Account',
       referralsRewards: 'Referrals & Rewards',
       earnRm20: 'Earn RM20',
@@ -991,6 +992,7 @@ export const translations = {
       aerialEffects: '空中效果',
       others: '其他',
       cart: '购物车',
+      menu: '菜单',
       myAccount: '我的账户',
       referralsRewards: '推荐与奖励',
       earnRm20: '赚取 RM20',
@@ -1081,4 +1083,6 @@ export const translations = {
     }
   }
 } as const;
+
+
 
