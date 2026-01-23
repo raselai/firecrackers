@@ -16,9 +16,11 @@ import { db } from "./firebase";
 export interface Product {
   id?: string;
   name: string;
+  nameZh?: string;
   price: number;
   offerPrice?: number; // Sale price when isOnSale is true
   description?: string;
+  descriptionZh?: string;
   category: string;
   subcategory: string;
   image?: string;

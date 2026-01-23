@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
-import { getProductImagePath } from '@/lib/utils';
+import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useUser } from '@/contexts/AuthContext';
 
@@ -12,7 +12,8 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const { t } = useI18n();
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const { t, locale } = useI18n();
   const { firebaseUser } = useUser();
   const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
@@ -33,13 +34,35 @@ export default function Home() {
     loadProducts();
   }, []);
 
+  const categoryTabs = [
+    { key: 'all', value: 'all' },
+    { key: 'redCrackersSeries', value: 'Red crackers series' },
+    { key: 'kidsSeries', value: 'Kids series' },
+    { key: 'handleSeries', value: 'Handle series' },
+    { key: 'fountainSeries', value: 'Fountain series' },
+    { key: 'firework4InchSeries', value: '4inch firework series' },
+    { key: 'firework6InchSeries', value: '6inch firework series' },
+    { key: 'firework7InchSeries', value: '7inch firework series' },
+    { key: 'firework8InchSeries', value: '8inch firework series' },
+    { key: 'firework10InchSeries', value: '10inch firework series' },
+    { key: 'firework11InchSeries', value: '11inch firework series' },
+    { key: 'firework12InchSeries', value: '12inch firework series' },
+    { key: 'bigHoleFireworkSeries', value: 'Big hole firework series' },
+    { key: 'giftBasket', value: 'Gift basket' }
+  ];
+
   // Get featured products from actual product data
   const featuredProducts = products.filter((product: any) => product.isFeatured).slice(0, 6);
 
   // Get seasonal sale products (products that are on sale)
   const seasonalProducts = products.filter((product: any) => product.isOnSale).slice(0, 6);
 
-  const currentTabProducts = products;
+  const currentTabProducts = products.filter((product: any) => {
+    if (selectedCategory === 'all') return true;
+    const category = product.category || '';
+    const subcategory = product.subcategory || '';
+    return category === selectedCategory || subcategory === selectedCategory;
+  });
 
   const isVideoUrl = (url: string) => {
     if (!url) return false;
@@ -98,9 +121,20 @@ export default function Home() {
       {/* New Products Section */}
       <section className="new-products-section">
         <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">{t('home.newArrivalsTitle')}</h2>
-            <p className="section-subtitle">{t('home.newArrivalsSubtitle')}</p>
+          <div className="category-tabs">
+            {categoryTabs.map((tab) => {
+              const isActive = selectedCategory === tab.value;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setSelectedCategory(tab.value)}
+                  className={`category-tab ${isActive ? 'category-tab-active' : ''}`}
+                >
+                  {tab.key === 'all' ? 'All' : t(`nav.categorySeries.${tab.key}`)}
+                </button>
+              );
+            })}
           </div>
 
           {/* Products Grid */}
@@ -127,7 +161,7 @@ export default function Home() {
                     ) : (
                       <Image
                         src={getProductImagePath(product, product.category)}
-                        alt={product.name}
+                        alt={getLocalizedProductName(product, locale)}
                         fill
                         className="product-image"
                       />
@@ -135,7 +169,7 @@ export default function Home() {
                     <div className="product-glow"></div>
                   </div>
                   <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
+                    <h3 className="product-name">{getLocalizedProductName(product, locale)}</h3>
                     <p className="product-category">{product.category}</p>
                     <div className="product-price">
                       {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
@@ -183,7 +217,7 @@ export default function Home() {
                     ) : (
                       <Image
                         src={getProductImagePath(product, product.category)}
-                        alt={product.name}
+                        alt={getLocalizedProductName(product, locale)}
                         fill
                         className="featured-image"
                       />
@@ -192,8 +226,8 @@ export default function Home() {
                   </div>
                   <div className="featured-info">
                     <div className="featured-category">{product.category}</div>
-                    <h3 className="featured-name">{product.name}</h3>
-                    <p className="featured-description">{product.description}</p>
+                    <h3 className="featured-name">{getLocalizedProductName(product, locale)}</h3>
+                    <p className="featured-description">{getLocalizedProductDescription(product, locale)}</p>
                     <div className="featured-price">
                       {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
                     </div>
@@ -239,7 +273,7 @@ export default function Home() {
                     ) : (
                       <Image
                         src={getProductImagePath(product, product.category)}
-                        alt={product.name}
+                        alt={getLocalizedProductName(product, locale)}
                         fill
                         className="sale-image"
                       />
@@ -248,8 +282,8 @@ export default function Home() {
                   </div>
                   <div className="sale-info">
                     <div className="sale-category">{product.category}</div>
-                    <h3 className="sale-name">{product.name}</h3>
-                    <p className="sale-description">{product.description}</p>
+                    <h3 className="sale-name">{getLocalizedProductName(product, locale)}</h3>
+                    <p className="sale-description">{getLocalizedProductDescription(product, locale)}</p>
                     <div className="sale-pricing">
                       {firebaseUser ? (
                         <>

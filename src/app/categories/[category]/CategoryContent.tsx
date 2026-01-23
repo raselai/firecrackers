@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import ProductCard from '@/app/components/ProductCard';
-import Image from 'next/image';
 import { fetchProducts } from '@/lib/productService';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -310,48 +309,6 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
 
   return (
     <div>
-      {/* Feature Image Section */}
-      <section className="category-hero">
-        <div className="category-hero-image">
-          <Image
-            src={categoryInfo?.featureImage || '/images/products/crystal-palace-chandelier.jpg'}
-            alt={categoryInfo?.name || t('category.imageAlt')}
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-          <div className="category-hero-overlay">
-            <div className="container">
-              <h1 className="category-hero-title">
-                {categoryInfo?.name || categorySlug.replace(/-/g, ' ').toUpperCase()}
-              </h1>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Category Description Section */}
-      <section className="category-description">
-        <div className="container">
-          <div className="category-content">
-            <div className="category-text">
-              <h2>{aboutTitle}</h2>
-              <p>{categoryInfo?.description || t('category.defaultDescription')}</p>
-              
-              {categoryInfo?.features && (
-                <div className="category-features">
-                  <h3>{t('category.keyFeatures')}</h3>
-                  <ul>
-                    {categoryInfo.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Products Section */}
       <section className="category-products">
         <div className="container">

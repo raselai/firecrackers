@@ -8,9 +8,12 @@ import { useUser } from '@/contexts/AuthContext';
 import { removeFromWishlist } from '@/lib/userService';
 import { getProductById } from '@/lib/firestore';
 import { Product } from '@/types/product';
+import { useI18n } from '@/i18n/I18nProvider';
+import { getLocalizedProductName } from '@/lib/utils';
 
 export default function WishlistPage() {
   const { user, firebaseUser, loading, refreshUser } = useUser();
+  const { locale } = useI18n();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -166,6 +169,7 @@ export default function WishlistPage() {
                   const displayImage = product.mainImage || product.image || product.images?.[0] || '/placeholder.png';
                   const displayPrice = product.offerPrice || product.price;
                   const hasDiscount = product.offerPrice && product.offerPrice < product.price;
+                  const productName = getLocalizedProductName(product, locale);
 
                   return (
                     <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden group">
@@ -174,7 +178,7 @@ export default function WishlistPage() {
                         <Link href={`/products/${product.id}`}>
                           <Image
                             src={displayImage}
-                            alt={product.name}
+                            alt={productName}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -190,7 +194,7 @@ export default function WishlistPage() {
                       <div className="p-4">
                         <Link href={`/products/${product.id}`}>
                           <h3 className="font-semibold text-gray-900 mb-2 hover:text-orange-600 transition-colors line-clamp-2">
-                            {product.name}
+                            {productName}
                           </h3>
                         </Link>
 

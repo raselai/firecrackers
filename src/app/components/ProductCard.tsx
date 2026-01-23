@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types/product';
-import { getProductImagePath } from '@/lib/utils';
+import { getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
   const handleAddToCart = async () => {
@@ -30,9 +30,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const displayPrice = product.isOnSale && product.offerPrice ? product.offerPrice : product.price;
 
+    const localizedName = getLocalizedProductName(product, locale);
+
     await addItem({
       productId: String(product.id),
-      productName: product.name,
+      productName: localizedName,
       productImage: getProductImagePath(product, product.category),
       quantity: 1,
       price: displayPrice || 0
@@ -70,7 +72,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   }, [imagePath]);
 
   // Add error handling for missing product data
-  if (!product || !product.name) {
+  const localizedName = getLocalizedProductName(product, locale);
+
+  if (!product || !localizedName) {
     return (
       <div className="product-card">
         <div style={{ padding: '1rem', textAlign: 'center' }}>
@@ -111,7 +115,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             // For base64 data URLs, use regular img tag
             <img
               src={imagePath}
-              alt={product.name}
+              alt={localizedName}
               style={{ 
                 width: '100%', 
                 height: '100%', 
@@ -122,7 +126,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             // For regular URLs, use Next.js Image component
             <Image
               src={imagePath}
-              alt={product.name}
+              alt={localizedName}
               fill
               style={{ objectFit: 'cover' }}
               priority={false}
@@ -133,7 +137,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             />
           )}
         </div>
-        <h3 style={{ margin: '0 0 0.5rem 0' }}>{product.name}</h3>
+        <h3 style={{ margin: '0 0 0.5rem 0' }}>{localizedName}</h3>
         <p style={{ color: '#6b7280', margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
           {product.category}
         </p>

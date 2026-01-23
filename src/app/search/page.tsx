@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getProductImagePath } from '@/lib/utils';
+import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { fetchProducts } from '@/lib/productService';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,7 +20,7 @@ export default function SearchPage() {
   const [availability, setAvailability] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
   const [loading, setLoading] = useState(true);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { firebaseUser } = useUser();
 
   // Load products on component mount
@@ -57,10 +57,12 @@ export default function SearchPage() {
       const searchTerm = query.toLowerCase().trim();
       
       // Ensure all product fields exist before searching
-      const productName = (product.name || '').toLowerCase();
+      const productName = getLocalizedProductName(product, locale).toLowerCase();
+      const productNameFallback = (product.name || '').toLowerCase();
       const productCategory = (product.category || '').toLowerCase();
       const productSubcategory = (product.subcategory || '').toLowerCase();
-      const productDescription = (product.description || '').toLowerCase();
+      const productDescription = getLocalizedProductDescription(product, locale).toLowerCase();
+      const productDescriptionFallback = (product.description || '').toLowerCase();
       const productLightType = (product.lightType || '').toLowerCase();
       
       // Split search terms for more flexible matching
@@ -68,10 +70,10 @@ export default function SearchPage() {
       
       // Check if any search term matches any product field
       const isMatch = searchTerms.some(term => {
-        const nameMatch = productName.includes(term);
+        const nameMatch = productName.includes(term) || productNameFallback.includes(term);
         const categoryMatch = productCategory.includes(term);
         const subcategoryMatch = productSubcategory.includes(term);
-        const descriptionMatch = productDescription.includes(term);
+        const descriptionMatch = productDescription.includes(term) || productDescriptionFallback.includes(term);
         const lightTypeMatch = productLightType.includes(term);
         
         return nameMatch || categoryMatch || subcategoryMatch || 
@@ -128,8 +130,8 @@ export default function SearchPage() {
         case 'relevance':
         default:
           // Prioritize exact name matches, then category matches
-          const aNameExact = (a.name || '').toLowerCase() === query.toLowerCase();
-          const bNameExact = (b.name || '').toLowerCase() === query.toLowerCase();
+          const aNameExact = getLocalizedProductName(a, locale).toLowerCase() === query.toLowerCase();
+          const bNameExact = getLocalizedProductName(b, locale).toLowerCase() === query.toLowerCase();
           if (aNameExact && !bNameExact) return -1;
           if (!aNameExact && bNameExact) return 1;
           return (b.rating || 0) - (a.rating || 0); // Fallback to rating
@@ -138,7 +140,7 @@ export default function SearchPage() {
 
     console.log('Search: Final filtered results:', sorted.length);
     setFilteredProducts(sorted);
-  }, [query, products, selectedCategory, priceRange, availability, sortBy]);
+  }, [query, products, selectedCategory, priceRange, availability, sortBy, locale]);
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
 
@@ -316,17 +318,17 @@ export default function SearchPage() {
                       }}>
                         <Image
                           src={getProductImagePath(product, product.category)}
-                          alt={product.name}
+                          alt={getLocalizedProductName(product, locale)}
                           fill
                           style={{ objectFit: 'cover' }}
                         />
                       </div>
-                      <h3 style={{ margin: '0 0 0.5rem 0' }}>{product.name}</h3>
+                      <h3 style={{ margin: '0 0 0.5rem 0' }}>{getLocalizedProductName(product, locale)}</h3>
                       <p style={{ color: '#6b7280', margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
                         {product.category}
                       </p>
                       <p style={{ color: '#6b7280', margin: '0 0 1rem 0', fontSize: '0.9rem' }}>
-                        {product.description.substring(0, 100)}...
+                        {getLocalizedProductDescription(product, locale).substring(0, 100)}...
                       </p>
                     </Link>
                     <div style={{ 

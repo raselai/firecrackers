@@ -12,9 +12,11 @@ interface EditProductFormProps {
 export default function EditProductForm({ product, onClose, onSave }: EditProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
+    nameZh: '',
     price: '',
     offerPrice: '',
     description: '',
+    descriptionZh: '',
     category: '',
     subcategory: '',
     // Firecracker-specific fields
@@ -40,9 +42,11 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
     if (product) {
       setFormData({
         name: product.name || '',
+        nameZh: product.nameZh || '',
         price: product.price?.toString() || '',
         offerPrice: product.offerPrice?.toString() || '',
         description: product.description || '',
+        descriptionZh: product.descriptionZh || '',
         category: product.category || '',
         subcategory: product.subcategory || product.category || '',
         // Firecracker-specific fields
@@ -200,6 +204,24 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                   fontSize: '1rem'
                 }}
                 required
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Product Name (Chinese)
+              </label>
+              <input
+                type="text"
+                value={formData.nameZh}
+                onChange={(e) => handleInputChange('nameZh', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -453,6 +475,26 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Describe the product features, benefits, and specifications..."
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                minHeight: '100px',
+                resize: 'vertical'
+              }}
+              />
+          </div>
+
+          <div style={{ marginTop: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              Product Description (Chinese)
+            </label>
+            <textarea
+              value={formData.descriptionZh}
+              onChange={(e) => handleInputChange('descriptionZh', e.target.value)}
+              placeholder="Optional Chinese description..."
               style={{
                 width: '100%',
                 padding: '0.75rem',

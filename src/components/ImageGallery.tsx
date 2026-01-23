@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { getProductImagePath } from '@/lib/utils';
+import { getLocalizedProductName, getProductImagePath } from '@/lib/utils';
+import { useI18n } from '@/i18n/I18nProvider';
 
 interface ImageGalleryProps {
   product: any;
@@ -13,8 +14,9 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
+  const { locale } = useI18n();
+  const localizedName = getLocalizedProductName(product, locale);
 
-  // Get all available images for the product
   const getAllImages = () => {
     const images = [];
     
@@ -102,7 +104,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
           ) : currentImage.startsWith('data:') ? (
             <img
               src={currentImage}
-              alt={`${product.name} - Image ${currentImageIndex + 1}`}
+              alt={`${localizedName} - Image ${currentImageIndex + 1}`}
               style={{ 
                 width: '100%', 
                 height: '100%', 
@@ -112,7 +114,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
           ) : (
             <Image
               src={currentImage}
-              alt={`${product.name} - Image ${currentImageIndex + 1}`}
+              alt={`${localizedName} - Image ${currentImageIndex + 1}`}
               fill
               style={{ objectFit: 'cover' }}
               priority={currentImageIndex === 0}
@@ -251,7 +253,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
               ) : image.startsWith('data:') ? (
                 <img
                   src={image}
-                  alt={`${product.name} thumbnail ${index + 1}`}
+                  alt={`${localizedName} thumbnail ${index + 1}`}
                   style={{ 
                     width: '100%', 
                     height: '100%', 
@@ -261,7 +263,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
               ) : (
                 <Image
                   src={image}
-                  alt={`${product.name} thumbnail ${index + 1}`}
+                  alt={`${localizedName} thumbnail ${index + 1}`}
                   fill
                   style={{ objectFit: 'cover' }}
                 />
@@ -297,7 +299,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
             {currentImage.startsWith('data:') ? (
               <img
                 src={currentImage}
-                alt={`${product.name} - Zoomed view`}
+                alt={`${localizedName} - Zoomed view`}
                 style={{ 
                   objectFit: 'contain',
                   maxWidth: '100%',
@@ -307,7 +309,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
             ) : (
               <Image
                 src={currentImage}
-                alt={`${product.name} - Zoomed view`}
+                alt={`${localizedName} - Zoomed view`}
                 width={800}
                 height={600}
                 style={{ 

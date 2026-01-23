@@ -11,9 +11,11 @@ interface AddProductFormProps {
 export default function AddProductForm({ onClose, onSave }: AddProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
+    nameZh: '',
     price: '',
     offerPrice: '',
     description: '',
+    descriptionZh: '',
     category: '',
     subcategory: '',
     // Firecracker-specific fields
@@ -121,9 +123,11 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
     // Create product object WITHOUT id (API will generate it)
     const newProduct = {
       name: formData.name,
+      nameZh: formData.nameZh || undefined,
       price: formData.price ? parseFloat(formData.price) : undefined,
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
       description: formData.description || '',
+      descriptionZh: formData.descriptionZh || undefined,
       category: formData.category,
       subcategory: formData.category,
       // Firecracker-specific fields
@@ -216,6 +220,24 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
                   fontSize: '1rem'
                 }}
                 required
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Product Name (Chinese)
+              </label>
+              <input
+                type="text"
+                value={formData.nameZh}
+                onChange={(e) => handleInputChange('nameZh', e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -469,6 +491,26 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Describe the product features, benefits, and specifications..."
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                minHeight: '100px',
+                resize: 'vertical'
+              }}
+              />
+          </div>
+
+          <div style={{ marginTop: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+              Product Description (Chinese)
+            </label>
+            <textarea
+              value={formData.descriptionZh}
+              onChange={(e) => handleInputChange('descriptionZh', e.target.value)}
+              placeholder="Optional Chinese description..."
               style={{
                 width: '100%',
                 padding: '0.75rem',

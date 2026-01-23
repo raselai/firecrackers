@@ -84,8 +84,10 @@ export async function POST(request: NextRequest) {
     // Convert to Firestore Product format and filter out undefined values
     const firestoreProduct: Omit<FirestoreProduct, 'id'> = {
       name: newProduct.name,
+      nameZh: newProduct.nameZh || undefined,
       price: newProduct.price || 0, // Default to 0 if no price provided
       description: newProduct.description || '',
+      descriptionZh: newProduct.descriptionZh || undefined,
       category: newProduct.category,
       subcategory: newProduct.subcategory,
       image: newProduct.image || newProduct.images?.[0] || '',

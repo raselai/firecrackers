@@ -9,7 +9,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 export default function Login() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/account';
+  const redirectPath = searchParams.get('redirect') || '/';
   const { signIn, signInWithGoogle, user, loading: authLoading } = useUser();
   const { t } = useI18n();
 

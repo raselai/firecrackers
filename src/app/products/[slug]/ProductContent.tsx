@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ImageGallery from '@/components/ImageGallery';
 import { fetchProducts } from '@/lib/productService';
-import { getProductImagePath } from '@/lib/utils';
+import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
@@ -23,7 +23,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
   const router = useRouter();
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   // Load products on component mount
   useEffect(() => {
@@ -60,6 +60,9 @@ export default function ProductContent({ slug }: ProductContentProps) {
     notFound();
   }
 
+  const productName = getLocalizedProductName(product, locale);
+  const productDescription = getLocalizedProductDescription(product, locale);
+
   const handleAddToCart = async () => {
     if (!firebaseUser) {
       router.push('/login');
@@ -72,7 +75,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
     try {
       await addItem({
         productId: String(product.id),
-        productName: product.name,
+        productName,
         productImage: getProductImagePath(product, product.category),
         quantity: 1,
         price: displayPrice || 0
@@ -132,7 +135,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
             <div className="details-section">
               {/* Product Title Card */}
               <div className="detail-card title-card">
-                <h1 className="product-title">{product.name}</h1>
+                <h1 className="product-title">{productName}</h1>
 
                 <div className="title-card-row">
                   {/* Price Section */}
@@ -190,7 +193,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
               </div>
 
               {/* Description Card */}
-              {product.description && (
+              {productDescription && (
                 <div className="detail-card description-card">
                   <h2 className="card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -198,7 +201,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
                     </svg>
                     {t('product.description')}
                   </h2>
-                  <p className="description-text">{product.description}</p>
+                  <p className="description-text">{productDescription}</p>
                 </div>
               )}
 

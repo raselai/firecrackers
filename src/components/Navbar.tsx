@@ -275,6 +275,18 @@ export default function Navbar() {
           />
         </form>
 
+        {/* Mobile Auth Buttons */}
+        {!loading && !user && (
+          <div className="navbar-mobile-auth">
+            <Link href="/login" className="navbar-mobile-auth-link">
+              {t('nav.login')}
+            </Link>
+            <Link href="/signup" className="navbar-mobile-auth-btn">
+              {t('nav.signUp')}
+            </Link>
+          </div>
+        )}
+
         {/* Mobile Menu Button */}
         <button
           className="navbar-mobile-btn-premium"

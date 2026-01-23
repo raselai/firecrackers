@@ -6,6 +6,27 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+type LocalizedProductText = {
+  name?: string;
+  nameZh?: string;
+  description?: string;
+  descriptionZh?: string;
+};
+
+export function getLocalizedProductName(product: LocalizedProductText, locale: string): string {
+  if (locale === 'zh-CN' && product.nameZh?.trim()) {
+    return product.nameZh;
+  }
+  return product.name || '';
+}
+
+export function getLocalizedProductDescription(product: LocalizedProductText, locale: string): string {
+  if (locale === 'zh-CN' && product.descriptionZh?.trim()) {
+    return product.descriptionZh;
+  }
+  return product.description || '';
+}
+
 // Image Management Utilities
 export function getProductImagePath(product: any, category?: string): string {
   // Priority order for image sources

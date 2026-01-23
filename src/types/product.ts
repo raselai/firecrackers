@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   name: string;
+  nameZh?: string;
   price: number;
   offerPrice?: number; // Sale price when isOnSale is true
   images: string[];
@@ -9,6 +10,7 @@ export interface Product {
   galleryImages?: string[]; // Additional product images
   imagePath?: string; // Organized path like 'hanging-lights/crystal-chandelier-1.jpg'
   description?: string;
+  descriptionZh?: string;
   category: string;
   subcategory: string;
   // Firecracker-specific fields
