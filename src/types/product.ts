@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   name: string;
+  productCode?: string; // Internal product code (admin only)
   nameZh?: string;
   price: number;
   offerPrice?: number; // Sale price when isOnSale is true

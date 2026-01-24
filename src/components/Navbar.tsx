@@ -104,8 +104,8 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="navbar-logo-premium">
           <Image
-            src="/images/Logo/Logo.png"
-            alt="FireWorks ML"
+            src="/images/Logo/New Logo.png"
+            alt="BBOOM"
             width={180}
             height={70}
             style={{ objectFit: 'contain' }}

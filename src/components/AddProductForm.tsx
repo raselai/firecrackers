@@ -11,6 +11,7 @@ interface AddProductFormProps {
 export default function AddProductForm({ onClose, onSave }: AddProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
+    productCode: '',
     nameZh: '',
     price: '',
     offerPrice: '',
@@ -123,6 +124,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
     // Create product object WITHOUT id (API will generate it)
     const newProduct = {
       name: formData.name,
+      productCode: formData.productCode || undefined,
       nameZh: formData.nameZh || undefined,
       price: formData.price ? parseFloat(formData.price) : undefined,
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
@@ -220,6 +222,25 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
                   fontSize: '1rem'
                 }}
                 required
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Product Code
+              </label>
+              <input
+                type="text"
+                value={formData.productCode}
+                onChange={(e) => handleInputChange('productCode', e.target.value)}
+                placeholder="Enter internal product code"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 

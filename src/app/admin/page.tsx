@@ -530,6 +530,9 @@ export default function AdminPanel() {
                         Product
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                        Product Code
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
                         Category
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
@@ -555,6 +558,7 @@ export default function AdminPanel() {
                             </div>
                           </div>
                         </td>
+                        <td style={{ padding: '1rem', color: '#6b7280' }}>{product.productCode || '-'}</td>
                         <td style={{ padding: '1rem' }}>{product.category}</td>
                         <td style={{ padding: '1rem' }}>RM {product.price.toLocaleString()}</td>
                         <td style={{ padding: '1rem' }}>

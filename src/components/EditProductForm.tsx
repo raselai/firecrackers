@@ -12,6 +12,7 @@ interface EditProductFormProps {
 export default function EditProductForm({ product, onClose, onSave }: EditProductFormProps) {
   const [formData, setFormData] = useState({
     name: '',
+    productCode: '',
     nameZh: '',
     price: '',
     offerPrice: '',
@@ -42,6 +43,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
     if (product) {
       setFormData({
         name: product.name || '',
+        productCode: product.productCode || '',
         nameZh: product.nameZh || '',
         price: product.price?.toString() || '',
         offerPrice: product.offerPrice?.toString() || '',
@@ -204,6 +206,25 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                   fontSize: '1rem'
                 }}
                 required
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Product Code
+              </label>
+              <input
+                type="text"
+                value={formData.productCode}
+                onChange={(e) => handleInputChange('productCode', e.target.value)}
+                placeholder="Enter internal product code"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
