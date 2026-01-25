@@ -560,7 +560,7 @@ export default function AdminPanel() {
                         </td>
                         <td style={{ padding: '1rem', color: '#6b7280' }}>{product.productCode || '-'}</td>
                         <td style={{ padding: '1rem' }}>{product.category}</td>
-                        <td style={{ padding: '1rem' }}>RM {product.price.toLocaleString()}</td>
+                        <td style={{ padding: '1rem' }}>RM {(product.price || 0).toLocaleString()}</td>
                         <td style={{ padding: '1rem' }}>
                           <span style={{
                             padding: '0.25rem 0.75rem',
