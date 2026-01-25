@@ -337,7 +337,7 @@ export default function SearchPage() {
                       alignItems: 'center' 
                     }}>
                       <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                        {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
                       </span>
                     </div>
                   </div>

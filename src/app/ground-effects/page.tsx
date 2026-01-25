@@ -329,7 +329,7 @@ export default function GroundEffects() {
                 marginBottom: '1rem'
               }}>
                 <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                  {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                  {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
                 </span>
                 <span style={{
                   color: product.availability === 'In Stock' ? '#059669' : '#dc2626',

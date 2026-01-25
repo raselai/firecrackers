@@ -40,10 +40,10 @@ export default function Home() {
     { key: 'kidsSeries', value: 'Kids series' },
     { key: 'handleSeries', value: 'Handle series' },
     { key: 'fountainSeries', value: 'Fountain series' },
-    { key: 'firework4InchSeries', value: '4inch firework series' },
+    { key: 'firework4InchSeries', value: '4inch & 5inch firework series' },
     { key: 'firework6InchSeries', value: '6inch firework series' },
     { key: 'firework7InchSeries', value: '7inch firework series' },
-    { key: 'firework8InchSeries', value: '8inch firework series' },
+    { key: 'firework8InchSeries', value: '8inch & 9inch firework series' },
     { key: 'firework10InchSeries', value: '10inch firework series' },
     { key: 'firework11InchSeries', value: '11inch firework series' },
     { key: 'firework12InchSeries', value: '12inch firework series' },
@@ -172,7 +172,7 @@ export default function Home() {
                     <h3 className="product-name">{getLocalizedProductName(product, locale)}</h3>
                     <p className="product-category">{product.category}</p>
                     <div className="product-price">
-                      {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                      {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
                     </div>
                   </div>
                 </Link>
@@ -229,7 +229,7 @@ export default function Home() {
                     <h3 className="featured-name">{getLocalizedProductName(product, locale)}</h3>
                     <p className="featured-description">{getLocalizedProductDescription(product, locale)}</p>
                     <div className="featured-price">
-                      {firebaseUser ? `RM ${product.price.toLocaleString()}` : t('common.loginToSeePrice')}
+                      {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
                     </div>
                   </div>
                 </Link>
@@ -287,8 +287,8 @@ export default function Home() {
                     <div className="sale-pricing">
                       {firebaseUser ? (
                         <>
-                          <span className="sale-price">RM {product.price.toLocaleString()}</span>
-                          <span className="sale-original-price">RM {(product.price * 1.2).toLocaleString()}</span>
+                          <span className="sale-price">RM {(product.price || 0).toLocaleString()}</span>
+                          <span className="sale-original-price">RM {((product.price || 0) * 1.2).toLocaleString()}</span>
                         </>
                       ) : (
                         <span className="sale-price">{t('common.loginToSeePrice')}</span>

@@ -151,19 +151,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           {firebaseUser ? (
             product.isOnSale && product.offerPrice ? (
               <>
-                <span style={{ 
-                  fontSize: '1.2rem', 
-                  fontWeight: 'bold', 
-                  color: '#dc2626' 
+                <span style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  color: '#dc2626'
                 }}>
-                  RM {product.offerPrice.toLocaleString()}
+                  RM {(product.offerPrice || 0).toLocaleString()}
                 </span>
-                <span style={{ 
-                  fontSize: '0.9rem', 
-                  color: '#6b7280', 
-                  textDecoration: 'line-through' 
+                <span style={{
+                  fontSize: '0.9rem',
+                  color: '#6b7280',
+                  textDecoration: 'line-through'
                 }}>
-                  RM {product.price.toLocaleString()}
+                  RM {(product.price || 0).toLocaleString()}
                 </span>
                 <span style={{ 
                   fontSize: '0.8rem', 
