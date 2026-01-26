@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { generateProductImagePath, uploadImage, uploadImageWithProgress } from '@/lib/storage';
 
 interface ImageUploadProps {
   category: string;
@@ -17,6 +18,7 @@ interface ImageItem {
   kind: MediaKind;
   isUploading: boolean;
   isUploaded: boolean;
+  uploadProgress?: number;
   uploadError?: string;
 }
 
@@ -94,6 +96,13 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
     setIsUploading(true);
     setUploadProgress(0);
     
+    if (!category || !subcategory) {
+      setIsUploading(false);
+      setUploadProgress(0);
+      alert('Please select a category and subcategory before uploading.');
+      return;
+    }
+
     const currentLength = imageItems.length;
     
     // Step 1: Create immediate previews with object URLs
@@ -105,7 +114,8 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
         fileName: file.name,
         kind: getFileKind(file.name, file.type),
         isUploading: true,
-        isUploaded: false
+        isUploaded: false,
+        uploadProgress: 0
       };
     });
 
@@ -118,63 +128,51 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
       const previewIndex = currentLength + i;
       
       try {
-        const formData = new FormData();
-        formData.append('files', file);
-        formData.append('category', category);
-        formData.append('subcategory', subcategory);
-        
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.uploadedPaths && result.uploadedPaths.length > 0) {
-            const firebaseURL = result.uploadedPaths[0];
-            
-            // Replace preview URL with Firebase URL
-            setImageItems(prev => {
-              const updated = [...prev];
-              const item = updated[previewIndex];
-              if (item) {
-                // Revoke the object URL to free memory
-                if (item.url.startsWith('blob:')) {
-                  URL.revokeObjectURL(item.url);
+        const fileName = `${Date.now()}_${i}_${file.name}`;
+        const path = generateProductImagePath(category, subcategory, fileName);
+        const kind = getFileKind(file.name, file.type);
+        const firebaseURL = kind === 'video'
+          ? await uploadImageWithProgress(file, path, (progress) => {
+              setImageItems(prev => {
+                const updated = [...prev];
+                if (updated[previewIndex]) {
+                  updated[previewIndex] = {
+                    ...updated[previewIndex],
+                    uploadProgress: progress
+                  };
                 }
-                updated[previewIndex] = {
-                  ...item,
-                  url: firebaseURL,
-                  isUploading: false,
-                  isUploaded: true
-                };
-                
-                // Immediately update parent with all uploaded URLs
-                const uploadedUrls = updated
-                  .filter(item => item.isUploaded && !item.url.startsWith('blob:'))
-                  .map(item => item.url);
-                onImagesUploaded(uploadedUrls);
-              }
-              return updated;
-            });
-          }
-          setUploadProgress(((i + 1) / files.length) * 100);
-        } else {
-          const errorData = await response.json();
-          // Update error state
-          setImageItems(prev => {
-            const updated = [...prev];
-            if (updated[previewIndex]) {
-              updated[previewIndex] = {
-                ...updated[previewIndex],
-                isUploading: false,
-                uploadError: errorData.error || 'Upload failed'
-              };
+                return updated;
+              });
+            })
+          : await uploadImage(file, path);
+
+        // Replace preview URL with Firebase URL
+        setImageItems(prev => {
+          const updated = [...prev];
+          const item = updated[previewIndex];
+          if (item) {
+            // Revoke the object URL to free memory
+            if (item.url.startsWith('blob:')) {
+              URL.revokeObjectURL(item.url);
             }
-            return updated;
-          });
-          alert(`Failed to upload ${file.name}: ${errorData.error || 'Unknown error'}`);
-        }
+            updated[previewIndex] = {
+              ...item,
+              url: firebaseURL,
+              isUploading: false,
+              isUploaded: true,
+              uploadProgress: 100
+            };
+
+            // Immediately update parent with all uploaded URLs
+            const uploadedUrls = updated
+              .filter(item => item.isUploaded && !item.url.startsWith('blob:'))
+              .map(item => item.url);
+            onImagesUploaded(uploadedUrls);
+          }
+          return updated;
+        });
+
+        setUploadProgress(((i + 1) / files.length) * 100);
       } catch (error) {
         console.error('Upload error:', error);
         // Update error state
@@ -275,7 +273,9 @@ export default function ImageUpload({ category, subcategory, onImagesUploaded, e
               {/* Upload Status Overlay */}
               {item.isUploading && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <div className="text-white text-sm font-semibold">Uploading...</div>
+                  <div className="text-white text-sm font-semibold">
+                    Uploading{typeof item.uploadProgress === 'number' ? ` ${item.uploadProgress}%` : '...'}
+                  </div>
                 </div>
               )}
               

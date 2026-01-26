@@ -1,6 +1,7 @@
 import { 
   ref, 
   uploadBytes, 
+  uploadBytesResumable,
   getDownloadURL, 
   deleteObject,
   listAll
@@ -18,6 +19,35 @@ export const uploadImage = async (file: File, path: string): Promise<string> => 
     console.error("Error uploading image: ", error);
     throw error;
   }
+};
+
+// Upload a single image with progress (0-100)
+export const uploadImageWithProgress = async (
+  file: File,
+  path: string,
+  onProgress?: (progress: number) => void
+): Promise<string> => {
+  const storageRef = ref(storage, path);
+  return new Promise((resolve, reject) => {
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        if (!onProgress) return;
+        const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        onProgress(progress);
+      },
+      (error) => {
+        console.error("Error uploading image: ", error);
+        reject(error);
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(downloadURL);
+      }
+    );
+  });
 };
 
 // Upload multiple images
