@@ -261,7 +261,9 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
     'stand': { subcategory: 'Stand Lights' },
     'garden-light': { subcategory: 'Garden Lights' },
     'floodlight': { subcategory: 'Floodlight' },
-    'solar-light': { subcategory: 'Solar Light' }
+    'solar-light': { subcategory: 'Solar Light' },
+    '4inch-firework-series': { category: '4inch & 5inch firework series' },
+    '8inch-firework-series': { category: '8inch & 9inch firework series' }
   };
   
   console.log('Current category slug:', categorySlug);

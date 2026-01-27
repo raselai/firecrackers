@@ -122,6 +122,7 @@ export async function createOrder(params: {
   paymentProofUrl?: string;
   paymentProofPath?: string;
   paymentMethod?: 'touch_n_go';
+  paymentAccountName?: string;
   orderId?: string;
 }): Promise<Order> {
   try {
@@ -136,6 +137,7 @@ export async function createOrder(params: {
       paymentProofUrl,
       paymentProofPath,
       paymentMethod,
+      paymentAccountName,
       orderId: providedOrderId
     } = params;
 
@@ -181,6 +183,7 @@ export async function createOrder(params: {
       deliveryAddress,
       status: 'pending',
       paymentMethod,
+      paymentAccountName,
       paymentProofUrl,
       paymentProofPath,
       paymentSubmittedAt: paymentProofUrl ? new Date() : undefined,

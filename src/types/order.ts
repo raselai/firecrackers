@@ -20,6 +20,7 @@ export interface Order {
 
   // Payment
   paymentMethod?: 'touch_n_go';
+  paymentAccountName?: string;
   paymentProofUrl?: string;
   paymentProofPath?: string;
   paymentSubmittedAt?: Date;

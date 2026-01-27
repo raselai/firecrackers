@@ -1235,18 +1235,35 @@ export default function AdminPanel() {
                         }}>
                           {selectedOrder.paymentMethod === 'touch_n_go' ? "Touch 'n Go" : selectedOrder.paymentMethod || "Touch 'n Go"}
                         </div>
-                        {selectedOrder.paymentSubmittedAt && (
-                          <div style={{
-                            fontSize: '0.75rem',
-                            color: '#94a3b8',
-                            marginTop: '0.25rem'
-                          }}>
-                            Submitted {new Date(selectedOrder.paymentSubmittedAt).toLocaleString('en-MY')}
+                          {selectedOrder.paymentSubmittedAt && (
+                            <div style={{
+                              fontSize: '0.75rem',
+                              color: '#94a3b8',
+                              marginTop: '0.25rem'
+                            }}>
+                              Submitted {new Date(selectedOrder.paymentSubmittedAt).toLocaleString('en-MY')}
+                            </div>
+                          )}
+                        </div>
+                        {selectedOrder.paymentAccountName && (
+                          <div style={{ marginBottom: '1.25rem' }}>
+                            <div style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              color: '#94a3b8',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em',
+                              marginBottom: '0.5rem'
+                            }}>
+                              Payment Account Name
+                            </div>
+                            <div style={{ fontSize: '0.85rem', color: '#0f172a' }}>
+                              {selectedOrder.paymentAccountName}
+                            </div>
                           </div>
                         )}
-                      </div>
 
-                      {/* Payment Proof */}
+                        {/* Payment Proof */}
                       {selectedOrder.paymentProofUrl && (
                         <div style={{ marginBottom: '1.25rem' }}>
                           <div style={{

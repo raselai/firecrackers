@@ -31,11 +31,13 @@ export default function CheckoutPage() {
   const { t } = useI18n();
 
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
-  const [voucherCount, setVoucherCount] = useState(0);
+  const [claimedVouchers, setClaimedVouchers] = useState<number[]>([]);
   const [uploading, setUploading] = useState(false);
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
   const [paymentProofPath, setPaymentProofPath] = useState('');
+  const [paymentAccountName, setPaymentAccountName] = useState('');
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [orderId] = useState(() => `ORD-${nanoid(10).toUpperCase()}`);
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
@@ -106,14 +108,25 @@ export default function CheckoutPage() {
   }, [subtotal, user]);
 
   useEffect(() => {
-    if (voucherCount > maxVouchers) {
-      setVoucherCount(maxVouchers);
+    if (!user) {
+      setClaimedVouchers([]);
+      return;
     }
-  }, [voucherCount, maxVouchers]);
+
+    setClaimedVouchers((prev) => {
+      const bounded = prev.filter((voucher) => voucher >= 1 && voucher <= user.vouchers);
+      if (bounded.length <= maxVouchers) {
+        return bounded;
+      }
+      return bounded.slice(0, maxVouchers);
+    });
+  }, [maxVouchers, user]);
+
+  const claimedCount = useMemo(() => claimedVouchers.length, [claimedVouchers]);
 
   const voucherDiscount = useMemo(() => {
-    return calculateVoucherDiscount(voucherCount);
-  }, [voucherCount]);
+    return calculateVoucherDiscount(claimedCount);
+  }, [claimedCount]);
 
   const totalAmount = Math.max(subtotal - voucherDiscount + deliveryFee, 0);
 
@@ -179,7 +192,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    const validation = validateVoucherUsage(subtotal, voucherCount, user.vouchers);
+    if (!paymentAccountName.trim()) {
+      setError(t('checkout.errors.paymentAccountNameRequired'));
+      return;
+    }
+
+    const validation = validateVoucherUsage(subtotal, claimedCount, user.vouchers);
     if (!validation.valid) {
       setError(validation.message || t('checkout.errors.voucherValidationFailed'));
       return;
@@ -197,8 +215,9 @@ export default function CheckoutPage() {
         deliveryArea: selectedDeliveryArea,
         deliveryAreaName,
         deliveryFee,
-        vouchersToUse: voucherCount,
+        vouchersToUse: claimedCount,
         paymentMethod: 'touch_n_go',
+        paymentAccountName: paymentAccountName.trim(),
         paymentProofUrl,
         paymentProofPath
       });
@@ -213,6 +232,39 @@ export default function CheckoutPage() {
     } finally {
       setPlacingOrder(false);
     }
+  };
+
+  const handleProceedToPayment = () => {
+    if (!user) return;
+
+    if (items.length === 0) {
+      setError(t('checkout.errors.cartEmpty'));
+      return;
+    }
+
+    if (addresses.length === 0) {
+      setError(t('checkout.errors.addressRequired'));
+      return;
+    }
+
+    if (!selectedAddress) {
+      setError(t('checkout.errors.addressSelect'));
+      return;
+    }
+
+    const validation = validateVoucherUsage(subtotal, claimedCount, user.vouchers);
+    if (!validation.valid) {
+      setError(validation.message || t('checkout.errors.voucherValidationFailed'));
+      return;
+    }
+
+    setError('');
+    setPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    if (uploading) return;
+    setPaymentModalOpen(false);
   };
 
   if (authLoading || cartLoading || (firebaseUser && !user)) {
@@ -307,72 +359,64 @@ export default function CheckoutPage() {
                 {t('checkout.voucherHint')}
               </p>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <label htmlFor="voucherCount">{t('checkout.vouchersToApply')}</label>
-                <input
-                  id="voucherCount"
-                  type="number"
-                  min={0}
-                  max={maxVouchers}
-                  value={voucherCount}
-                  onChange={(e) => setVoucherCount(Number(e.target.value))}
-                  style={{
-                    width: '120px',
-                    padding: '0.5rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px'
-                  }}
-                />
-                <span style={{ color: '#6b7280' }}>
+              <div>
+                <div style={{ marginBottom: '0.75rem', color: '#6b7280' }}>
                   {maxVouchers} {t('checkout.voucherMax')} ({t('checkout.availableVouchers')}: {user.vouchers})
-                </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
+                  {Array.from({ length: user.vouchers }, (_, index) => {
+                    const voucherNumber = index + 1;
+                    const isClaimed = claimedVouchers.includes(voucherNumber);
+                    const isDisabled = !isClaimed && claimedCount >= maxVouchers;
+
+                    return (
+                      <div
+                        key={`voucher-${voucherNumber}`}
+                        style={{
+                          padding: '0.75rem',
+                          border: isClaimed ? '2px solid #16a34a' : '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          background: isClaimed ? '#ecfdf5' : '#fff',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <div style={{ fontWeight: 600 }}>{`Voucher #${voucherNumber}`}</div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setClaimedVouchers((prev) => {
+                              if (prev.includes(voucherNumber)) {
+                                return prev.filter((voucher) => voucher !== voucherNumber);
+                              }
+                              if (prev.length >= maxVouchers) {
+                                return prev;
+                              }
+                              return [...prev, voucherNumber].sort((a, b) => a - b);
+                            });
+                          }}
+                          disabled={isDisabled}
+                          style={{
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: isClaimed ? '#16a34a' : '#f97316',
+                            color: 'white',
+                            cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            opacity: isDisabled ? 0.6 : 1
+                          }}
+                        >
+                          {isClaimed ? t('checkout.unclaimVoucher') : t('checkout.claimVoucher')}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </section>
 
-          <section style={{ padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
-            <h2 style={{ marginBottom: '1rem' }}>{t('checkout.payment')}</h2>
-            {paymentSettingsLoading && (
-              <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
-            )}
-            {paymentSettingsError && (
-              <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
-            )}
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ width: '220px' }}>
-                <Image
-                  src={paymentQrUrl}
-                  alt={t('checkout.paymentMethod')}
-                  width={220}
-                  height={300}
-                  style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: '220px' }}>
-                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
-                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
-                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
-                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                  {t('checkout.paymentInstruction')}
-                </p>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleUploadProof(file);
-                    }
-                  }}
-                />
-                {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
-                {paymentProofUrl && !uploading && (
-                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
-                )}
-              </div>
-            </div>
-          </section>
         </div>
 
         <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '1.5rem', height: 'fit-content' }}>
@@ -397,11 +441,10 @@ export default function CheckoutPage() {
           </div>
 
           <button
-            onClick={handlePlaceOrder}
+            onClick={handleProceedToPayment}
             disabled={
               placingOrder ||
               uploading ||
-              !paymentProofUrl ||
               !selectedAddressId ||
               addresses.length === 0
             }
@@ -416,10 +459,159 @@ export default function CheckoutPage() {
               fontWeight: 'bold'
             }}
           >
-            {placingOrder ? t('checkout.placingOrder') : t('checkout.placeOrder')}
+            {placingOrder ? t('checkout.placingOrder') : t('checkout.proceedToPayment')}
           </button>
         </div>
       </div>
+
+      {paymentModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.55)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem',
+            zIndex: 50
+          }}
+          onClick={() => {
+            if (!uploading) {
+              handleClosePaymentModal();
+            }
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '720px',
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              position: 'relative'
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ margin: 0 }}>{t('checkout.payment')}</h2>
+              <button
+                type="button"
+                onClick={handleClosePaymentModal}
+                disabled={uploading}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: '1.25rem',
+                  cursor: uploading ? 'not-allowed' : 'pointer',
+                  color: '#6b7280'
+                }}
+                aria-label={t('checkout.close')}
+              >
+                &times;
+              </button>
+            </div>
+
+            {paymentSettingsLoading && (
+              <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
+            )}
+            {paymentSettingsError && (
+              <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
+            )}
+
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ width: '220px' }}>
+                <Image
+                  src={paymentQrUrl}
+                  alt={t('checkout.paymentMethod')}
+                  width={220}
+                  height={300}
+                  style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: '220px' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
+                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
+                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
+                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+                  {t('checkout.paymentInstruction')}
+                </p>
+
+                <label
+                  htmlFor="paymentAccountName"
+                  style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}
+                >
+                  {t('checkout.paymentAccountName')}
+                </label>
+                <input
+                  id="paymentAccountName"
+                  type="text"
+                  value={paymentAccountName}
+                  onChange={(e) => setPaymentAccountName(e.target.value)}
+                  placeholder={t('checkout.paymentAccountNamePlaceholder')}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    marginBottom: '1rem'
+                  }}
+                />
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleUploadProof(file);
+                    }
+                  }}
+                />
+                {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
+                {paymentProofUrl && !uploading && (
+                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button
+                type="button"
+                onClick={handleClosePaymentModal}
+                disabled={uploading}
+                style={{
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '6px',
+                  border: '1px solid #d1d5db',
+                  background: '#fff',
+                  cursor: uploading ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {t('checkout.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handlePlaceOrder}
+                disabled={placingOrder || uploading || !paymentProofUrl || !paymentAccountName.trim()}
+                style={{
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: placingOrder ? '#9ca3af' : '#f97316',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: placingOrder || uploading || !paymentProofUrl ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {placingOrder ? t('checkout.placingOrder') : t('checkout.submitOrder')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
