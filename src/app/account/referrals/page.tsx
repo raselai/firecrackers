@@ -51,7 +51,7 @@ export default function ReferralsPage() {
             totalReferrals: user.referralCount || 0,
             availableVouchers: user.vouchers || 0,
             usedVouchers: user.vouchersUsed || 0,
-            totalSavings: (user.vouchersUsed || 0) * 20,
+            totalSavings: (user.vouchersUsed || 0) * 30,
             referrals: []
           });
         } finally {
@@ -123,10 +123,10 @@ export default function ReferralsPage() {
     totalReferrals: user.referralCount || 0,
     availableVouchers: user.vouchers || 0,
     usedVouchers: user.vouchersUsed || 0,
-    totalSavings: (user.vouchersUsed || 0) * 20,
+    totalSavings: (user.vouchersUsed || 0) * 30,
     referrals: []
   };
-  const voucherValue = safeStats.availableVouchers * 20;
+  const voucherValue = safeStats.availableVouchers * 30;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -358,6 +358,13 @@ export default function ReferralsPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
+              <h2 className="text-lg font-bold text-amber-900 mb-3">{t('accountReferrals.termsTitle')}</h2>
+              <p className="text-sm text-amber-800 whitespace-pre-line">{t('accountReferrals.terms')}</p>
+              <p className="text-sm text-amber-800 mt-3 font-medium">{t('accountReferrals.registrationVoucherNote')}</p>
             </div>
 
             {/* Referrals List */}

@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Order, OrderItem } from '@/types/order';
-import { getUserById, useVouchers } from './userService';
+import { getUserById, useVouchers, useRegistrationVoucher } from './userService';
 import { Address } from '@/types/user';
 import { nanoid } from 'nanoid';
 import { createOrderStatusNotification } from './notificationService';
@@ -24,6 +24,64 @@ export interface VoucherValidation {
   discount?: number;
   finalTotal?: number;
   message?: string;
+}
+
+const VOUCHER_VALUE = 30;
+const REGISTRATION_VOUCHER_PERCENT = 0.10;
+
+/**
+ * Calculate registration discount (10% of subtotal)
+ */
+export function calculateRegistrationDiscount(subtotal: number): number {
+  return Math.round(subtotal * REGISTRATION_VOUCHER_PERCENT * 100) / 100;
+}
+
+/**
+ * Validate registration voucher availability
+ */
+export function validateRegistrationVoucher(
+  hasVoucher: boolean,
+  alreadyUsed: boolean
+): { valid: boolean; message?: string } {
+  if (alreadyUsed) {
+    return { valid: false, message: 'Registration voucher has already been used.' };
+  }
+  if (!hasVoucher) {
+    return { valid: false, message: 'Registration voucher is not available.' };
+  }
+  return { valid: true };
+}
+
+const VOUCHER_ELIGIBLE_CATEGORIES = [
+  '6inch firework series',
+  '7inch firework series',
+  '8inch & 9inch firework series',
+  '10inch firework series',
+  '11inch firework series',
+  '12inch firework series',
+  'Big hole firework series',
+];
+
+/**
+ * Check if an item's category is eligible for voucher usage
+ */
+export function isItemVoucherEligible(category?: string): boolean {
+  if (!category) return false;
+  return VOUCHER_ELIGIBLE_CATEGORIES.some(
+    (c) => c.toLowerCase() === category.toLowerCase()
+  );
+}
+
+/**
+ * Count total quantity of voucher-eligible items
+ */
+export function countEligibleItems(items: { category?: string; quantity: number }[]): number {
+  return items.reduce((sum, item) => {
+    if (isItemVoucherEligible(item.category)) {
+      return sum + item.quantity;
+    }
+    return sum;
+  }, 0);
 }
 
 const toDateValue = (value?: { toDate?: () => Date } | Date) => {
@@ -47,22 +105,16 @@ const mapOrderSnapshot = (orderDoc: { id: string; data: () => Record<string, any
 };
 
 /**
- * Validate voucher usage based on cart total
- * Rule: Must spend RM100 to use 1 voucher (worth RM20)
- *
- * Examples:
- * - RM80 cart → max 0 vouchers
- * - RM150 cart → max 1 voucher (RM20 discount)
- * - RM350 cart → max 3 vouchers (RM60 discount)
+ * Validate voucher usage based on eligible items in cart
+ * Rule: 1 voucher (worth RM30) per eligible firework item (6-inch series and above)
  */
 export function validateVoucherUsage(
-  subtotal: number,
+  items: { category?: string; quantity: number }[],
   vouchersToUse: number,
   availableVouchers: number
 ): VoucherValidation {
-  // Calculate maximum vouchers allowed based on cart total
-  // floor(subtotal / 100) = max vouchers
-  const maxVouchers = Math.floor(subtotal / 100);
+  // Calculate maximum vouchers allowed based on eligible item count
+  const maxVouchers = countEligibleItems(items);
 
   // Check if user has enough vouchers
   if (vouchersToUse > availableVouchers) {
@@ -77,35 +129,35 @@ export function validateVoucherUsage(
     return {
       valid: false,
       maxVouchers,
-      message: `You can only use ${maxVouchers} voucher(s) for RM${subtotal.toFixed(2)}. You must spend at least RM100 per voucher.`
+      message: `You can only use ${maxVouchers} voucher(s) based on eligible firework items in your cart.`
     };
   }
 
   // Validation passed
-  const discount = vouchersToUse * 20; // Each voucher worth RM20
-  const finalTotal = subtotal - discount;
+  const discount = vouchersToUse * VOUCHER_VALUE;
+  const finalTotal = items.reduce((sum, item) => sum + ((item as OrderItem).price || 0) * item.quantity, 0) - discount;
 
   return {
     valid: true,
     maxVouchers,
     discount,
-    finalTotal,
+    finalTotal: Math.max(finalTotal, 0),
     message: `${vouchersToUse} voucher(s) applied. You save RM${discount}!`
   };
 }
 
 /**
- * Calculate maximum vouchers that can be used for a given subtotal
+ * Calculate maximum vouchers that can be used based on eligible items
  */
-export function calculateMaxVouchers(subtotal: number): number {
-  return Math.floor(subtotal / 100);
+export function calculateMaxVouchers(items: { category?: string; quantity: number }[]): number {
+  return countEligibleItems(items);
 }
 
 /**
  * Calculate discount amount for given number of vouchers
  */
 export function calculateVoucherDiscount(voucherCount: number): number {
-  return voucherCount * 20;
+  return voucherCount * VOUCHER_VALUE;
 }
 
 /**
@@ -119,6 +171,7 @@ export async function createOrder(params: {
   deliveryAreaName: string;
   deliveryFee: number;
   vouchersToUse?: number;
+  promotionType?: 'none' | 'referral' | 'registration';
   paymentProofUrl?: string;
   paymentProofPath?: string;
   paymentMethod?: 'touch_n_go';
@@ -134,6 +187,7 @@ export async function createOrder(params: {
       deliveryAreaName,
       deliveryFee,
       vouchersToUse = 0,
+      promotionType = 'none',
       paymentProofUrl,
       paymentProofPath,
       paymentMethod,
@@ -154,16 +208,33 @@ export async function createOrder(params: {
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-    // Validate voucher usage
-    const validation = validateVoucherUsage(subtotal, vouchersToUse, user.vouchers);
+    let voucherDiscount = 0;
+    let registrationDiscount = 0;
+    let appliedVouchers = 0;
 
-    if (!validation.valid) {
-      throw new Error(validation.message);
+    if (promotionType === 'referral' && vouchersToUse > 0) {
+      // Validate referral voucher usage
+      const validation = validateVoucherUsage(items, vouchersToUse, user.vouchers);
+      if (!validation.valid) {
+        throw new Error(validation.message);
+      }
+      voucherDiscount = calculateVoucherDiscount(vouchersToUse);
+      appliedVouchers = vouchersToUse;
+    } else if (promotionType === 'registration') {
+      // Validate registration voucher
+      const regValidation = validateRegistrationVoucher(
+        user.hasRegistrationVoucher,
+        user.registrationVoucherUsed
+      );
+      if (!regValidation.valid) {
+        throw new Error(regValidation.message);
+      }
+      registrationDiscount = calculateRegistrationDiscount(subtotal);
     }
 
     // Calculate pricing
-    const voucherDiscount = calculateVoucherDiscount(vouchersToUse);
-    const totalAmount = subtotal - voucherDiscount + deliveryFee;
+    const totalDiscount = voucherDiscount + registrationDiscount;
+    const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
     // Generate order ID
     const orderId = providedOrderId || `ORD-${nanoid(10).toUpperCase()}`;
@@ -174,9 +245,11 @@ export async function createOrder(params: {
       userId,
       items,
       subtotal,
-      vouchersApplied: vouchersToUse,
+      vouchersApplied: appliedVouchers,
       voucherDiscount,
       totalAmount,
+      promotionType,
+      registrationDiscount: registrationDiscount > 0 ? registrationDiscount : undefined,
       deliveryArea,
       deliveryAreaName,
       deliveryFee,
@@ -200,9 +273,11 @@ export async function createOrder(params: {
       createdAt: order.createdAt
     });
 
-    // Deduct vouchers from user account
-    if (vouchersToUse > 0) {
-      await useVouchers(userId, vouchersToUse);
+    // Deduct vouchers or consume registration voucher
+    if (promotionType === 'referral' && appliedVouchers > 0) {
+      await useVouchers(userId, appliedVouchers);
+    } else if (promotionType === 'registration') {
+      await useRegistrationVoucher(userId);
     }
 
     console.log(`Order created: ${orderId} for user ${userId}`);

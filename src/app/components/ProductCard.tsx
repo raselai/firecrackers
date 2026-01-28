@@ -37,7 +37,8 @@ export default function ProductCard({ product }: ProductCardProps) {
       productName: localizedName,
       productImage: getProductImagePath(product, product.category),
       quantity: 1,
-      price: displayPrice || 0
+      price: displayPrice || 0,
+      category: product.category
     });
   };
 

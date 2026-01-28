@@ -13,6 +13,7 @@ import { PaymentSettings } from '@/types/paymentSettings';
 import {
   calculateMaxVouchers,
   calculateVoucherDiscount,
+  calculateRegistrationDiscount,
   createOrder,
   validateVoucherUsage
 } from '@/lib/orderService';
@@ -31,6 +32,7 @@ export default function CheckoutPage() {
   const { t } = useI18n();
 
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [promotionType, setPromotionType] = useState<'none' | 'referral' | 'registration'>('none');
   const [claimedVouchers, setClaimedVouchers] = useState<number[]>([]);
   const [uploading, setUploading] = useState(false);
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
@@ -104,8 +106,8 @@ export default function CheckoutPage() {
 
   const maxVouchers = useMemo(() => {
     if (!user) return 0;
-    return Math.min(calculateMaxVouchers(subtotal), user.vouchers);
-  }, [subtotal, user]);
+    return Math.min(calculateMaxVouchers(items), user.vouchers);
+  }, [items, user]);
 
   useEffect(() => {
     if (!user) {
@@ -125,10 +127,17 @@ export default function CheckoutPage() {
   const claimedCount = useMemo(() => claimedVouchers.length, [claimedVouchers]);
 
   const voucherDiscount = useMemo(() => {
+    if (promotionType !== 'referral') return 0;
     return calculateVoucherDiscount(claimedCount);
-  }, [claimedCount]);
+  }, [claimedCount, promotionType]);
 
-  const totalAmount = Math.max(subtotal - voucherDiscount + deliveryFee, 0);
+  const registrationDiscount = useMemo(() => {
+    if (promotionType !== 'registration') return 0;
+    return calculateRegistrationDiscount(subtotal);
+  }, [promotionType, subtotal]);
+
+  const totalDiscount = voucherDiscount + registrationDiscount;
+  const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
   const paymentQrUrl = paymentSettings?.qrImageUrl || '/images/ewallet-qr.jpg';
   const paymentWalletName = paymentSettings?.walletName || WALLET_NAME;
@@ -197,10 +206,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    const validation = validateVoucherUsage(subtotal, claimedCount, user.vouchers);
-    if (!validation.valid) {
-      setError(validation.message || t('checkout.errors.voucherValidationFailed'));
-      return;
+    if (promotionType === 'referral') {
+      const validation = validateVoucherUsage(items, claimedCount, user.vouchers);
+      if (!validation.valid) {
+        setError(validation.message || t('checkout.errors.voucherValidationFailed'));
+        return;
+      }
     }
 
     setError('');
@@ -215,7 +226,8 @@ export default function CheckoutPage() {
         deliveryArea: selectedDeliveryArea,
         deliveryAreaName,
         deliveryFee,
-        vouchersToUse: claimedCount,
+        vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
+        promotionType,
         paymentMethod: 'touch_n_go',
         paymentAccountName: paymentAccountName.trim(),
         paymentProofUrl,
@@ -252,10 +264,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    const validation = validateVoucherUsage(subtotal, claimedCount, user.vouchers);
-    if (!validation.valid) {
-      setError(validation.message || t('checkout.errors.voucherValidationFailed'));
-      return;
+    if (promotionType === 'referral') {
+      const validation = validateVoucherUsage(items, claimedCount, user.vouchers);
+      if (!validation.valid) {
+        setError(validation.message || t('checkout.errors.voucherValidationFailed'));
+        return;
+      }
     }
 
     setError('');
@@ -353,13 +367,98 @@ export default function CheckoutPage() {
           </section>
 
           <section style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '10px' }}>
-            <h2 style={{ marginBottom: '1rem' }}>{t('checkout.voucher')}</h2>
-            {maxVouchers === 0 ? (
-              <p style={{ color: '#6b7280' }}>
-                {t('checkout.voucherHint')}
-              </p>
-            ) : (
-              <div>
+            <h2 style={{ marginBottom: '0.5rem' }}>{t('checkout.choosePromotion')}</h2>
+            <p style={{ marginBottom: '1rem', color: '#6b7280', fontSize: '0.9rem' }}>{t('checkout.promotionNote')}</p>
+
+            {/* Promotion Radio Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+              {/* No Promotion */}
+              <label style={{
+                padding: '0.75rem',
+                border: promotionType === 'none' ? '2px solid #f97316' : '1px solid #d1d5db',
+                borderRadius: '8px',
+                display: 'flex',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                background: promotionType === 'none' ? '#fff7ed' : '#fff'
+              }}>
+                <input
+                  type="radio"
+                  name="promotionType"
+                  checked={promotionType === 'none'}
+                  onChange={() => {
+                    setPromotionType('none');
+                    setClaimedVouchers([]);
+                  }}
+                />
+                <span style={{ fontWeight: 600 }}>{t('checkout.noPromotion')}</span>
+              </label>
+
+              {/* Promotion 1 - Referral Vouchers */}
+              <label style={{
+                padding: '0.75rem',
+                border: promotionType === 'referral' ? '2px solid #f97316' : '1px solid #d1d5db',
+                borderRadius: '8px',
+                display: 'flex',
+                gap: '0.75rem',
+                cursor: user.vouchers === 0 ? 'not-allowed' : 'pointer',
+                background: promotionType === 'referral' ? '#fff7ed' : '#fff',
+                opacity: user.vouchers === 0 ? 0.5 : 1
+              }}>
+                <input
+                  type="radio"
+                  name="promotionType"
+                  checked={promotionType === 'referral'}
+                  disabled={user.vouchers === 0}
+                  onChange={() => {
+                    setPromotionType('referral');
+                  }}
+                />
+                <div>
+                  <span style={{ fontWeight: 600 }}>{t('checkout.promotion1')}</span>
+                  {user.vouchers === 0 && (
+                    <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
+                      {t('checkout.availableVouchers')}: 0
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              {/* Promotion 2 - Registration 10% Discount */}
+              <label style={{
+                padding: '0.75rem',
+                border: promotionType === 'registration' ? '2px solid #f97316' : '1px solid #d1d5db',
+                borderRadius: '8px',
+                display: 'flex',
+                gap: '0.75rem',
+                cursor: (!user.hasRegistrationVoucher || user.registrationVoucherUsed) ? 'not-allowed' : 'pointer',
+                background: promotionType === 'registration' ? '#fff7ed' : '#fff',
+                opacity: (!user.hasRegistrationVoucher || user.registrationVoucherUsed) ? 0.5 : 1
+              }}>
+                <input
+                  type="radio"
+                  name="promotionType"
+                  checked={promotionType === 'registration'}
+                  disabled={!user.hasRegistrationVoucher || user.registrationVoucherUsed}
+                  onChange={() => {
+                    setPromotionType('registration');
+                    setClaimedVouchers([]);
+                  }}
+                />
+                <div>
+                  <span style={{ fontWeight: 600 }}>{t('checkout.promotion2')}</span>
+                  {(!user.hasRegistrationVoucher || user.registrationVoucherUsed) && (
+                    <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
+                      {t('checkout.promotion2Disabled')}
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
+
+            {/* Referral Voucher Cards (shown when Promotion 1 selected) */}
+            {promotionType === 'referral' && user.vouchers > 0 && (
+              <div style={{ marginTop: '1rem' }}>
                 <div style={{ marginBottom: '0.75rem', color: '#6b7280' }}>
                   {maxVouchers} {t('checkout.voucherMax')} ({t('checkout.availableVouchers')}: {user.vouchers})
                 </div>
@@ -413,8 +512,37 @@ export default function CheckoutPage() {
                     );
                   })}
                 </div>
+
+                {/* Referral Voucher Terms & Conditions */}
+                <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
+                  <h4 style={{ fontWeight: 600, marginBottom: '0.5rem', color: '#92400e' }}>
+                    {t('checkout.voucherTermsTitle')}
+                  </h4>
+                  <p style={{ fontSize: '0.85rem', color: '#78350f', whiteSpace: 'pre-line' }}>
+                    {t('checkout.voucherTerms')}
+                  </p>
+                </div>
               </div>
             )}
+
+            {/* Registration Discount Preview (shown when Promotion 2 selected) */}
+            {promotionType === 'registration' && (
+              <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#ecfdf5', border: '1px solid #86efac', borderRadius: '8px' }}>
+                <p style={{ fontWeight: 600, color: '#166534' }}>
+                  {t('checkout.registrationDiscountApplied').replace('{amount}', registrationDiscount.toFixed(2))}
+                </p>
+              </div>
+            )}
+
+            {/* Registration Voucher Terms & Conditions */}
+            <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem', color: '#92400e' }}>
+                {t('checkout.registrationVoucherTermsTitle')}
+              </h4>
+              <p style={{ fontSize: '0.85rem', color: '#78350f', whiteSpace: 'pre-line' }}>
+                {t('checkout.registrationVoucherTerms')}
+              </p>
+            </div>
           </section>
 
         </div>
@@ -425,10 +553,18 @@ export default function CheckoutPage() {
             <span>{t('checkout.subtotal')}</span>
             <span>RM {subtotal.toLocaleString()}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span>{t('checkout.voucherDiscount')}</span>
-            <span>- RM {voucherDiscount.toLocaleString()}</span>
-          </div>
+          {voucherDiscount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>{t('checkout.voucherDiscount')}</span>
+              <span>- RM {voucherDiscount.toLocaleString()}</span>
+            </div>
+          )}
+          {registrationDiscount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>{t('checkout.registrationDiscountLabel')}</span>
+              <span>- RM {registrationDiscount.toFixed(2)}</span>
+            </div>
+          )}
           {selectedDeliveryArea && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>

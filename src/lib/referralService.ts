@@ -102,7 +102,7 @@ export async function processReferral(
 
     await addDoc(collection(db, 'referrals'), referralData);
 
-    // Award RM20 voucher to referrer
+    // Award RM30 voucher to referrer
     await awardVoucher(referrer.uid);
 
     console.log(`Referral processed: ${referrer.email} referred ${newUser.email}`);
@@ -152,7 +152,7 @@ export async function getReferralStats(userId: string): Promise<ReferralStats> {
       totalReferrals: user.referralCount,
       availableVouchers: user.vouchers,
       usedVouchers: user.vouchersUsed,
-      totalSavings: user.vouchersUsed * 20, // RM20 per voucher
+      totalSavings: user.vouchersUsed * 30, // RM30 per voucher
       referrals
     };
   } catch (error) {
@@ -176,8 +176,8 @@ export function generateReferralMessage(referralCode: string, userName?: string)
   const referralLink = getReferralLink(referralCode);
 
   const message = userName
-    ? `${userName} invited you to join FireWorks ML! Sign up with my referral code ${referralCode} and I'll get RM20 off my next purchase! ${referralLink}`
-    : `Join FireWorks ML with my referral code ${referralCode} and I'll get RM20 off! ${referralLink}`;
+    ? `${userName} invited you to join FireWorks ML! Sign up with my referral code ${referralCode} and I'll get RM30 off my next purchase! ${referralLink}`
+    : `Join FireWorks ML with my referral code ${referralCode} and I'll get RM30 off! ${referralLink}`;
 
   return message;
 }

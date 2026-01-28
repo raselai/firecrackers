@@ -4,6 +4,7 @@ export interface CartItem {
   productImage: string;
   quantity: number;
   price: number; // Unit price at time added
+  category?: string; // Product category for voucher eligibility
 }
 
 export interface CartSummary {

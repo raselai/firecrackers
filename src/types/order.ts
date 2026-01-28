@@ -9,7 +9,7 @@ export interface Order {
   // Pricing
   subtotal: number;              // Total before voucher discount
   vouchersApplied: number;       // Number of vouchers used
-  voucherDiscount: number;       // vouchersApplied * 20 (RM)
+  voucherDiscount: number;       // vouchersApplied * 30 (RM)
   totalAmount: number;           // subtotal - voucherDiscount + deliveryFee
 
   // Delivery
@@ -24,6 +24,10 @@ export interface Order {
   paymentProofUrl?: string;
   paymentProofPath?: string;
   paymentSubmittedAt?: Date;
+
+  // Promotion tracking
+  promotionType?: 'none' | 'referral' | 'registration';
+  registrationDiscount?: number;  // 10% of subtotal when registration voucher used
 
   // Status
   status: 'pending' | 'approved' | 'rejected' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
@@ -45,4 +49,5 @@ export interface OrderItem {
   productImage: string;
   quantity: number;
   price: number;                 // Price per unit at time of order
+  category?: string;             // Product category for voucher eligibility
 }

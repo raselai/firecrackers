@@ -13,7 +13,7 @@ export interface User {
   referredBy?: string;          // UID of user who referred them
   referralCount: number;        // Number of successful referrals
 
-  // Voucher System (RM20 per voucher)
+  // Voucher System (RM30 per voucher)
   vouchers: number;             // Available vouchers
   vouchersUsed: number;         // Total vouchers used
 
@@ -21,6 +21,10 @@ export interface User {
   wishlist: string[];           // Product IDs
   cart: CartItem[];
   addresses: Address[];
+
+  // Registration Voucher (10% one-time discount)
+  hasRegistrationVoucher: boolean;
+  registrationVoucherUsed: boolean;
 
   // Metadata
   createdAt: Date;

@@ -104,13 +104,21 @@ export default function Home() {
             <p className="hero-eyebrow">
               {t('home.heroEyebrow')}
             </p>
-            <h1 className="hero-title">
-              {t('home.heroTitlePrefix')}{' '}
-              <span className="hero-highlight">
-                {t('home.heroTitleHighlight')}
-              </span>{' '}
-              {t('home.heroTitleSuffix')}
-            </h1>
+            <div className="hero-title-slider">
+              <div className="hero-title-slide">
+                {t('home.heroTitlePrefix')}{' '}
+                <span className="hero-highlight">
+                  {t('home.heroTitleHighlight')}
+                </span>{' '}
+                {t('home.heroTitleSuffix')}
+              </div>
+              <div className="hero-title-slide">
+                {t('home.heroSlide2')}
+              </div>
+              <div className="hero-title-slide">
+                {t('home.heroSlide3')}
+              </div>
+            </div>
             <p className="hero-subtitle">
               {t('home.heroSubtitle')}
             </p>

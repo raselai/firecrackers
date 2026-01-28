@@ -78,7 +78,8 @@ export default function ProductContent({ slug }: ProductContentProps) {
         productName,
         productImage: getProductImagePath(product, product.category),
         quantity: 1,
-        price: displayPrice || 0
+        price: displayPrice || 0,
+        category: product.category
       });
     } finally {
       setTimeout(() => setAddingToCart(false), 1000);

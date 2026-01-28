@@ -66,7 +66,7 @@ export default function AccountDashboard() {
     return null;
   }
 
-  const voucherValue = user.vouchers * 20;
+  const voucherValue = user.vouchers * 30;
   const defaultUserName = t('account.defaultUserName');
   const statusLabelFor = (status: string) => {
     const key = `account.status.${status}`;
@@ -229,6 +229,42 @@ export default function AccountDashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Registration Voucher Status */}
+            <div className={`rounded-lg shadow-md p-6 mb-8 flex items-center justify-between ${
+              user.hasRegistrationVoucher && !user.registrationVoucherUsed
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
+                : 'bg-white border border-gray-200'
+            }`}>
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  user.hasRegistrationVoucher && !user.registrationVoucherUsed
+                    ? 'bg-green-100'
+                    : 'bg-gray-100'
+                }`}>
+                  <svg className={`w-6 h-6 ${
+                    user.hasRegistrationVoucher && !user.registrationVoucherUsed
+                      ? 'text-green-600'
+                      : 'text-gray-400'
+                  }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{t('account.registrationVoucher')}</p>
+                  <p className="text-sm text-gray-500">{t('account.registrationVoucherDesc')}</p>
+                </div>
+              </div>
+              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                user.hasRegistrationVoucher && !user.registrationVoucherUsed
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-gray-100 text-gray-500'
+              }`}>
+                {user.hasRegistrationVoucher && !user.registrationVoucherUsed
+                  ? t('account.registrationVoucherAvailable')
+                  : t('account.registrationVoucherUsed')}
+              </span>
             </div>
 
             {/* Recent Orders */}

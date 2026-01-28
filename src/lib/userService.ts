@@ -45,6 +45,8 @@ export async function createUserDocument(
     referralCount: 0,
     vouchers: 0,
     vouchersUsed: 0,
+    hasRegistrationVoucher: true,
+    registrationVoucherUsed: false,
     wishlist: [],
     cart: [],
     addresses: [],
@@ -87,6 +89,8 @@ export async function getUserById(uid: string): Promise<User | null> {
       uid: data.uid || userDoc.id,
       cart: data.cart || [],
       addresses: data.addresses || [],
+      hasRegistrationVoucher: data.hasRegistrationVoucher ?? false,
+      registrationVoucherUsed: data.registrationVoucherUsed ?? false,
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date()
     } as User;
@@ -289,6 +293,29 @@ export async function awardVoucher(uid: string): Promise<void> {
     });
   } catch (error) {
     console.error('Error awarding voucher:', error);
+    throw error;
+  }
+}
+
+/**
+ * Consume the registration voucher (one-time 10% discount)
+ */
+export async function useRegistrationVoucher(uid: string): Promise<void> {
+  try {
+    const user = await getUserById(uid);
+    if (!user) throw new Error('User not found');
+
+    if (!user.hasRegistrationVoucher || user.registrationVoucherUsed) {
+      throw new Error('Registration voucher not available');
+    }
+
+    await updateDoc(doc(db, 'users', uid), {
+      hasRegistrationVoucher: false,
+      registrationVoucherUsed: true,
+      updatedAt: new Date()
+    });
+  } catch (error) {
+    console.error('Error using registration voucher:', error);
     throw error;
   }
 }
