@@ -47,8 +47,7 @@ export default function Home() {
     { key: 'firework10InchSeries', value: '10inch firework series' },
     { key: 'firework11InchSeries', value: '11inch firework series' },
     { key: 'firework12InchSeries', value: '12inch firework series' },
-    { key: 'bigHoleFireworkSeries', value: 'Big hole firework series' },
-    { key: 'giftBasket', value: 'Gift basket' }
+    { key: 'bigHoleFireworkSeries', value: 'Big hole firework series' }
   ];
 
   // Get featured products from actual product data

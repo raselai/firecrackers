@@ -1336,6 +1336,7 @@ h1, h2, h3 {
   line-height: 1.1;
   color: var(--color-text-light);
   text-align: center;
+  white-space: pre-line;
   opacity: 0;
   transform: translateX(100%);
 }
