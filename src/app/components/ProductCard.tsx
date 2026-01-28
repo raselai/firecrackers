@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/types/product';
@@ -20,7 +20,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
   const { t, locale } = useI18n();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
+
+  const showNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
 
   const handleAddToCart = async () => {
     if (!firebaseUser) {
@@ -32,14 +40,20 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const localizedName = getLocalizedProductName(product, locale);
 
-    await addItem({
-      productId: String(product.id),
-      productName: localizedName,
-      productImage: getProductImagePath(product, product.category),
-      quantity: 1,
-      price: displayPrice || 0,
-      category: product.category
-    });
+    try {
+      await addItem({
+        productId: String(product.id),
+        productName: localizedName,
+        productImage: getProductImagePath(product, product.category),
+        quantity: 1,
+        price: displayPrice || 0,
+        category: product.category
+      });
+      showNotification(t('common.addedToCart'));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showNotification(t('common.addToCartFailed'));
+    }
   };
 
   const imagePath = getProductImagePath(product, product.category);
@@ -189,21 +203,58 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
         </div>
-        <button
-          onClick={handleAddToCart}
-          style={{
-            padding: '0.5rem 0.75rem',
-            background: '#1f2937',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: '600'
-          }}
-        >
-          {t('common.addToCart')}
-        </button>
+        {firebaseUser && (
+          <button
+            onClick={handleAddToCart}
+            style={{
+              padding: '0.5rem 0.75rem',
+              background: '#1f2937',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            {t('common.addToCart')}
+          </button>
+        )}
       </div>
+
+      {showToast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
+          <div className="bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <svg
+              className="w-5 h-5 text-green-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="font-medium">{toastMessage}</span>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

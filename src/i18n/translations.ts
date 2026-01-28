@@ -7,6 +7,8 @@ export const translations = {
   en: {
     common: {
       addToCart: 'Add to Cart',
+      addedToCart: 'Added to cart',
+      addToCartFailed: 'Could not add to cart',
       sale: 'SALE!',
       contactForPrice: 'Contact for Price',
       loginToSeePrice: 'Login to see price',
@@ -516,6 +518,7 @@ export const translations = {
     },
     product: {
       loading: 'Loading product...',
+      suggestedTitle: 'Suggested Products',
       description: 'Description',
       specifications: 'Specifications',
       adding: 'Adding...',
@@ -744,6 +747,8 @@ export const translations = {
     },
     common: {
       addToCart: '加入购物车',
+      addedToCart: '已加入购物车',
+      addToCartFailed: '加入购物车失败',
       sale: '促销',
       contactForPrice: '联系询价',
       loginToSeePrice: 'Login to see price',
@@ -1102,6 +1107,7 @@ export const translations = {
     },
     product: {
       loading: '正在加载产品...',
+      suggestedTitle: '相关推荐',
       description: '产品描述',
       specifications: '规格参数',
       adding: '正在加入...',

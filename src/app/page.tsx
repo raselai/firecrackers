@@ -7,6 +7,7 @@ import { fetchProducts } from '@/lib/productService';
 import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useI18n } from '@/i18n/I18nProvider';
 import { useUser } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
@@ -15,6 +16,9 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { t, locale } = useI18n();
   const { firebaseUser } = useUser();
+  const { addItem } = useCart();
+  const [showCartToast, setShowCartToast] = useState(false);
+  const [cartToastMessage, setCartToastMessage] = useState('');
   const videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg'];
 
   // Load products on component mount
@@ -79,6 +83,40 @@ export default function Home() {
       preload="metadata"
     />
   );
+
+  const showCartNotification = (message: string) => {
+    setCartToastMessage(message);
+    setShowCartToast(true);
+    setTimeout(() => setShowCartToast(false), 2000);
+  };
+
+  const handleAddToCart = async (
+    event: React.MouseEvent,
+    product: any
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!firebaseUser) return;
+
+    const displayPrice = product.isOnSale && product.offerPrice ? product.offerPrice : product.price;
+    const localizedName = getLocalizedProductName(product, locale);
+
+    try {
+      await addItem({
+        productId: String(product.id),
+        productName: localizedName,
+        productImage: getProductImagePath(product, product.category),
+        quantity: 1,
+        price: displayPrice || 0,
+        category: product.category
+      });
+      showCartNotification(t('common.addedToCart'));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showCartNotification(t('common.addToCartFailed'));
+    }
+  };
 
   return (
     <div className="homepage-wrapper">
@@ -153,36 +191,60 @@ export default function Home() {
               </div>
             ) : currentTabProducts.length > 0 ? (
               currentTabProducts.map((product, index) => (
-                <Link
+                <div
                   key={product.id}
-                  href={`/products/${product.id}`}
                   className="product-card-new"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <div className="product-image-wrapper">
-                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <VideoPreview
-                        src={getProductImagePath(product, product.category)}
-                        className="product-image"
-                      />
-                    ) : (
-                      <Image
-                        src={getProductImagePath(product, product.category)}
-                        alt={getLocalizedProductName(product, locale)}
-                        fill
-                        className="product-image"
-                      />
-                    )}
-                    <div className="product-glow"></div>
-                  </div>
-                  <div className="product-info">
-                    <h3 className="product-name">{getLocalizedProductName(product, locale)}</h3>
-                    <p className="product-category">{product.category}</p>
-                    <div className="product-price">
-                      {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
+                  <Link
+                    href={`/products/${product.id}`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                  >
+                    <div className="product-image-wrapper">
+                      {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                        <VideoPreview
+                          src={getProductImagePath(product, product.category)}
+                          className="product-image"
+                        />
+                      ) : (
+                        <Image
+                          src={getProductImagePath(product, product.category)}
+                          alt={getLocalizedProductName(product, locale)}
+                          fill
+                          className="product-image"
+                        />
+                      )}
+                      <div className="product-glow"></div>
                     </div>
-                  </div>
-                </Link>
+                    <div className="product-info">
+                      <h3 className="product-name">{getLocalizedProductName(product, locale)}</h3>
+                      <p className="product-category">{product.category}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.35rem' }}>
+                        <div className="product-price">
+                          {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
+                        </div>
+                        {firebaseUser && (
+                          <button
+                            type="button"
+                            onClick={(event) => handleAddToCart(event, product)}
+                            style={{
+                              padding: '0.5rem 0.9rem',
+                              background: '#0f172a',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '999px',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            {t('common.addToCart')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))
             ) : (
               <div className="empty-state">
@@ -208,38 +270,62 @@ export default function Home() {
               </div>
             ) : (
               featuredProducts.map((product, index) => (
-                <Link
+                <div
                   key={product.id}
-                  href={`/products/${product.id}`}
                   className="featured-card"
                   style={{ animationDelay: `${index * 0.08}s` }}
                 >
-                  <div className="featured-badge">{t('home.featuredBadge')}</div>
-                  <div className="featured-image-wrapper">
-                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <VideoPreview
-                        src={getProductImagePath(product, product.category)}
-                        className="featured-image"
-                      />
-                    ) : (
-                      <Image
-                        src={getProductImagePath(product, product.category)}
-                        alt={getLocalizedProductName(product, locale)}
-                        fill
-                        className="featured-image"
-                      />
-                    )}
-                    <div className="featured-overlay"></div>
-                  </div>
-                  <div className="featured-info">
-                    <div className="featured-category">{product.category}</div>
-                    <h3 className="featured-name">{getLocalizedProductName(product, locale)}</h3>
-                    <p className="featured-description">{getLocalizedProductDescription(product, locale)}</p>
-                    <div className="featured-price">
-                      {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
+                  <Link
+                    href={`/products/${product.id}`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                  >
+                    <div className="featured-badge">{t('home.featuredBadge')}</div>
+                    <div className="featured-image-wrapper">
+                      {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                        <VideoPreview
+                          src={getProductImagePath(product, product.category)}
+                          className="featured-image"
+                        />
+                      ) : (
+                        <Image
+                          src={getProductImagePath(product, product.category)}
+                          alt={getLocalizedProductName(product, locale)}
+                          fill
+                          className="featured-image"
+                        />
+                      )}
+                      <div className="featured-overlay"></div>
                     </div>
-                  </div>
-                </Link>
+                    <div className="featured-info">
+                      <div className="featured-category">{product.category}</div>
+                      <h3 className="featured-name">{getLocalizedProductName(product, locale)}</h3>
+                      <p className="featured-description">{getLocalizedProductDescription(product, locale)}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.35rem' }}>
+                        <div className="featured-price">
+                          {firebaseUser ? `RM ${(product.price || 0).toLocaleString()}` : t('common.loginToSeePrice')}
+                        </div>
+                        {firebaseUser && (
+                          <button
+                            type="button"
+                            onClick={(event) => handleAddToCart(event, product)}
+                            style={{
+                              padding: '0.5rem 0.9rem',
+                              background: '#0f172a',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '999px',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            {t('common.addToCart')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))
             )}
           </div>
@@ -262,52 +348,95 @@ export default function Home() {
               </div>
             ) : (
               seasonalProducts.map((product, index) => (
-                <Link
+                <div
                   key={product.id}
-                  href={`/products/${product.id}`}
                   className="sale-card"
                   style={{ animationDelay: `${index * 0.06}s` }}
                 >
-                  <div className="sale-badge">
-                    <span className="sale-badge-text">{t('common.sale')}</span>
-                  </div>
-                  <div className="sale-image-wrapper">
-                    {isVideoUrl(getProductImagePath(product, product.category)) ? (
-                      <VideoPreview
-                        src={getProductImagePath(product, product.category)}
-                        className="sale-image"
-                      />
-                    ) : (
-                      <Image
-                        src={getProductImagePath(product, product.category)}
-                        alt={getLocalizedProductName(product, locale)}
-                        fill
-                        className="sale-image"
-                      />
-                    )}
-                    <div className="sale-image-overlay"></div>
-                  </div>
-                  <div className="sale-info">
-                    <div className="sale-category">{product.category}</div>
-                    <h3 className="sale-name">{getLocalizedProductName(product, locale)}</h3>
-                    <p className="sale-description">{getLocalizedProductDescription(product, locale)}</p>
-                    <div className="sale-pricing">
-                      {firebaseUser ? (
-                        <>
-                          <span className="sale-price">RM {(product.price || 0).toLocaleString()}</span>
-                          <span className="sale-original-price">RM {((product.price || 0) * 1.2).toLocaleString()}</span>
-                        </>
-                      ) : (
-                        <span className="sale-price">{t('common.loginToSeePrice')}</span>
-                      )}
+                  <Link
+                    href={`/products/${product.id}`}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                  >
+                    <div className="sale-badge">
+                      <span className="sale-badge-text">{t('common.sale')}</span>
                     </div>
-                  </div>
-                </Link>
+                    <div className="sale-image-wrapper">
+                      {isVideoUrl(getProductImagePath(product, product.category)) ? (
+                        <VideoPreview
+                          src={getProductImagePath(product, product.category)}
+                          className="sale-image"
+                        />
+                      ) : (
+                        <Image
+                          src={getProductImagePath(product, product.category)}
+                          alt={getLocalizedProductName(product, locale)}
+                          fill
+                          className="sale-image"
+                        />
+                      )}
+                      <div className="sale-image-overlay"></div>
+                    </div>
+                    <div className="sale-info">
+                      <div className="sale-category">{product.category}</div>
+                      <h3 className="sale-name">{getLocalizedProductName(product, locale)}</h3>
+                      <p className="sale-description">{getLocalizedProductDescription(product, locale)}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.35rem' }}>
+                        <div className="sale-pricing">
+                          {firebaseUser ? (
+                            <>
+                              <span className="sale-price">RM {(product.price || 0).toLocaleString()}</span>
+                              <span className="sale-original-price">RM {((product.price || 0) * 1.2).toLocaleString()}</span>
+                            </>
+                          ) : (
+                            <span className="sale-price">{t('common.loginToSeePrice')}</span>
+                          )}
+                        </div>
+                        {firebaseUser && (
+                          <button
+                            type="button"
+                            onClick={(event) => handleAddToCart(event, product)}
+                            style={{
+                              padding: '0.5rem 0.9rem',
+                              background: '#0f172a',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '999px',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              fontSize: '0.85rem'
+                            }}
+                          >
+                            {t('common.addToCart')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))
             )}
           </div>
         </div>
       </section>
+
+      {showCartToast && (
+        <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
+          <div className="bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <svg
+              className="w-5 h-5 text-green-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="font-medium">{cartToastMessage}</span>
+          </div>
+        </div>
+      )}
 
       {/* WhatsApp Float Button */}
       <div
@@ -331,6 +460,22 @@ export default function Home() {
           />
         </svg>
       </div>
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

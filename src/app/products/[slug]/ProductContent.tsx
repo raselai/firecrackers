@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ImageGallery from '@/components/ImageGallery';
+import ProductCard from '@/app/components/ProductCard';
 import { fetchProducts } from '@/lib/productService';
 import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
@@ -62,6 +63,9 @@ export default function ProductContent({ slug }: ProductContentProps) {
 
   const productName = getLocalizedProductName(product, locale);
   const productDescription = getLocalizedProductDescription(product, locale);
+  const suggestedProducts = products
+    .filter((item: any) => item.id !== product.id && item.category === product.category)
+    .slice(0, 4);
 
   const handleAddToCart = async () => {
     if (!firebaseUser) {
@@ -232,6 +236,19 @@ export default function ProductContent({ slug }: ProductContentProps) {
             </div>
           </div>
         </div>
+
+        {suggestedProducts.length > 0 && (
+          <div className="suggested-section">
+            <div className="suggested-header">
+              <h2>{t('product.suggestedTitle')}</h2>
+            </div>
+            <div className="suggested-grid">
+              {suggestedProducts.map((suggested) => (
+                <ProductCard key={suggested.id} product={suggested} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
@@ -526,6 +543,46 @@ export default function ProductContent({ slug }: ProductContentProps) {
           font-size: 1rem;
           font-weight: 700;
           color: #1f2937;
+        }
+
+        .suggested-section {
+          position: relative;
+          z-index: 10;
+          max-width: 1400px;
+          margin: 2.5rem auto 0;
+          padding: 0 1rem 2rem;
+        }
+
+        .suggested-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1.5rem;
+        }
+
+        .suggested-header h2 {
+          font-size: 1.75rem;
+          font-weight: 800;
+          color: #fff;
+          text-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .suggested-grid {
+          display: grid;
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+          gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+          .suggested-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .suggested-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
         }
 
         .add-to-cart-btn {
