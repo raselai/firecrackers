@@ -24,6 +24,8 @@
 .DS_Store
 *.pem
 *firebase-adminsdk*.json
+nul
+tmpclaude-*
 
 # debug
 npm-debug.log*
