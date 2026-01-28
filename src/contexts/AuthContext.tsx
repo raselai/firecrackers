@@ -18,6 +18,7 @@ import { User } from '@/types/user';
 import {
   createUserDocument,
   getUserById,
+  generateReferralCode,
   updateUserProfile
 } from '@/lib/userService';
 
@@ -67,6 +68,25 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     try {
       const userData = await getUserById(firebaseAuthUser.uid);
       if (userData) {
+        const referralCode =
+          typeof userData.referralCode === 'string'
+            ? userData.referralCode.trim()
+            : '';
+        const hasValidReferral = Boolean(referralCode) && referralCode !== 'undefined';
+
+        if (!hasValidReferral) {
+          try {
+            const newReferralCode = await generateReferralCode();
+            await updateUserProfile(firebaseAuthUser.uid, { referralCode: newReferralCode });
+            return {
+              ...userData,
+              referralCode: newReferralCode
+            };
+          } catch (error) {
+            console.error('Error generating referral code:', error);
+          }
+        }
+
         return userData;
       }
     } catch (error) {

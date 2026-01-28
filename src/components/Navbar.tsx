@@ -19,7 +19,11 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartPulse, setCartPulse] = useState(false);
   const [prevCartCount, setPrevCartCount] = useState(cartItems.length);
+  const [referralCopied, setReferralCopied] = useState(false);
   const router = useRouter();
+  const referralCode =
+    typeof user?.referralCode === 'string' ? user.referralCode.trim() : '';
+  const shouldShowReferral = Boolean(referralCode) && referralCode !== 'undefined';
 
   const categories = [
     { key: 'redCrackersSeries', slug: 'red-crackers-series' },
@@ -77,6 +81,30 @@ export default function Navbar() {
   const handleCategoriesToggle = () => {
     setIsCategoriesDropdownOpen(!isCategoriesDropdownOpen);
     // Don't close mobile menu when toggling dropdowns
+  };
+
+  const handleCopyReferral = async () => {
+    if (!shouldShowReferral) return;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(referralCode);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = referralCode;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 1500);
+    } catch (error) {
+      console.error('Failed to copy referral code:', error);
+    }
   };
 
   useEffect(() => {
@@ -456,6 +484,22 @@ export default function Navbar() {
             </span>
           )}
         </Link>
+
+        {shouldShowReferral && (
+          <button
+            type="button"
+            className="mobile-bottom-item mobile-bottom-referral"
+            onClick={handleCopyReferral}
+            aria-label={t('accountProfile.referralCode')}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6H20M4 12H20M4 18H14"/>
+            </svg>
+            <span className="mobile-referral-text">
+              {referralCopied ? t('accountReferrals.copied') : referralCode}
+            </span>
+          </button>
+        )}
 
         <button
           type="button"
