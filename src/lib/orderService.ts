@@ -174,7 +174,7 @@ export async function createOrder(params: {
   promotionType?: 'none' | 'referral' | 'registration';
   paymentProofUrl?: string;
   paymentProofPath?: string;
-  paymentMethod?: 'touch_n_go';
+  paymentMethod?: 'touch_n_go' | 'cod';
   paymentAccountName?: string;
   orderId?: string;
 }): Promise<Order> {

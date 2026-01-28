@@ -19,7 +19,7 @@ export interface Order {
   deliveryAddress: Address;
 
   // Payment
-  paymentMethod?: 'touch_n_go';
+  paymentMethod?: 'touch_n_go' | 'cod';
   paymentAccountName?: string;
   paymentProofUrl?: string;
   paymentProofPath?: string;

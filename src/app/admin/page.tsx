@@ -1233,7 +1233,11 @@ export default function AdminPanel() {
                           fontSize: '0.8rem',
                           color: '#475569'
                         }}>
-                          {selectedOrder.paymentMethod === 'touch_n_go' ? "Touch 'n Go" : selectedOrder.paymentMethod || "Touch 'n Go"}
+                          {selectedOrder.paymentMethod === 'cod'
+                            ? 'Cash on Delivery (COD)'
+                            : selectedOrder.paymentMethod === 'touch_n_go'
+                              ? "Touch 'n Go"
+                              : selectedOrder.paymentMethod || "Touch 'n Go"}
                         </div>
                           {selectedOrder.paymentSubmittedAt && (
                             <div style={{
