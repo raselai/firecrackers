@@ -310,7 +310,10 @@ export default function CheckoutPage() {
 
   return (
     <div className="container" style={{ padding: '2rem 0' }}>
-      <h1 style={{ marginBottom: '1.5rem' }}>{t('checkout.title')}</h1>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem' }}>
+        <h1 style={{ marginBottom: '1.5rem' }}>{t('checkout.title')}</h1>
+        <span style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600 }}>v2026-01-28</span>
+      </div>
 
       {error && (
         <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fef2f2', color: '#b91c1c', borderRadius: '6px' }}>
