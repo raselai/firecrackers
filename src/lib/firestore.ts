@@ -99,7 +99,6 @@ export const getAllProducts = async (): Promise<Product[]> => {
     })) as Product[];
     
     // Sort by creation date (newest first) in JavaScript
-    console.log(`Firestore: Found ${products.length} products, sorting by creation date...`);
     const sortedProducts = products.sort((a, b) => {
       // Handle different createdAt field types (Firestore Timestamp or Date)
       let aDate: Date;
@@ -125,11 +124,8 @@ export const getAllProducts = async (): Promise<Product[]> => {
         bDate = new Date(b.createdAt as any);
       }
       
-      console.log(`Firestore: Comparing ${a.name} (${aDate.toISOString()}) vs ${b.name} (${bDate.toISOString()})`);
       return bDate.getTime() - aDate.getTime(); // Descending order (newest first)
     });
-    
-    console.log(`Firestore: Sorted products - first 3:`, sortedProducts.slice(0, 3).map(p => ({ name: p.name, createdAt: p.createdAt })));
     return sortedProducts;
   } catch (error) {
     console.error("Error getting products: ", error);

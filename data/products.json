@@ -6,9 +6,9 @@
     "subcategory": "Ceiling Lights",
     "price": 250,
     "description": "Beautiful modern LED ceiling light with dimmable functionality. Perfect for living rooms and bedrooms.",
-    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "image": "/images/categories/ceiling-lights.jpg",
     "images": [
-      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+      "/images/categories/ceiling-lights.jpg"
     ],
     "wattage": "12W",
     "material": "Aluminum",
@@ -27,9 +27,9 @@
     "subcategory": "Flood Lights",
     "price": 180,
     "description": "High-power LED flood light perfect for outdoor security and illumination. Weatherproof design.",
-    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "image": "/images/categories/flood-lights.jpg",
     "images": [
-      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+      "/images/categories/flood-lights.jpg"
     ],
     "wattage": "50W",
     "material": "Aluminum",
@@ -48,9 +48,9 @@
     "subcategory": "LED Strips",
     "price": 120,
     "description": "Colorful RGB LED strip light with remote control. Perfect for accent lighting and decoration.",
-    "image": "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg",
+    "image": "/images/categories/Led-strip.jpg",
     "images": [
-      "https://res.cloudinary.com/dbdybplj5/image/upload/v1760495581/lighting-products/test-product-migration.jpg"
+      "/images/categories/Led-strip.jpg"
     ],
     "wattage": "15W",
     "material": "Silicone",

@@ -30,13 +30,8 @@ export function getLocalizedProductDescription(product: LocalizedProductText, lo
 // Image Management Utilities
 export function getProductImagePath(product: any, category?: string): string {
   // Priority order for image sources
-  
-  // 1. Check for Cloudinary URLs first (new primary source)
-  if (product.image && product.image.includes('cloudinary.com')) {
-    return product.image;
-  }
-  
-  // 2. Check for existing Firebase URLs (fallback during migration)
+
+  // 1. Check for existing Firebase URLs (or any absolute URL stored in the product)
   if (product.image) {
     return product.image;
   }

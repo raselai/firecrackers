@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ImageGallery from '@/components/ImageGallery';
 import ProductCard from '@/app/components/ProductCard';
-import { fetchProducts } from '@/lib/productService';
 import { getLocalizedProductDescription, getLocalizedProductName, getProductImagePath } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
@@ -14,48 +13,17 @@ import { useI18n } from '@/i18n/I18nProvider';
 
 type ProductContentProps = {
   slug: string;
+  products: any[];
 };
 
-export default function ProductContent({ slug }: ProductContentProps) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [product, setProduct] = useState<any>(null);
+export default function ProductContent({ slug, products }: ProductContentProps) {
+  const safeProducts = Array.isArray(products) ? products : [];
+  const product = safeProducts.find((p: any) => p.id?.toString() === slug);
   const [addingToCart, setAddingToCart] = useState(false);
   const router = useRouter();
   const { addItem } = useCart();
   const { firebaseUser } = useUser();
   const { t, locale } = useI18n();
-
-  // Load products on component mount
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const fetchedProducts = await fetchProducts();
-        setProducts(fetchedProducts);
-        const foundProduct = fetchedProducts.find((p: any) => p.id.toString() === slug);
-        setProduct(foundProduct);
-      } catch (error) {
-        console.error('Error loading products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner">
-          <div className="spinner-ring"></div>
-          <div className="spinner-ring"></div>
-          <div className="spinner-ring"></div>
-        </div>
-        <p className="loading-text">{t('product.loading')}</p>
-      </div>
-    );
-  }
 
   if (!product) {
     notFound();
@@ -63,7 +31,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
 
   const productName = getLocalizedProductName(product, locale);
   const productDescription = getLocalizedProductDescription(product, locale);
-  const suggestedProducts = products
+  const suggestedProducts = safeProducts
     .filter((item: any) => item.id !== product.id && item.category === product.category)
     .slice(0, 4);
 
@@ -252,13 +220,12 @@ export default function ProductContent({ slug }: ProductContentProps) {
       </div>
 
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
         .product-page {
           min-height: 100vh;
           position: relative;
           overflow: hidden;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           padding: 2rem 1rem;
           padding-top: 4rem;
         }
@@ -648,7 +615,7 @@ export default function ProductContent({ slug }: ProductContentProps) {
           justify-content: center;
           gap: 1.5rem;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         .loading-spinner {

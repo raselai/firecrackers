@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProductCard from '@/app/components/ProductCard';
-import { fetchProducts } from '@/lib/productService';
 import { useI18n } from '@/i18n/I18nProvider';
 
 // Category data specifically for Others
@@ -22,10 +21,12 @@ const categoryData = {
 
 type CategoryContentProps = {
   categorySlug: string;
+  products: any[];
 };
 
-export default function CategoryContent({ categorySlug }: CategoryContentProps) {
+export default function CategoryContent({ categorySlug, products }: CategoryContentProps) {
   const { t } = useI18n();
+  const safeProducts = Array.isArray(products) ? products : [];
   const categoryInfo = categoryData[categorySlug as keyof typeof categoryData] || {
     name: 'Other Products',
     description: t('category.defaultDescription'),
@@ -33,51 +34,19 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
     features: []
   };
   
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Load products on component mount
-  useEffect(() => {
-    console.log('useEffect: Starting to load products for Others category');
-    const loadProducts = async () => {
-      try {
-        console.log('Fetching products for Others category...');
-        const fetchedProducts = await fetchProducts();
-        console.log('All fetched products for Others:', fetchedProducts);
-        console.log('Number of products loaded for Others:', fetchedProducts.length);
-        setProducts(fetchedProducts || []);
-      } catch (error) {
-        console.error('Error loading products for Others category:', error);
-        setProducts([]); // Set empty array on error
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadProducts();
-  }, []);
+  const [loading] = useState(false);
   
   // Filter products specifically for Others category
-  const otherProducts = products.filter((product: any) => {
+  const otherProducts = safeProducts.filter((product: any) => {
     const productCategory = product.category?.toLowerCase() || '';
-    
-    // Debug logging
-    console.log('Others filtering for product:', product.name, {
-      categorySlug,
-      productCategory,
-      productName: product.name
-    });
-    
+
     // Check if the product category is "Others" (case-insensitive)
     if (productCategory === 'others') {
-      console.log('Match found for Others category');
       return true;
     }
     
     return false;
   });
-
-  console.log('Filtered Others products count:', otherProducts.length);
 
   if (loading) {
     return (

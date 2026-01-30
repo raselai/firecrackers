@@ -218,6 +218,7 @@ export default function OrderDetailPage() {
                       width={80}
                       height={80}
                       className="w-full h-full object-cover"
+                      sizes="80px"
                     />
                   </div>
                   <div className="flex-1">

@@ -3,6 +3,8 @@ import { updateProduct, deleteProduct, getProductById } from '@/lib/firestore';
 import { deleteImage } from '@/lib/storage';
 import { Product } from '@/types/product';
 
+export const revalidate = 300;
+
 // GET - Get a single product
 export async function GET(
   request: NextRequest,
@@ -16,7 +18,11 @@ export async function GET(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
     
-    return NextResponse.json(product);
+    return NextResponse.json(product, {
+      headers: {
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     console.error('Error getting product:', error);
     return NextResponse.json({ error: 'Failed to get product' }, { status: 500 });

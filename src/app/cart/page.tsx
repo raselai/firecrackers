@@ -96,7 +96,6 @@ export default function CartPage() {
         </div>
 
         <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
           .cart-page {
             min-height: 100vh;
@@ -105,7 +104,7 @@ export default function CartPage() {
             justify-content: center;
             position: relative;
             overflow: hidden;
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--font-poppins), sans-serif;
           }
 
           .animated-bg {
@@ -186,7 +185,7 @@ export default function CartPage() {
             justify-content: center;
             gap: 1.5rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            font-family: 'Poppins', sans-serif;
+            font-family: var(--font-poppins), sans-serif;
           }
 
           .loading-spinner {
@@ -393,6 +392,7 @@ export default function CartPage() {
                         alt={item.productName}
                         fill
                         style={{ objectFit: 'cover' }}
+                        sizes="96px"
                       />
                     ) : (
                       <div className="image-placeholder">📦</div>
@@ -498,13 +498,12 @@ export default function CartPage() {
       </div>
 
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
         .cart-page {
           min-height: 100vh;
           position: relative;
           overflow: hidden;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           padding: 2rem 1rem;
         }
 
@@ -709,7 +708,7 @@ export default function CartPage() {
           padding: 0.5rem 0.75rem;
           border: 2px solid #e5e7eb;
           border-radius: 8px;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           font-size: 1rem;
           font-weight: 600;
           text-align: center;
@@ -731,7 +730,7 @@ export default function CartPage() {
           color: white;
           border: none;
           border-radius: 8px;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           font-size: 0.875rem;
           font-weight: 600;
           cursor: pointer;
@@ -806,7 +805,7 @@ export default function CartPage() {
           padding: 0.75rem 1rem;
           border: 2px solid #e5e7eb;
           border-radius: 10px;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           font-size: 0.9rem;
           font-weight: 500;
           color: #1f2937;
@@ -928,7 +927,7 @@ export default function CartPage() {
           justify-content: center;
           gap: 1.5rem;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         .loading-spinner {

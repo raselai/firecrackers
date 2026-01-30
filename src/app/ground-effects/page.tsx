@@ -306,6 +306,7 @@ export default function GroundEffects() {
                   alt={product.name}
                   fill
                   style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
               <h3 style={{ margin: '0 0 0.5rem 0' }}>{product.name}</h3>

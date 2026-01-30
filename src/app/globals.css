@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -65,7 +63,7 @@ a:visited {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   line-height: 1.6;
   color: #333;
   background-color: #ffffff;
@@ -106,7 +104,7 @@ body {
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-size: 0.9rem; /* Mobile-first font size */
 }
 
@@ -165,7 +163,7 @@ body {
   font-weight: 700;
   text-decoration: none !important;
   color: #1f2937;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   letter-spacing: -0.5px;
   transition: all 0.3s ease;
 }
@@ -191,7 +189,7 @@ body {
 .navbar-link {
   text-decoration: none !important;
   color: #374151;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -214,7 +212,7 @@ body {
   color: #374151;
   cursor: pointer;
   padding: 0.5rem 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -260,7 +258,7 @@ body {
   text-decoration: none !important;
   color: #374151;
   font-size: 0.9rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 400;
   transition: all 0.2s ease;
 }
@@ -299,7 +297,7 @@ body {
   outline: none;
   font-size: 0.9rem;
   width: 200px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   background-color: transparent;
   color: #1f2937;
 }
@@ -413,7 +411,7 @@ body {
   border: none;
   outline: none;
   font-size: 0.9rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   background-color: transparent;
   width: auto;
 }
@@ -439,7 +437,7 @@ body {
   padding: 0.75rem 0;
   text-decoration: none !important;
   color: #374151;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 500;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -462,7 +460,7 @@ body {
   color: #374151;
   cursor: pointer;
   padding: 0.75rem 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 500;
   font-size: 1rem;
   text-align: left;
@@ -487,7 +485,7 @@ body {
   text-decoration: none !important;
   color: #6b7280;
   font-size: 0.9rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 400;
   transition: all 0.2s ease;
 }
@@ -536,7 +534,7 @@ body {
   font-size: 2rem; /* Mobile-first font size */
   margin-bottom: 1rem;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   line-height: 1.2;
 }
 
@@ -549,7 +547,7 @@ body {
 .hero p {
   font-size: 1rem; /* Mobile-first font size */
   margin-bottom: 2rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 @media (min-width: 768px) {
@@ -680,7 +678,7 @@ body {
   margin-bottom: 1rem;
   font-size: 1.1rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 @media (min-width: 768px) {
@@ -693,7 +691,7 @@ body {
   margin-bottom: 0.5rem;
   color: #d1d5db;
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   transition: color 0.3s ease;
   font-size: 0.9rem;
 }
@@ -727,7 +725,7 @@ body {
   border-top: 1px solid #374151;
   padding-top: 1rem;
   text-align: center;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 .footer-bottom p {
@@ -834,16 +832,16 @@ body {
 
 /* Typography improvements */
 h1, h2, h3 {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   font-weight: 600;
 }
 
 .navbar a, .navbar button {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 .navbar input, .navbar select {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 /* Mobile-specific navbar adjustments */
@@ -880,7 +878,7 @@ h1, h2, h3 {
     padding: 0.75rem 0;
     color: #374151;
     text-decoration: none;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter), sans-serif;
     font-weight: 500;
     border-bottom: 1px solid #f3f4f6;
   }
@@ -892,7 +890,7 @@ h1, h2, h3 {
     color: #374151;
     background: none;
     border: none;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-inter), sans-serif;
     font-weight: 500;
     text-align: left;
     border-bottom: 1px solid #f3f4f6;
@@ -1019,7 +1017,7 @@ h1, h2, h3 {
   color: #1f2937;
   font-size: 2.5rem;
   font-weight: 700;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   text-align: center;
   text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
 }
@@ -1043,7 +1041,7 @@ h1, h2, h3 {
 .category-text h2 {
   font-size: 2rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   color: #1f2937;
   margin-bottom: 1rem;
 }
@@ -1053,7 +1051,7 @@ h1, h2, h3 {
   line-height: 1.7;
   color: #6b7280;
   margin-bottom: 2rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 .category-features {
@@ -1067,7 +1065,7 @@ h1, h2, h3 {
 .category-features h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   color: #1f2937;
   margin-bottom: 1rem;
 }
@@ -1081,7 +1079,7 @@ h1, h2, h3 {
 .category-features li {
   padding: 0.5rem 0;
   color: #6b7280;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), sans-serif;
   position: relative;
   padding-left: 1.5rem;
 }
@@ -1102,7 +1100,7 @@ h1, h2, h3 {
   text-align: center;
   font-size: 2rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
   color: #1f2937;
   margin-bottom: 2rem;
 }
@@ -1194,8 +1192,8 @@ h1, h2, h3 {
   --space-2xl: 6rem;
 
   /* Typography */
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Manrope', sans-serif;
+  --font-display: var(--font-playfair), serif;
+  --font-body: var(--font-manrope), sans-serif;
 }
 
 .homepage-wrapper {
@@ -1225,6 +1223,14 @@ h1, h2, h3 {
 }
 
 .hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-poster {
   position: absolute;
   inset: 0;
   width: 100%;

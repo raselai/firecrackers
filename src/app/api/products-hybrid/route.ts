@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllProducts, addProduct, Product as FirestoreProduct } from '@/lib/firestore';
 import { Product } from '@/types/product';
 
+export const revalidate = 300;
+
 // GET - Fetch all products from Firestore
 export async function GET() {
   try {
-    console.log('API: Fetching products from Firestore (database only)');
     const products = await getAllProducts();
-    console.log(`API: Found ${products.length} products in Firestore`);
-    return NextResponse.json(products);
+    return NextResponse.json(products, {
+      headers: {
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     console.error('Error reading products from Firestore:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
@@ -18,9 +22,7 @@ export async function GET() {
 // POST - Add a new product to Firestore
 export async function POST(request: NextRequest) {
   try {
-    console.log('API: Adding new product to Firestore');
     const newProduct: Omit<Product, 'id'> = await request.json();
-    console.log('API: Received product data:', newProduct);
     
     // Validate required fields
     if (!newProduct.name?.trim()) {
@@ -69,16 +71,8 @@ export async function POST(request: NextRequest) {
       (firestoreProduct as any).offerPrice = newProduct.offerPrice;
     }
 
-    console.log('API: Saving product to Firestore:', firestoreProduct);
-    console.log('API: Main images array:', firestoreProduct.images);
-    console.log('API: Gallery images array:', firestoreProduct.galleryImages);
-    
     // Add product to Firestore
     const addedProduct = await addProduct(firestoreProduct);
-    console.log('API: Product added successfully to Firestore:', addedProduct);
-    console.log('API: Added product images:', addedProduct.images);
-    console.log('API: Added product galleryImages:', (addedProduct as any).galleryImages);
-    
     return NextResponse.json(addedProduct, { status: 201 });
     
   } catch (error) {

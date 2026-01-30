@@ -240,7 +240,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 700;
           color: #1f2937;
           margin-bottom: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -252,7 +252,7 @@ Message: ${formData.message || 'I would like more information about your lightin
         .contact-hero-content p {
           font-size: 1rem;
           color: #6b7280;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -289,7 +289,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 2rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -347,7 +347,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 0.5rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -359,13 +359,13 @@ Message: ${formData.message || 'I would like more information about your lightin
         .contact-value {
           color: #374151;
           margin-bottom: 0.25rem;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .contact-note {
           font-size: 0.9rem;
           color: #6b7280;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .whatsapp-note {
@@ -389,7 +389,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -418,7 +418,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 2rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -456,7 +456,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 500;
           color: #374151;
           margin-bottom: 0.5rem;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .form-group input,
@@ -466,7 +466,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           border: 1px solid #d1d5db;
           border-radius: 8px;
           font-size: 0.9rem;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
           transition: all 0.3s ease;
         }
 
@@ -495,7 +495,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
           display: flex;
           align-items: center;
           gap: 0.5rem;
@@ -511,7 +511,7 @@ Message: ${formData.message || 'I would like more information about your lightin
           font-size: 0.8rem;
           color: #6b7280;
           margin-top: 0.5rem;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (max-width: 768px) {

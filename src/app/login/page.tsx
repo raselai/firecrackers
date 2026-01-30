@@ -276,7 +276,6 @@ export default function Login() {
       </div>
 
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
         /* Loading Screen */
         .loading-screen {
@@ -321,7 +320,7 @@ export default function Login() {
           padding: 2rem;
           position: relative;
           overflow: hidden;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         /* Animated Background */
@@ -490,7 +489,7 @@ export default function Login() {
           border: 2px solid #e5e7eb;
           border-radius: 12px;
           font-size: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
           transition: all 0.3s ease;
           background: white;
           color: #1f2937;

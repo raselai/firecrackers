@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProductCard from '@/app/components/ProductCard';
-import { fetchProducts } from '@/lib/productService';
 import { useI18n } from '@/i18n/I18nProvider';
 
 // Category data with descriptions and feature images
@@ -198,10 +197,12 @@ const categoryData = {
 
 type CategoryContentProps = {
   categorySlug: string;
+  products: any[];
 };
 
-export default function CategoryContent({ categorySlug }: CategoryContentProps) {
+export default function CategoryContent({ categorySlug, products }: CategoryContentProps) {
   const { t } = useI18n();
+  const safeProducts = Array.isArray(products) ? products : [];
   const fallbackCategoryInfo = {
     name: categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
     description: t('category.defaultDescription'),
@@ -214,29 +215,7 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
   const collectionTitle = `${t('category.collectionPrefix')} ${categoryName} ${t('category.collectionSuffix')}`
     .replace(/\s+/g, ' ')
     .trim();
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Load products on component mount
-  useEffect(() => {
-    console.log('useEffect: Starting to load products');
-    const loadProducts = async () => {
-      try {
-        console.log('Fetching products...');
-        const fetchedProducts = await fetchProducts();
-        console.log('All fetched products:', fetchedProducts);
-        console.log('Number of products loaded:', fetchedProducts.length);
-        setProducts(fetchedProducts || []);
-      } catch (error) {
-        console.error('Error loading products:', error);
-        setProducts([]); // Set empty array on error
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadProducts();
-  }, []);
+  const [loading] = useState(false);
   
   // Map navbar categories to product categories/subcategories
   const categoryMapping: { [key: string]: { category?: string; subcategory?: string } } = {
@@ -266,48 +245,29 @@ export default function CategoryContent({ categorySlug }: CategoryContentProps) 
     '8inch-firework-series': { category: '8inch & 9inch firework series' }
   };
   
-  console.log('Current category slug:', categorySlug);
-  console.log('Category mapping for this slug:', categoryMapping[categorySlug]);
-  console.log('Current products state:', products);
-  console.log('Products length:', products.length);
-  
   // Filter products by category or subcategory
-  const categoryProducts = products.filter((product: any) => {
+  const categoryProducts = safeProducts.filter((product: any) => {
     const productCategory = product.category?.toLowerCase().replace(/ /g, '-') || '';
     const productSubcategory = product.subcategory?.toLowerCase().replace(/ /g, '-') || '';
     const mapping = categoryMapping[categorySlug];
     
-    // Debug logging
-    console.log('Category filtering for product:', product.name, {
-      categorySlug,
-      productCategory,
-      productSubcategory,
-      productName: product.name,
-      mapping
-    });
-    
     // Check if the category slug matches the product category or subcategory
     if (productCategory === categorySlug || productSubcategory === categorySlug) {
-      console.log('Match found by direct comparison');
       return true;
     }
     
     // Check if the mapping exists and matches
     if (mapping) {
       if (mapping.category && product.category?.toLowerCase() === mapping.category.toLowerCase()) {
-        console.log('Match found by category mapping');
         return true;
       }
       if (mapping.subcategory && product.subcategory?.toLowerCase() === mapping.subcategory.toLowerCase()) {
-        console.log('Match found by subcategory mapping');
         return true;
       }
     }
     
     return false;
   });
-
-  console.log('Filtered products count:', categoryProducts.length);
 
   return (
     <div>

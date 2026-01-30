@@ -1,15 +1,28 @@
 import type { Metadata } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Inter, Poppins, Playfair_Display, Manrope } from 'next/font/google';
 import './globals.css';
 import Navbar from '../components/Navbar';
 import { Providers } from '../components/Providers';
 import Footer from '../components/Footer';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter'
+});
 const poppins = Poppins({ 
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-poppins'
+});
+const playfair = Playfair_Display({
+  weight: ['600', '700', '800'],
+  subsets: ['latin'],
+  variable: '--font-playfair'
+});
+const manrope = Manrope({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-manrope'
 });
 
 export const metadata: Metadata = {
@@ -24,7 +37,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${poppins.variable}`} suppressHydrationWarning={true}>
+      <body
+        className={`${inter.variable} ${poppins.variable} ${playfair.variable} ${manrope.variable}`}
+        suppressHydrationWarning={true}
+      >
         <Providers>
           <Navbar />
           <main>

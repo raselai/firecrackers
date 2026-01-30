@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllProducts, addProduct, Product as FirestoreProduct } from '@/lib/firestore';
 import { Product } from '@/types/product';
 
+export const revalidate = 300;
+
 // GET - Fetch all products
 export async function GET() {
   try {
-    console.log('API: Fetching products from Firestore');
     const products = await getAllProducts();
-    console.log('API: Found products:', products.length);
-    console.log('API: Products:', products);
-    return NextResponse.json(products);
+    return NextResponse.json(products, {
+      headers: {
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     console.error('Error reading products:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
@@ -19,9 +22,7 @@ export async function GET() {
 // POST - Add a new product
 export async function POST(request: NextRequest) {
   try {
-    console.log('API: Adding new product to Firestore');
     const newProduct: Omit<Product, 'id'> = await request.json();
-    console.log('API: Received product data:', newProduct);
     
     // Validate required fields (only 5 mandatory fields)
     if (!newProduct.name?.trim()) {
@@ -113,12 +114,8 @@ export async function POST(request: NextRequest) {
       Object.entries(firestoreProduct).filter(([_, value]) => value !== undefined)
     ) as Omit<FirestoreProduct, 'id'>;
 
-    console.log('API: Cleaned product data for Firestore:', cleanProduct);
-    
     // Add product to Firestore
     const addedProduct = await addProduct(cleanProduct);
-    console.log('API: Product added successfully to Firestore:', addedProduct);
-    
     return NextResponse.json(addedProduct, { status: 201 });
     
   } catch (error) {

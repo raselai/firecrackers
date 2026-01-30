@@ -118,6 +118,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
               fill
               style={{ objectFit: 'cover' }}
               priority={currentImageIndex === 0}
+              sizes="(max-width: 768px) 100vw, 700px"
             />
           )}
           
@@ -266,6 +267,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
                   alt={`${localizedName} thumbnail ${index + 1}`}
                   fill
                   style={{ objectFit: 'cover' }}
+                  sizes="80px"
                 />
               )}
             </button>

@@ -204,7 +204,7 @@ export default function AboutPage() {
           font-weight: 700;
           color: white;
           margin-bottom: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -218,7 +218,7 @@ export default function AboutPage() {
           color: #d1d5db;
           max-width: 800px;
           margin: 0 auto;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -256,7 +256,7 @@ export default function AboutPage() {
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 1.5rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -270,7 +270,7 @@ export default function AboutPage() {
           color: #6b7280;
           margin-bottom: 1.5rem;
           line-height: 1.7;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .story-image {
@@ -304,7 +304,7 @@ export default function AboutPage() {
           color: #6b7280;
           font-size: 1rem;
           font-weight: 500;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -334,7 +334,7 @@ export default function AboutPage() {
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -346,7 +346,7 @@ export default function AboutPage() {
         .values-header p {
           font-size: 1rem;
           color: #6b7280;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -422,7 +422,7 @@ export default function AboutPage() {
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 0.75rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -434,7 +434,7 @@ export default function AboutPage() {
         .value-card p {
           color: #6b7280;
           line-height: 1.6;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .about-stats {
@@ -457,7 +457,7 @@ export default function AboutPage() {
           font-weight: 600;
           color: #1f2937;
           margin-bottom: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -469,7 +469,7 @@ export default function AboutPage() {
         .stats-header p {
           font-size: 1rem;
           color: #6b7280;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -524,7 +524,7 @@ export default function AboutPage() {
 
         .stat-label {
           color: #6b7280;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         .about-cta {
@@ -547,7 +547,7 @@ export default function AboutPage() {
           font-weight: 600;
           color: white;
           margin-bottom: 1rem;
-          font-family: 'Poppins', sans-serif;
+          font-family: var(--font-poppins), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -563,7 +563,7 @@ export default function AboutPage() {
           max-width: 600px;
           margin-left: auto;
           margin-right: auto;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
         }
 
         @media (min-width: 768px) {
@@ -582,7 +582,7 @@ export default function AboutPage() {
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          font-family: 'Inter', sans-serif;
+          font-family: var(--font-inter), sans-serif;
           display: flex;
           align-items: center;
           gap: 0.5rem;
