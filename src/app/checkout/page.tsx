@@ -770,6 +770,7 @@ export default function CheckoutPage() {
                     width={220}
                     height={300}
                     style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                    quality={75}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: '220px' }}>

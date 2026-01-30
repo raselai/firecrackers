@@ -1291,6 +1291,7 @@ export default function AdminPanel() {
                               width={360}
                               height={360}
                               style={{ width: '100%', height: 'auto', display: 'block' }}
+                              quality={75}
                             />
                           </div>
                         </div>
@@ -1995,6 +1996,7 @@ export default function AdminPanel() {
                                 maxHeight: '100%',
                                 objectFit: 'contain'
                               }}
+                              quality={75}
                             />
                           ) : (
                             <div style={{ textAlign: 'center', padding: '2rem' }}>

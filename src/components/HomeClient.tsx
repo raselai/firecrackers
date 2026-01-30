@@ -120,6 +120,7 @@ export default function HomeClient({ products }: HomeClientProps) {
             fill
             priority
             sizes="100vw"
+            quality={70}
             className="hero-poster"
           />
           <div className="hero-overlay" />
@@ -202,6 +203,7 @@ export default function HomeClient({ products }: HomeClientProps) {
                           fill
                           className="product-image"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          quality={60}
                         />
                       )}
                       <div className="product-glow"></div>
@@ -283,6 +285,7 @@ export default function HomeClient({ products }: HomeClientProps) {
                           fill
                           className="featured-image"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          quality={60}
                         />
                       )}
                       <div className="featured-overlay"></div>
@@ -364,6 +367,7 @@ export default function HomeClient({ products }: HomeClientProps) {
                           fill
                           className="sale-image"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          quality={60}
                         />
                       )}
                       <div className="sale-image-overlay"></div>

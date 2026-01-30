@@ -307,6 +307,7 @@ export default function AerialEffects() {
                   fill
                   style={{ objectFit: 'cover' }}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  quality={60}
                 />
               </div>
               <h3 style={{ margin: '0 0 0.5rem 0' }}>{product.name}</h3>

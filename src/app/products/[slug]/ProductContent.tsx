@@ -300,6 +300,16 @@ export default function ProductContent({ slug, products }: ProductContentProps) 
           backdrop-filter: blur(2px);
         }
 
+        @media (max-width: 640px), (prefers-reduced-motion: reduce) {
+          .floating-shape {
+            display: none;
+          }
+
+          .gradient-blob {
+            animation: none;
+          }
+        }
+
         .product-container {
           position: relative;
           z-index: 10;

@@ -532,6 +532,16 @@ export default function SignUp() {
           backdrop-filter: blur(2px);
         }
 
+        @media (max-width: 640px), (prefers-reduced-motion: reduce) {
+          .floating-shape {
+            display: none;
+          }
+
+          .gradient-blob {
+            animation: none;
+          }
+        }
+
         /* Form Wrapper */
         .form-wrapper {
           position: relative;

@@ -393,6 +393,7 @@ export default function CartPage() {
                         fill
                         style={{ objectFit: 'cover' }}
                         sizes="96px"
+                        quality={60}
                       />
                     ) : (
                       <div className="image-placeholder">📦</div>
@@ -575,6 +576,16 @@ export default function CartPage() {
           border-radius: 50%;
           animation: float-shape linear infinite;
           backdrop-filter: blur(2px);
+        }
+
+        @media (max-width: 640px), (prefers-reduced-motion: reduce) {
+          .floating-shape {
+            display: none;
+          }
+
+          .gradient-blob {
+            animation: none;
+          }
         }
 
         .cart-container {

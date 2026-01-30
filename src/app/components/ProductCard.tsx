@@ -146,6 +146,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               style={{ objectFit: 'cover' }}
               priority={false}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              quality={60}
               onError={(e) => {
                 console.error('Image failed to load:', imagePath);
                 // You could set a fallback image here

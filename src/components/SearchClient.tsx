@@ -296,6 +296,7 @@ export default function SearchPage({ products }: SearchClientProps) {
                           fill
                           style={{ objectFit: 'cover' }}
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          quality={60}
                         />
                       </div>
                       <h3 style={{ margin: '0 0 0.5rem 0' }}>{getLocalizedProductName(product, locale)}</h3>

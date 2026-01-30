@@ -119,6 +119,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
               style={{ objectFit: 'cover' }}
               priority={currentImageIndex === 0}
               sizes="(max-width: 768px) 100vw, 700px"
+              quality={70}
             />
           )}
           
@@ -268,6 +269,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
                   fill
                   style={{ objectFit: 'cover' }}
                   sizes="80px"
+                  quality={50}
                 />
               )}
             </button>
@@ -319,6 +321,7 @@ export default function ImageGallery({ product, className = '' }: ImageGalleryPr
                   maxWidth: '100%',
                   maxHeight: '100%'
                 }}
+                quality={75}
               />
             )}
             
