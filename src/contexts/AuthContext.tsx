@@ -58,7 +58,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+type AuthContextProviderProps = {
+  children: React.ReactNode;
+  deferInit?: boolean;
+};
+
+export function AuthContextProvider({ children, deferInit = false }: AuthContextProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -248,22 +253,61 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
 
   // Listen to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setFirebaseUser(firebaseUser);
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    let idleHandle: number | undefined;
 
-      if (firebaseUser) {
-        // Fetch user data from Firestore or create a profile if missing.
-        const userData = await fetchUserData(firebaseUser);
-        setUser(userData);
-      } else {
-        setUser(null);
-      }
+    const initAuth = () => {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseAuthUser) => {
+        setFirebaseUser(firebaseAuthUser);
 
+        if (firebaseAuthUser) {
+          // Fetch user data from Firestore or create a profile if missing.
+          const userData = await fetchUserData(firebaseAuthUser);
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+
+        setLoading(false);
+      });
+    };
+
+    if (deferInit) {
       setLoading(false);
-    });
+      const win = typeof window !== 'undefined' ? (window as any) : undefined;
+      if (win?.requestIdleCallback) {
+        idleHandle = win.requestIdleCallback(() => {
+          if (!cancelled) {
+            initAuth();
+          }
+        });
+      } else {
+        idleHandle = window.setTimeout(() => {
+          if (!cancelled) {
+            initAuth();
+          }
+        }, 1500);
+      }
+    } else {
+      initAuth();
+    }
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      cancelled = true;
+      if (idleHandle !== undefined) {
+        const win = typeof window !== 'undefined' ? (window as any) : undefined;
+        if (win?.cancelIdleCallback) {
+          win.cancelIdleCallback(idleHandle);
+        } else {
+          window.clearTimeout(idleHandle);
+        }
+      }
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [deferInit]);
 
   const value: AuthContextType = {
     user,
