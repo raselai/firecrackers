@@ -257,6 +257,7 @@ export async function createOrder(params: {
       status: 'pending',
       paymentMethod,
       paymentAccountName,
+      deliveryFeePaid: paymentMethod === 'cod' ? Boolean(paymentProofUrl) : undefined,
       paymentProofUrl,
       paymentProofPath,
       paymentSubmittedAt: paymentProofUrl ? new Date() : undefined,

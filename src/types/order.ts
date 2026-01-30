@@ -24,6 +24,7 @@ export interface Order {
   paymentProofUrl?: string;
   paymentProofPath?: string;
   paymentSubmittedAt?: Date;
+  deliveryFeePaid?: boolean;
 
   // Promotion tracking
   promotionType?: 'none' | 'referral' | 'registration';

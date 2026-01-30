@@ -200,7 +200,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === 'touch_n_go') {
+    if (paymentMethod === 'touch_n_go' || paymentMethod === 'cod') {
       if (!paymentProofUrl) {
         setError(t('checkout.errors.proofRequired'));
         return;
@@ -235,9 +235,9 @@ export default function CheckoutPage() {
         vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
         promotionType,
         paymentMethod,
-        paymentAccountName: paymentMethod === 'touch_n_go' ? paymentAccountName.trim() : undefined,
-        paymentProofUrl: paymentMethod === 'touch_n_go' ? paymentProofUrl : undefined,
-        paymentProofPath: paymentMethod === 'touch_n_go' ? paymentProofPath : undefined
+        paymentAccountName: paymentAccountName.trim() ? paymentAccountName.trim() : undefined,
+        paymentProofUrl: paymentProofUrl || undefined,
+        paymentProofPath: paymentProofPath || undefined
       });
 
       // Clear delivery area from localStorage after successful order
@@ -552,6 +552,51 @@ export default function CheckoutPage() {
                 {t('checkout.registrationVoucherTerms')}
               </p>
             </div>
+
+            {/* Payment Method Selection */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{t('checkout.paymentMethodLabel')}</p>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod('touch_n_go');
+                    setPaymentAccountName('');
+                    setPaymentProofUrl('');
+                    setPaymentProofPath('');
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '999px',
+                    border: paymentMethod === 'touch_n_go' ? '2px solid #f97316' : '1px solid #d1d5db',
+                    background: paymentMethod === 'touch_n_go' ? '#fff7ed' : '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('checkout.paymentMethodTng')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod('cod');
+                    setPaymentAccountName('');
+                    setPaymentProofUrl('');
+                    setPaymentProofPath('');
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '999px',
+                    border: paymentMethod === 'cod' ? '2px solid #f97316' : '1px solid #d1d5db',
+                    background: paymentMethod === 'cod' ? '#fff7ed' : '#fff',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('checkout.paymentMethodCod')}
+                </button>
+              </div>
+            </div>
           </section>
 
         </div>
@@ -748,77 +793,79 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {paymentMethod === 'touch_n_go' && paymentSettingsLoading && (
+            {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsLoading && (
               <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
             )}
-            {paymentMethod === 'touch_n_go' && paymentSettingsError && (
+            {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsError && (
               <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
             )}
 
-            {paymentMethod === 'cod' ? (
-              <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
+            {paymentMethod === 'cod' && (
+              <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', marginBottom: '1rem' }}>
                 <p style={{ margin: 0, color: '#92400e' }}>
-                  {t('checkout.paymentInstructionCod')}
+                  {t('checkout.paymentInstructionCod').replace('{amount}', deliveryFee.toFixed(2))}
                 </p>
               </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '220px' }}>
-                  <Image
-                    src={paymentQrUrl}
-                    alt={t('checkout.paymentMethod')}
-                    width={220}
-                    height={300}
-                    style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                    quality={75}
-                  />
-                </div>
-                <div style={{ flex: 1, minWidth: '220px' }}>
-                  <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
-                  <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
-                  <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
-                  <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                    {t('checkout.paymentInstruction')}
-                  </p>
-
-                  <label
-                    htmlFor="paymentAccountName"
-                    style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}
-                  >
-                    {t('checkout.paymentAccountName')}
-                  </label>
-                  <input
-                    id="paymentAccountName"
-                    type="text"
-                    value={paymentAccountName}
-                    onChange={(e) => setPaymentAccountName(e.target.value)}
-                    placeholder={t('checkout.paymentAccountNamePlaceholder')}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      marginBottom: '1rem'
-                    }}
-                  />
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleUploadProof(file);
-                      }
-                    }}
-                  />
-                  {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
-                  {paymentProofUrl && !uploading && (
-                    <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
-                  )}
-                </div>
-              </div>
             )}
+
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ width: '220px' }}>
+                <Image
+                  src={paymentQrUrl}
+                  alt={t('checkout.paymentMethod')}
+                  width={220}
+                  height={300}
+                  style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                  quality={75}
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: '220px' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
+                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
+                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
+                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+                  {paymentMethod === 'cod'
+                    ? t('checkout.paymentInstructionCod').replace('{amount}', deliveryFee.toFixed(2))
+                    : t('checkout.paymentInstruction')}
+                </p>
+
+                <label
+                  htmlFor="paymentAccountName"
+                  style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}
+                >
+                  {t('checkout.paymentAccountName')}
+                </label>
+                <input
+                  id="paymentAccountName"
+                  type="text"
+                  value={paymentAccountName}
+                  onChange={(e) => setPaymentAccountName(e.target.value)}
+                  placeholder={t('checkout.paymentAccountNamePlaceholder')}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    marginBottom: '1rem'
+                  }}
+                />
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleUploadProof(file);
+                    }
+                  }}
+                />
+                {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
+                {paymentProofUrl && !uploading && (
+                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
+                )}
+              </div>
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
               <button
@@ -841,7 +888,7 @@ export default function CheckoutPage() {
                 disabled={
                   placingOrder ||
                   uploading ||
-                  (paymentMethod === 'touch_n_go' && (!paymentProofUrl || !paymentAccountName.trim()))
+                  ((paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && (!paymentProofUrl || !paymentAccountName.trim()))
                 }
                 style={{
                   padding: '0.6rem 1.2rem',
@@ -850,7 +897,7 @@ export default function CheckoutPage() {
                   background: placingOrder ? '#9ca3af' : '#f97316',
                   color: '#fff',
                   fontWeight: 600,
-                  cursor: placingOrder || uploading || !paymentProofUrl ? 'not-allowed' : 'pointer'
+                  cursor: placingOrder || uploading || ((paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && !paymentProofUrl) ? 'not-allowed' : 'pointer'
                 }}
               >
                 {placingOrder ? t('checkout.placingOrder') : t('checkout.submitOrder')}

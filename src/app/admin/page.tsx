@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import AddProductForm from '@/components/AddProductForm';
@@ -34,6 +34,10 @@ export default function AdminPanel() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [ordersFilter, setOrdersFilter] = useState<AdminOrderStatus>('all');
   const [orderActionLoading, setOrderActionLoading] = useState<string | null>(null);
+  const [soundBlocked, setSoundBlocked] = useState(false);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const beepIntervalRef = useRef<number | null>(null);
 
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
   const [paymentForm, setPaymentForm] = useState({
@@ -48,6 +52,8 @@ export default function AdminPanel() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
 
+  const pendingCount = orders.filter((order) => order.status === 'pending').length;
+  
   
   // Check authentication and redirect if not authenticated
   useEffect(() => {
@@ -72,6 +78,78 @@ export default function AdminPanel() {
       loadPaymentSettings();
     }
   }, [status, activeTab]);
+
+  const stopBeepLoop = () => {
+    if (beepIntervalRef.current !== null) {
+      window.clearInterval(beepIntervalRef.current);
+      beepIntervalRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.suspend().catch(() => undefined);
+    }
+  };
+
+  const playBeep = () => {
+    const audioContext = audioContextRef.current;
+    if (!audioContext) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const now = audioContext.currentTime;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.2);
+  };
+
+  const startBeepLoop = async () => {
+    try {
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        audioContextRef.current = new AudioContext();
+      }
+
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+    } catch (error) {
+      console.error('Unable to start sound notification:', error);
+      setSoundBlocked(true);
+      return;
+    }
+
+    setSoundBlocked(false);
+
+    if (beepIntervalRef.current !== null) {
+      return;
+    }
+
+    playBeep();
+    beepIntervalRef.current = window.setInterval(playBeep, 1200);
+  };
+
+  useEffect(() => {
+    return () => stopBeepLoop();
+  }, []);
+
+  useEffect(() => {
+    const hasPendingOrders = orders.some((order) => order.status === 'pending');
+
+    if (status !== 'authenticated' || !hasPendingOrders) {
+      stopBeepLoop();
+      return;
+    }
+
+    startBeepLoop();
+  }, [orders, status]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -697,6 +775,47 @@ export default function AdminPanel() {
               </div>
             </div>
 
+            {pendingCount > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1rem',
+                padding: '0.75rem 1rem',
+                borderRadius: '10px',
+                border: '1px solid #fcd34d',
+                background: '#fef3c7',
+                color: '#92400e',
+                marginBottom: '1.5rem'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>
+                    New pending orders: {pendingCount}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#b45309' }}>
+                    Sound will loop until all pending orders are approved, rejected, or cancelled.
+                  </div>
+                </div>
+                {soundBlocked && (
+                  <button
+                    onClick={startBeepLoop}
+                    style={{
+                      padding: '0.5rem 0.875rem',
+                      background: '#92400e',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    Enable sound
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Status Filter Tabs */}
             <div style={{
               display: 'flex',
@@ -1234,11 +1353,20 @@ export default function AdminPanel() {
                           color: '#475569'
                         }}>
                           {selectedOrder.paymentMethod === 'cod'
-                            ? 'Cash on Delivery (COD)'
+                            ? 'COD (Delivery fee paid via TnG)'
                             : selectedOrder.paymentMethod === 'touch_n_go'
                               ? "Touch 'n Go"
                               : selectedOrder.paymentMethod || "Touch 'n Go"}
                         </div>
+                        {selectedOrder.paymentMethod === 'cod' && (
+                          <div style={{
+                            fontSize: '0.75rem',
+                            color: '#64748b',
+                            marginTop: '0.25rem'
+                          }}>
+                            Delivery fee paid: {selectedOrder.deliveryFeePaid === undefined ? 'Unknown' : selectedOrder.deliveryFeePaid ? 'Yes' : 'No'}
+                          </div>
+                        )}
                           {selectedOrder.paymentSubmittedAt && (
                             <div style={{
                               fontSize: '0.75rem',
