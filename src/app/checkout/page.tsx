@@ -674,7 +674,7 @@ export default function CheckoutPage() {
               maxWidth: '420px',
               background: '#fff',
               borderRadius: '12px',
-              padding: '1.5rem',
+              padding: '1.5rem 1.5rem calc(1.5rem + 140px)',
               textAlign: 'center'
             }}
             onClick={(event) => event.stopPropagation()}
@@ -731,7 +731,10 @@ export default function CheckoutPage() {
               background: '#fff',
               borderRadius: '12px',
               padding: '1.5rem',
-              position: 'relative'
+              position: 'relative',
+              maxHeight: 'calc(100vh - 3rem)',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch'
             }}
             onClick={(event) => event.stopPropagation()}
           >
@@ -803,7 +806,7 @@ export default function CheckoutPage() {
             {paymentMethod === 'cod' && (
               <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', marginBottom: '1rem' }}>
                 <p style={{ margin: 0, color: '#92400e' }}>
-                  {t('checkout.paymentInstructionCod').replace('{amount}', deliveryFee.toFixed(2))}
+                  {t('checkout.paymentAntiFraudNotice')}
                 </p>
               </div>
             )}
@@ -823,10 +826,8 @@ export default function CheckoutPage() {
                 <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
                 <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
                 <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
-                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                  {paymentMethod === 'cod'
-                    ? t('checkout.paymentInstructionCod').replace('{amount}', deliveryFee.toFixed(2))
-                    : t('checkout.paymentInstruction')}
+                <p style={{ color: '#6b7280', marginBottom: '1rem', whiteSpace: 'pre-line' }}>
+                  {t('checkout.paymentAccountMismatchNotice')}
                 </p>
 
                 <label

@@ -144,6 +144,10 @@ export const translations = {
       paymentWalletNo: 'Wallet No',
       paymentInstruction: 'Transfer the total amount and upload your payment screenshot below.',
       paymentInstructionCod: 'Pay the delivery fee (RM{amount}) via Touch \'n Go and upload the receipt. Remaining balance is cash on delivery.',
+      paymentAntiFraudNotice:
+        'For security and anti-fraud purposes, customers are strictly required to use a bank account under the SAME NAME as the registered account when making any payment.',
+      paymentAccountMismatchNotice:
+        'Payments made from third-party or mismatched bank account names may be delayed, rejected, or not credited without prior notice.\nThe Company shall not be held responsible for any losses arising from non-compliance.',
       uploadingProof: 'Uploading proof...',
       proofUploaded: 'Payment proof uploaded.',
       orderSummary: 'Order Summary',
@@ -884,6 +888,9 @@ export const translations = {
       paymentWalletNo: '钱包号',
       paymentInstruction: '请转账总金额并在下方上传付款截图。',
       paymentInstructionCod: '请通过 Touch \'n Go 支付运费（RM{amount}）并上传凭证，其余金额货到付款。',
+      paymentAntiFraudNotice: '为保障交易安全并防止任何诈骗行为，\n顾客在进行转账时，必须使用与注册账号姓名一致的银行账户。',
+      paymentAccountMismatchNotice:
+        '任何使用第三方或姓名不一致的银行账户进行的转账，款项可能被延迟、拒绝或无法入账，恕不另行通知。\n因未遵守此规定而产生的任何损失，本公司概不负责。',
       uploadingProof: '正在上传凭证...',
       proofUploaded: '付款凭证已上传。',
       orderSummary: '订单摘要',
