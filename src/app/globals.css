@@ -2806,8 +2806,18 @@ h1, h2, h3 {
 
 .mobile-bottom-referral {
   flex: 1;
+  flex-direction: column;
   justify-content: center;
+  gap: 0.15rem;
   min-width: 0;
+}
+
+.mobile-referral-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .mobile-referral-text {
@@ -2819,15 +2829,6 @@ h1, h2, h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
-}
-
-.mobile-bottom-menu .hamburger-premium {
-  width: 22px;
-  height: 16px;
-}
-
-.mobile-bottom-menu .hamburger-premium span {
-  height: 2px;
 }
 
 .mobile-cart-badge {

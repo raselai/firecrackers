@@ -496,25 +496,13 @@ export default function Navbar() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6H20M4 12H20M4 18H14"/>
             </svg>
+            <span className="mobile-referral-label">{t('accountProfile.referralCode')}</span>
             <span className="mobile-referral-text">
               {referralCopied ? t('accountReferrals.copied') : referralCode}
             </span>
           </button>
         )}
 
-        <button
-          type="button"
-          className="mobile-bottom-item mobile-bottom-menu"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label={t('nav.toggleMobileMenu')}
-        >
-          <span className={`hamburger-premium ${isMobileMenuOpen ? 'open' : ''}`}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-          <span>{t('nav.menu')}</span>
-        </button>
       </div>
     </nav>
   );
