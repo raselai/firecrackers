@@ -1,29 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { nanoid } from 'nanoid';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
 import { useI18n } from '@/i18n/I18nProvider';
-import { getPaymentSettings } from '@/lib/paymentSettingsService';
-import { PaymentSettings } from '@/types/paymentSettings';
 import {
   calculateMaxVouchers,
   calculateVoucherDiscount,
   calculateRegistrationDiscount,
-  createOrder,
   validateVoucherUsage
 } from '@/lib/orderService';
-import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
 import { Address } from '@/types/user';
-import { deliveryAreas, getDeliveryFee, getDeliveryAreaName } from '@/app/data/deliveryAreas';
+import { getDeliveryFee, getDeliveryAreaName } from '@/app/data/deliveryAreas';
 
-const WALLET_NAME = 'Low Chee tong';
-const WALLET_NUMBER = '160836785359';
-const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+const CHECKOUT_DRAFT_KEY = 'checkoutDraft';
 
 export default function CheckoutPage() {
   const { items, loading: cartLoading, subtotal, clearCart } = useCart();
@@ -34,18 +26,8 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [promotionType, setPromotionType] = useState<'none' | 'referral' | 'registration'>('none');
   const [claimedVouchers, setClaimedVouchers] = useState<number[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [paymentProofUrl, setPaymentProofUrl] = useState('');
-  const [paymentProofPath, setPaymentProofPath] = useState('');
-  const [paymentAccountName, setPaymentAccountName] = useState('');
-  const [placingOrder, setPlacingOrder] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'touch_n_go' | 'cod'>('touch_n_go');
   const [error, setError] = useState('');
-  const [orderId] = useState(() => `ORD-${nanoid(10).toUpperCase()}`);
-  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
-  const [paymentSettingsError, setPaymentSettingsError] = useState('');
-  const [paymentSettingsLoading, setPaymentSettingsLoading] = useState(true);
   const [selectedDeliveryArea, setSelectedDeliveryArea] = useState<string>('');
   const [addressAlertOpen, setAddressAlertOpen] = useState(false);
 
@@ -66,34 +48,6 @@ export default function CheckoutPage() {
     if (savedArea) {
       setSelectedDeliveryArea(savedArea);
     }
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadPaymentSettings = async () => {
-      try {
-        const settings = await getPaymentSettings();
-        if (isMounted) {
-          setPaymentSettings(settings);
-        }
-      } catch (error) {
-        console.error('Error loading payment settings:', error);
-        if (isMounted) {
-          setPaymentSettingsError('Failed to load payment settings. Using defaults.');
-        }
-      } finally {
-        if (isMounted) {
-          setPaymentSettingsLoading(false);
-        }
-      }
-    };
-
-    loadPaymentSettings();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -141,116 +95,9 @@ export default function CheckoutPage() {
   const totalDiscount = voucherDiscount + registrationDiscount;
   const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
-  const paymentQrUrl = paymentSettings?.qrImageUrl || '/images/ewallet-qr.jpg';
-  const paymentWalletName = paymentSettings?.walletName || WALLET_NAME;
-  const paymentWalletNumber = paymentSettings?.walletNumber || WALLET_NUMBER;
-
   const selectedAddress = useMemo<Address | undefined>(() => {
     return addresses.find(addr => addr.id === selectedAddressId);
   }, [addresses, selectedAddressId]);
-
-  const handleUploadProof = async (file: File) => {
-    const userId = firebaseUser?.uid || user?.uid;
-    if (!userId) return;
-
-    if (!file.type.startsWith('image/')) {
-      setError(t('checkout.errors.imageFileOnly'));
-      return;
-    }
-
-    if (file.size > MAX_UPLOAD_SIZE) {
-      setError(t('checkout.errors.imageTooLarge'));
-      return;
-    }
-
-    setError('');
-    setUploading(true);
-
-    try {
-      const path = generatePaymentProofPath(userId, orderId, file.name);
-      const url = await uploadImage(file, path);
-      setPaymentProofUrl(url);
-      setPaymentProofPath(path);
-    } catch (uploadError) {
-      console.error('Error uploading payment proof:', uploadError);
-      setError(t('checkout.errors.uploadFailed'));
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handlePlaceOrder = async () => {
-    const userId = firebaseUser?.uid || user?.uid;
-    if (!userId || !user) return;
-
-    if (items.length === 0) {
-      setError(t('checkout.errors.cartEmpty'));
-      return;
-    }
-
-    if (addresses.length === 0) {
-      setError(t('checkout.errors.addressRequired'));
-      setAddressAlertOpen(true);
-      return;
-    }
-
-    if (!selectedAddress) {
-      setError(t('checkout.errors.addressSelect'));
-      setAddressAlertOpen(true);
-      return;
-    }
-
-    if (paymentMethod === 'touch_n_go' || paymentMethod === 'cod') {
-      if (!paymentProofUrl) {
-        setError(t('checkout.errors.proofRequired'));
-        return;
-      }
-
-      if (!paymentAccountName.trim()) {
-        setError(t('checkout.errors.paymentAccountNameRequired'));
-        return;
-      }
-    }
-
-    if (promotionType === 'referral') {
-      const validation = validateVoucherUsage(items, claimedCount, user.vouchers);
-      if (!validation.valid) {
-        setError(validation.message || t('checkout.errors.voucherValidationFailed'));
-        return;
-      }
-    }
-
-    setError('');
-    setPlacingOrder(true);
-
-    try {
-      await createOrder({
-        orderId,
-        userId,
-        items,
-        deliveryAddress: selectedAddress,
-        deliveryArea: selectedDeliveryArea,
-        deliveryAreaName,
-        deliveryFee,
-        vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
-        promotionType,
-        paymentMethod,
-        paymentAccountName: paymentAccountName.trim() ? paymentAccountName.trim() : undefined,
-        paymentProofUrl: paymentProofUrl || undefined,
-        paymentProofPath: paymentProofPath || undefined
-      });
-
-      // Clear delivery area from localStorage after successful order
-      localStorage.removeItem('selectedDeliveryArea');
-      await clearCart();
-      router.push('/account/orders');
-    } catch (orderError) {
-      console.error('Error placing order:', orderError);
-      setError(t('checkout.errors.orderFailed'));
-    } finally {
-      setPlacingOrder(false);
-    }
-  };
 
   const handleProceedToPayment = () => {
     if (!user) return;
@@ -279,12 +126,21 @@ export default function CheckoutPage() {
     }
 
     setError('');
-    setPaymentModalOpen(true);
-  };
-
-  const handleClosePaymentModal = () => {
-    if (uploading) return;
-    setPaymentModalOpen(false);
+    try {
+      sessionStorage.setItem(
+        CHECKOUT_DRAFT_KEY,
+        JSON.stringify({
+          selectedAddressId,
+          promotionType,
+          claimedVouchers,
+          paymentMethod,
+          selectedDeliveryArea
+        })
+      );
+    } catch (storageError) {
+      console.error('Failed to store checkout draft:', storageError);
+    }
+    router.push('/checkout/payment');
   };
 
   if (authLoading || cartLoading || (firebaseUser && !user)) {
@@ -633,21 +489,20 @@ export default function CheckoutPage() {
           <button
             onClick={handleProceedToPayment}
             disabled={
-              placingOrder ||
-              uploading
+              false
             }
             style={{
               width: '100%',
               padding: '0.75rem',
-              background: placingOrder ? '#9ca3af' : '#f97316',
+              background: '#f97316',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              cursor: placingOrder ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               fontWeight: 'bold'
             }}
           >
-            {placingOrder ? t('checkout.placingOrder') : t('checkout.proceedToPayment')}
+            {t('checkout.proceedToPayment')}
           </button>
         </div>
       </div>
@@ -704,209 +559,6 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      {paymentModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.55)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1.5rem',
-            zIndex: 50
-          }}
-          onClick={() => {
-            if (!uploading) {
-              handleClosePaymentModal();
-            }
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '720px',
-              background: '#fff',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              position: 'relative',
-              maxHeight: 'calc(100vh - 3rem)',
-              overflowY: 'auto',
-              WebkitOverflowScrolling: 'touch'
-            }}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={{ margin: 0 }}>{t('checkout.payment')}</h2>
-              <button
-                type="button"
-                onClick={handleClosePaymentModal}
-                disabled={uploading}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: '1.25rem',
-                  cursor: uploading ? 'not-allowed' : 'pointer',
-                  color: '#6b7280'
-                }}
-                aria-label={t('checkout.close')}
-              >
-                &times;
-              </button>
-            </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-              <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{t('checkout.paymentMethodLabel')}</p>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('touch_n_go')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '999px',
-                    border: paymentMethod === 'touch_n_go' ? '2px solid #f97316' : '1px solid #d1d5db',
-                    background: paymentMethod === 'touch_n_go' ? '#fff7ed' : '#fff',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {t('checkout.paymentMethodTng')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPaymentMethod('cod');
-                    setPaymentAccountName('');
-                    setPaymentProofUrl('');
-                    setPaymentProofPath('');
-                  }}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '999px',
-                    border: paymentMethod === 'cod' ? '2px solid #f97316' : '1px solid #d1d5db',
-                    background: paymentMethod === 'cod' ? '#fff7ed' : '#fff',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {t('checkout.paymentMethodCod')}
-                </button>
-              </div>
-            </div>
-
-            {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsLoading && (
-              <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
-            )}
-            {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsError && (
-              <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
-            )}
-
-            {paymentMethod === 'cod' && (
-              <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', marginBottom: '1rem' }}>
-                <p style={{ margin: 0, color: '#92400e' }}>
-                  {t('checkout.paymentAntiFraudNotice')}
-                </p>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ width: '220px' }}>
-                <Image
-                  src={paymentQrUrl}
-                  alt={t('checkout.paymentMethod')}
-                  width={220}
-                  height={300}
-                  style={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                  quality={75}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: '220px' }}>
-                <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
-                <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
-                <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
-                <p style={{ color: '#6b7280', marginBottom: '1rem', whiteSpace: 'pre-line' }}>
-                  {t('checkout.paymentAccountMismatchNotice')}
-                </p>
-
-                <label
-                  htmlFor="paymentAccountName"
-                  style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 600 }}
-                >
-                  {t('checkout.paymentAccountName')}
-                </label>
-                <input
-                  id="paymentAccountName"
-                  type="text"
-                  value={paymentAccountName}
-                  onChange={(e) => setPaymentAccountName(e.target.value)}
-                  placeholder={t('checkout.paymentAccountNamePlaceholder')}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    marginBottom: '1rem'
-                  }}
-                />
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleUploadProof(file);
-                    }
-                  }}
-                />
-                {uploading && <p style={{ marginTop: '0.5rem' }}>{t('checkout.uploadingProof')}</p>}
-                {paymentProofUrl && !uploading && (
-                  <p style={{ marginTop: '0.5rem', color: '#059669' }}>{t('checkout.proofUploaded')}</p>
-                )}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-              <button
-                type="button"
-                onClick={handleClosePaymentModal}
-                disabled={uploading}
-                style={{
-                  padding: '0.6rem 1.2rem',
-                  borderRadius: '6px',
-                  border: '1px solid #d1d5db',
-                  background: '#fff',
-                  cursor: uploading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {t('checkout.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handlePlaceOrder}
-                disabled={
-                  placingOrder ||
-                  uploading ||
-                  ((paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && (!paymentProofUrl || !paymentAccountName.trim()))
-                }
-                style={{
-                  padding: '0.6rem 1.2rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  background: placingOrder ? '#9ca3af' : '#f97316',
-                  color: '#fff',
-                  fontWeight: 600,
-                  cursor: placingOrder || uploading || ((paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && !paymentProofUrl) ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {placingOrder ? t('checkout.placingOrder') : t('checkout.submitOrder')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

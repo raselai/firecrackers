@@ -115,6 +115,7 @@ export const translations = {
     checkout: {
       loading: 'Loading checkout...',
       title: 'Checkout',
+      back: 'Back to checkout',
       cartEmpty: 'Your cart is empty.',
       continueShopping: 'Continue shopping',
       shippingAddress: 'Shipping Address',
@@ -859,6 +860,7 @@ export const translations = {
     checkout: {
       loading: '正在加载结账...',
       title: '结账',
+      back: '返回结账',
       cartEmpty: '购物车为空。',
       continueShopping: '继续购物',
       shippingAddress: '收货地址',
