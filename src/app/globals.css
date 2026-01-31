@@ -2579,6 +2579,8 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  z-index: 10002;
 }
 
 .navbar-mobile-auth-link,
