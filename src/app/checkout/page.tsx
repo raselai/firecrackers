@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [selectedDeliveryArea, setSelectedDeliveryArea] = useState<string>('');
   const [addressAlertOpen, setAddressAlertOpen] = useState(false);
+  const [codInfoOpen, setCodInfoOpen] = useState(false);
 
   const addresses = user?.addresses || [];
   const deliveryFee = getDeliveryFee(selectedDeliveryArea);
@@ -417,9 +418,6 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={() => {
                     setPaymentMethod('touch_n_go');
-                    setPaymentAccountName('');
-                    setPaymentProofUrl('');
-                    setPaymentProofPath('');
                   }}
                   style={{
                     padding: '0.5rem 1rem',
@@ -436,9 +434,7 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={() => {
                     setPaymentMethod('cod');
-                    setPaymentAccountName('');
-                    setPaymentProofUrl('');
-                    setPaymentProofPath('');
+                    setCodInfoOpen(true);
                   }}
                   style={{
                     padding: '0.5rem 1rem',
@@ -543,6 +539,56 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={() => setAddressAlertOpen(false)}
+              style={{
+                padding: '0.6rem 1.4rem',
+                borderRadius: '6px',
+                border: 'none',
+                background: '#f97316',
+                color: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {t('checkout.close')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {codInfoOpen && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem',
+            zIndex: 60
+          }}
+          onClick={() => setCodInfoOpen(false)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              textAlign: 'center'
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>{t('checkout.codPaymentNoticeTitle')}</h3>
+            <p style={{ marginBottom: '1.25rem', color: '#6b7280' }}>
+              {t('checkout.codPaymentNotice')}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCodInfoOpen(false)}
               style={{
                 padding: '0.6rem 1.4rem',
                 borderRadius: '6px',

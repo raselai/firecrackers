@@ -24,6 +24,9 @@ export const translations = {
       heroTitleSuffix: 'in fireworks joy',
       heroSlide2: 'Only Klang Valley can COD\n只有巴生谷,可以货到付款',
       heroSlide3: 'Stay Home. Fireworks Delivered\n「人在家，烟花到」',
+      heroSlide4Prefix: 'Enjoy FREE delivery with a minimum spend of',
+      heroSlide4Highlight: 'RM3,000',
+      heroSlide4Suffix: 'per order',
       heroSubtitle: 'Share your code, light up their first order, and celebrate together.',
       newArrivalsTitle: 'New Arrivals',
       newArrivalsSubtitle: 'Discover our latest explosive selections',
@@ -145,6 +148,8 @@ export const translations = {
       paymentWalletNo: 'Wallet No',
       paymentInstruction: 'Transfer the total amount and upload your payment screenshot below.',
       paymentInstructionCod: 'Pay the delivery fee (RM{amount}) via Touch \'n Go and upload the receipt. Remaining balance is cash on delivery.',
+      codPaymentNoticeTitle: 'Cash on Delivery',
+      codPaymentNotice: 'Cash on Delivery selected. Please pay the delivery fee now; the remaining amount will be collected when your order is delivered.',
       paymentAntiFraudNotice:
         'For security and anti-fraud purposes, customers are strictly required to use a bank account under the SAME NAME as the registered account when making any payment.',
       paymentAccountMismatchNotice:
@@ -769,6 +774,9 @@ export const translations = {
       heroTitleSuffix: '烟花惊喜',
       heroSlide2: '只有巴生谷，可以货到付款',
       heroSlide3: '人在家，烟花到',
+      heroSlide4Prefix: '单笔订单消费满',
+      heroSlide4Highlight: 'RM3,000',
+      heroSlide4Suffix: '即可享有免费运送服务',
       heroSubtitle: '分享你的邀请码，点亮他们的首单，一起庆祝。',
       newArrivalsTitle: '新品上架',
       newArrivalsSubtitle: '探索我们的最新爆款精选',
@@ -890,6 +898,8 @@ export const translations = {
       paymentWalletNo: '钱包号',
       paymentInstruction: '请转账总金额并在下方上传付款截图。',
       paymentInstructionCod: '请通过 Touch \'n Go 支付运费（RM{amount}）并上传凭证，其余金额货到付款。',
+      codPaymentNoticeTitle: '货到付款',
+      codPaymentNotice: '已选择货到付款。请先支付运费，剩余金额将在送货时收取。',
       paymentAntiFraudNotice: '为保障交易安全并防止任何诈骗行为，\n顾客在进行转账时，必须使用与注册账号姓名一致的银行账户。',
       paymentAccountMismatchNotice:
         '任何使用第三方或姓名不一致的银行账户进行的转账，款项可能被延迟、拒绝或无法入账，恕不另行通知。\n因未遵守此规定而产生的任何损失，本公司概不负责。',

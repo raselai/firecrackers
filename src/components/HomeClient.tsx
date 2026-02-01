@@ -145,6 +145,13 @@ export default function HomeClient({ products }: HomeClientProps) {
               <div className="hero-title-slide">
                 {t('home.heroSlide3')}
               </div>
+              <div className="hero-title-slide hero-title-slide-compact">
+                {t('home.heroSlide4Prefix')}{' '}
+                <span className="hero-highlight">
+                  {t('home.heroSlide4Highlight')}
+                </span>{' '}
+                {t('home.heroSlide4Suffix')}
+              </div>
             </div>
             <p className="hero-subtitle">
               {t('home.heroSubtitle')}
