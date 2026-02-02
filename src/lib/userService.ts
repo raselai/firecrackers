@@ -84,9 +84,15 @@ export async function getUserById(uid: string): Promise<User | null> {
     }
 
     const data = userDoc.data();
+    const referralCount = typeof data.referralCount === 'number' ? data.referralCount : 0;
+    const vouchers = typeof data.vouchers === 'number' ? data.vouchers : 0;
+    const vouchersUsed = typeof data.vouchersUsed === 'number' ? data.vouchersUsed : 0;
     return {
       ...data,
       uid: data.uid || userDoc.id,
+      referralCount,
+      vouchers,
+      vouchersUsed,
       cart: data.cart || [],
       addresses: data.addresses || [],
       hasRegistrationVoucher: data.hasRegistrationVoucher ?? false,
@@ -117,8 +123,14 @@ export async function getUserByReferralCode(code: string): Promise<User | null> 
     }
 
     const data = querySnapshot.docs[0].data();
+    const referralCount = typeof data.referralCount === 'number' ? data.referralCount : 0;
+    const vouchers = typeof data.vouchers === 'number' ? data.vouchers : 0;
+    const vouchersUsed = typeof data.vouchersUsed === 'number' ? data.vouchersUsed : 0;
     return {
       ...data,
+      referralCount,
+      vouchers,
+      vouchersUsed,
       createdAt: data.createdAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date()
     } as User;
@@ -345,3 +357,4 @@ export async function useVouchers(
     throw error;
   }
 }
+
