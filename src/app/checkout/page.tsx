@@ -13,7 +13,11 @@ import {
   validateVoucherUsage
 } from '@/lib/orderService';
 import { Address } from '@/types/user';
-import { getDeliveryFee, getDeliveryAreaName } from '@/app/data/deliveryAreas';
+import {
+  calculateEffectiveDeliveryFee,
+  getCodRequiredPaymentAmount,
+  getDeliveryAreaName
+} from '@/app/data/deliveryAreas';
 
 const CHECKOUT_DRAFT_KEY = 'checkoutDraft';
 
@@ -33,8 +37,9 @@ export default function CheckoutPage() {
   const [codInfoOpen, setCodInfoOpen] = useState(false);
 
   const addresses = user?.addresses || [];
-  const deliveryFee = getDeliveryFee(selectedDeliveryArea);
+  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
+  const codRequiredPaymentAmount = getCodRequiredPaymentAmount(deliveryFee);
 
   useEffect(() => {
     if (authLoading) return;
@@ -474,7 +479,7 @@ export default function CheckoutPage() {
           {selectedDeliveryArea && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>
-              <span>RM {deliveryFee.toLocaleString()}</span>
+              <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
@@ -584,7 +589,7 @@ export default function CheckoutPage() {
           >
             <h3 style={{ marginTop: 0 }}>{t('checkout.codPaymentNoticeTitle')}</h3>
             <p style={{ marginBottom: '1.25rem', color: '#6b7280' }}>
-              {t('checkout.codPaymentNotice')}
+              {t('checkout.paymentInstructionCod').replace('{amount}', codRequiredPaymentAmount.toFixed(2))}
             </p>
             <button
               type="button"
@@ -608,3 +613,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

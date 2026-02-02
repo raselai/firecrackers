@@ -7,17 +7,20 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
 import { useI18n } from '@/i18n/I18nProvider';
-import { deliveryAreas, getDeliveryFee } from '@/app/data/deliveryAreas';
+import { calculateEffectiveDeliveryFee, deliveryAreas } from '@/app/data/deliveryAreas';
+import { fetchProducts } from '@/lib/productService';
+import { getLocalizedProductName } from '@/lib/utils';
 
 export default function CartPage() {
   const { items, loading, subtotal, updateQuantity, removeItem } = useCart();
   const { firebaseUser, loading: authLoading } = useUser();
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
+  const [localizedProductNames, setLocalizedProductNames] = useState<Record<string, string>>({});
 
-  const deliveryFee = getDeliveryFee(selectedDeliveryArea);
+  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
@@ -33,6 +36,29 @@ export default function CartPage() {
       setSelectedDeliveryArea(savedArea);
     }
   }, [firebaseUser, authLoading, router]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProductNames = async () => {
+      const products = await fetchProducts();
+      if (cancelled) return;
+
+      const namesById: Record<string, string> = {};
+      products.forEach((product) => {
+        const id = String(product.id);
+        namesById[id] = getLocalizedProductName(product, locale) || product.name || '';
+      });
+
+      setLocalizedProductNames(namesById);
+    };
+
+    loadProductNames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   const handleProceedToCheckout = () => {
     // Save delivery area to localStorage for checkout page
@@ -379,7 +405,9 @@ export default function CartPage() {
           <div className="cart-content">
             {/* Cart Items */}
             <div className="cart-items">
-              {items.map((item, index) => (
+              {items.map((item, index) => {
+                const displayName = localizedProductNames[item.productId] || item.productName;
+                return (
                 <div
                   key={item.productId}
                   className="cart-item"
@@ -389,7 +417,7 @@ export default function CartPage() {
                     {item.productImage ? (
                       <Image
                         src={item.productImage}
-                        alt={item.productName}
+                        alt={displayName}
                         fill
                         style={{ objectFit: 'cover' }}
                         sizes="96px"
@@ -401,7 +429,7 @@ export default function CartPage() {
                   </div>
 
                   <div className="item-details">
-                    <h3 className="item-name">{item.productName}</h3>
+                    <h3 className="item-name">{displayName}</h3>
                     <p className="item-price">RM {item.price.toLocaleString()}</p>
 
                     <div className="item-actions">
@@ -433,7 +461,8 @@ export default function CartPage() {
                     RM {(item.price * item.quantity).toLocaleString()}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Cart Summary */}
@@ -465,7 +494,7 @@ export default function CartPage() {
               {selectedDeliveryArea && (
                 <div className="summary-row">
                   <span>{t('cart.deliveryFee')}</span>
-                  <span>RM {deliveryFee.toLocaleString()}</span>
+                  <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
                 </div>
               )}
 

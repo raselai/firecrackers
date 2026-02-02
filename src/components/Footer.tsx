@@ -3,6 +3,22 @@
 import { useI18n } from '@/i18n/I18nProvider';
 import { categories } from '@/app/data/categories';
 
+const categoryKeyByHref: Record<string, string> = {
+  '/categories/red-crackers-series': 'redCrackersSeries',
+  '/categories/kids-series': 'kidsSeries',
+  '/categories/handle-series': 'handleSeries',
+  '/categories/fountain-series': 'fountainSeries',
+  '/categories/4inch-firework-series': 'firework4InchSeries',
+  '/categories/6inch-firework-series': 'firework6InchSeries',
+  '/categories/7inch-firework-series': 'firework7InchSeries',
+  '/categories/8inch-firework-series': 'firework8InchSeries',
+  '/categories/10inch-firework-series': 'firework10InchSeries',
+  '/categories/11inch-firework-series': 'firework11InchSeries',
+  '/categories/12inch-firework-series': 'firework12InchSeries',
+  '/categories/big-hole-firework-series': 'bigHoleFireworkSeries',
+  '/categories/gift-basket': 'giftBasket'
+};
+
 export default function Footer() {
   const { t } = useI18n();
   const categoryColumns = [[], [], []] as typeof categories[];
@@ -44,7 +60,11 @@ export default function Footer() {
                 <ul className="footer-links-premium" key={`footer-category-col-${columnIndex}`}>
                   {column.map((category) => (
                     <li key={category.href}>
-                      <a href={category.href} className="footer-link-premium">{category.name}</a>
+                      <a href={category.href} className="footer-link-premium">
+                        {categoryKeyByHref[category.href]
+                          ? t(`nav.categorySeries.${categoryKeyByHref[category.href]}`)
+                          : category.name}
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -65,3 +85,4 @@ export default function Footer() {
     </footer>
   );
 }
+

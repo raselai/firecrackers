@@ -4,6 +4,9 @@ export interface DeliveryArea {
   fee: number;
 }
 
+export const FREE_DELIVERY_THRESHOLD = 3000;
+export const COD_MINIMUM_PAYMENT_WHEN_FREE_DELIVERY = 200;
+
 export const deliveryAreas: DeliveryArea[] = [
   { id: 'kuala-lumpur', name: 'Kuala Lumpur (city center)', fee: 100 },
   { id: 'petaling-jaya', name: 'Petaling Jaya', fee: 100 },
@@ -32,3 +35,19 @@ export function getDeliveryAreaName(areaId: string): string {
   const area = deliveryAreas.find(a => a.id === areaId);
   return area?.name ?? '';
 }
+
+export function calculateEffectiveDeliveryFee(
+  areaId: string,
+  subtotal: number
+): { baseFee: number; fee: number; isFreeDelivery: boolean } {
+  const baseFee = getDeliveryFee(areaId);
+  const isFreeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD;
+  const fee = isFreeDelivery ? 0 : baseFee;
+
+  return { baseFee, fee, isFreeDelivery };
+}
+
+export function getCodRequiredPaymentAmount(deliveryFee: number): number {
+  return deliveryFee === 0 ? COD_MINIMUM_PAYMENT_WHEN_FREE_DELIVERY : deliveryFee;
+}
+

@@ -19,7 +19,11 @@ import {
 } from '@/lib/orderService';
 import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
 import { Address } from '@/types/user';
-import { getDeliveryFee, getDeliveryAreaName } from '@/app/data/deliveryAreas';
+import {
+  calculateEffectiveDeliveryFee,
+  getCodRequiredPaymentAmount,
+  getDeliveryAreaName
+} from '@/app/data/deliveryAreas';
 
 const WALLET_NAME = 'Low Chee tong';
 const WALLET_NUMBER = '160836785359';
@@ -148,8 +152,9 @@ export default function CheckoutPaymentPage() {
     return calculateRegistrationDiscount(subtotal);
   }, [promotionType, subtotal]);
   const totalDiscount = voucherDiscount + registrationDiscount;
-  const deliveryFee = getDeliveryFee(selectedDeliveryArea);
+  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
+  const codRequiredPaymentAmount = getCodRequiredPaymentAmount(deliveryFee);
   const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
   const selectedAddress = useMemo<Address | undefined>(() => {
@@ -235,7 +240,6 @@ export default function CheckoutPaymentPage() {
         deliveryAddress: selectedAddress,
         deliveryArea: selectedDeliveryArea,
         deliveryAreaName,
-        deliveryFee,
         vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
         promotionType,
         paymentMethod,
@@ -348,6 +352,9 @@ export default function CheckoutPaymentPage() {
 
           {paymentMethod === 'cod' && (
             <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', marginBottom: '1rem' }}>
+              <p style={{ margin: '0 0 0.35rem', color: '#92400e', fontWeight: 600 }}>
+                {t('checkout.paymentInstructionCod').replace('{amount}', codRequiredPaymentAmount.toFixed(2))}
+              </p>
               <p style={{ margin: 0, color: '#92400e' }}>
                 {t('checkout.paymentAntiFraudNotice')}
               </p>
@@ -433,7 +440,7 @@ export default function CheckoutPaymentPage() {
           {selectedDeliveryArea && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>
-              <span>RM {deliveryFee.toLocaleString()}</span>
+              <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
@@ -466,3 +473,4 @@ export default function CheckoutPaymentPage() {
     </div>
   );
 }
+

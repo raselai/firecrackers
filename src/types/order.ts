@@ -15,7 +15,9 @@ export interface Order {
   // Delivery
   deliveryArea: string;          // Area ID (e.g., 'kuala-lumpur')
   deliveryAreaName: string;      // Display name (e.g., 'Kuala Lumpur (city center)')
+  baseDeliveryFee?: number;      // Delivery fee before free-delivery rule
   deliveryFee: number;           // Delivery fee amount
+  isFreeDelivery?: boolean;
   deliveryAddress: Address;
 
   // Payment
@@ -25,6 +27,7 @@ export interface Order {
   paymentProofPath?: string;
   paymentSubmittedAt?: Date;
   deliveryFeePaid?: boolean;
+  codRequiredPaymentAmount?: number;
 
   // Promotion tracking
   promotionType?: 'none' | 'referral' | 'registration';
@@ -52,3 +55,4 @@ export interface OrderItem {
   price: number;                 // Price per unit at time of order
   category?: string;             // Product category for voucher eligibility
 }
+

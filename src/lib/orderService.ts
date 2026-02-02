@@ -14,6 +14,11 @@ import { getUserById, useVouchers, useRegistrationVoucher } from './userService'
 import { Address } from '@/types/user';
 import { nanoid } from 'nanoid';
 import { createOrderStatusNotification } from './notificationService';
+import {
+  calculateEffectiveDeliveryFee,
+  getCodRequiredPaymentAmount,
+  getDeliveryAreaName
+} from '@/app/data/deliveryAreas';
 
 /**
  * Voucher validation result
@@ -168,8 +173,8 @@ export async function createOrder(params: {
   items: OrderItem[];
   deliveryAddress: Address;
   deliveryArea: string;
-  deliveryAreaName: string;
-  deliveryFee: number;
+  deliveryAreaName?: string;
+  deliveryFee?: number;
   vouchersToUse?: number;
   promotionType?: 'none' | 'referral' | 'registration';
   paymentProofUrl?: string;
@@ -184,8 +189,7 @@ export async function createOrder(params: {
       items,
       deliveryAddress,
       deliveryArea,
-      deliveryAreaName,
-      deliveryFee,
+      deliveryAreaName: deliveryAreaNameFromClient,
       vouchersToUse = 0,
       promotionType = 'none',
       paymentProofUrl,
@@ -207,6 +211,12 @@ export async function createOrder(params: {
 
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const { baseFee: baseDeliveryFee, fee: deliveryFee, isFreeDelivery } =
+      calculateEffectiveDeliveryFee(deliveryArea, subtotal);
+    const deliveryAreaName = getDeliveryAreaName(deliveryArea) || deliveryAreaNameFromClient || deliveryArea;
+    const codRequiredPaymentAmount = paymentMethod === 'cod'
+      ? getCodRequiredPaymentAmount(deliveryFee)
+      : undefined;
 
     let voucherDiscount = 0;
     let registrationDiscount = 0;
@@ -252,12 +262,15 @@ export async function createOrder(params: {
       registrationDiscount: registrationDiscount > 0 ? registrationDiscount : undefined,
       deliveryArea,
       deliveryAreaName,
+      baseDeliveryFee,
       deliveryFee,
+      isFreeDelivery,
       deliveryAddress,
       status: 'pending',
       paymentMethod,
       paymentAccountName,
       deliveryFeePaid: paymentMethod === 'cod' ? Boolean(paymentProofUrl) : undefined,
+      codRequiredPaymentAmount,
       paymentProofUrl,
       paymentProofPath,
       paymentSubmittedAt: paymentProofUrl ? new Date() : undefined,
@@ -494,3 +507,4 @@ export async function getUserOrderStats(userId: string) {
     throw error;
   }
 }
+
