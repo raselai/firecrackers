@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '../components/Navbar';
 import { Providers } from '../components/Providers';
 import Footer from '../components/Footer';
+import WhatsAppFloat from '../components/WhatsAppFloat';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,9 +47,11 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+          <WhatsAppFloat />
           <Footer />
         </Providers>
       </body>
     </html>
   );
 }
+
