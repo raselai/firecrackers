@@ -19,6 +19,7 @@ export default function CartPage() {
   const { t, locale } = useI18n();
   const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
   const [localizedProductNames, setLocalizedProductNames] = useState<Record<string, string>>({});
+  const [qtyInputs, setQtyInputs] = useState<Record<string, string>>({});
 
   const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const total = subtotal + deliveryFee;
@@ -64,6 +65,23 @@ export default function CartPage() {
     // Save delivery area to localStorage for checkout page
     localStorage.setItem('selectedDeliveryArea', selectedDeliveryArea);
     router.push('/checkout');
+  };
+
+  const handleQtyInputChange = (productId: string, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    setQtyInputs((prev) => ({ ...prev, [productId]: value }));
+  };
+
+  const commitQtyInput = (productId: string, currentQuantity: number) => {
+    const rawValue = qtyInputs[productId];
+    if (rawValue === undefined) return;
+    if (rawValue === '' || rawValue === '0') return;
+
+    const parsedQuantity = Number(rawValue);
+    if (Number.isNaN(parsedQuantity) || parsedQuantity < 1) return;
+    if (parsedQuantity === currentQuantity) return;
+
+    updateQuantity(productId, parsedQuantity);
   };
 
   if (checkingAuth || authLoading || loading) {
@@ -435,14 +453,58 @@ export default function CartPage() {
                     <div className="item-actions">
                       <div className="quantity-control">
                         <label htmlFor={`qty-${item.productId}`} className="qty-label">{t('cart.qty')}</label>
-                        <input
-                          id={`qty-${item.productId}`}
-                          type="number"
-                          min={1}
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.productId, Number(e.target.value))}
-                          className="qty-input"
-                        />
+                        <div className="qty-stepper">
+                          <button
+                            type="button"
+                            className="qty-step-btn"
+                            onClick={() => {
+                              const draftValue = qtyInputs[item.productId];
+                              const draftQuantity =
+                                draftValue !== undefined && draftValue !== '' ? Number(draftValue) : item.quantity;
+                              const baseQuantity = Number.isNaN(draftQuantity) ? item.quantity : draftQuantity;
+                              const nextQuantity = Math.max(1, baseQuantity - 1);
+                              setQtyInputs((prev) => ({ ...prev, [item.productId]: String(nextQuantity) }));
+                              updateQuantity(item.productId, nextQuantity);
+                            }}
+                            aria-label={`Decrease quantity for ${displayName}`}
+                            disabled={item.quantity <= 1 && (qtyInputs[item.productId] ?? String(item.quantity)) === '1'}
+                          >
+                            -
+                          </button>
+                          <input
+                            id={`qty-${item.productId}`}
+                            type="number"
+                            min={0}
+                            value={qtyInputs[item.productId] ?? String(item.quantity)}
+                            onChange={(e) => {
+                              handleQtyInputChange(item.productId, e.target.value);
+                            }}
+                            onBlur={() => commitQtyInput(item.productId, item.quantity)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                commitQtyInput(item.productId, item.quantity);
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                            className="qty-input"
+                          />
+                          <button
+                            type="button"
+                            className="qty-step-btn"
+                            onClick={() => {
+                              const draftValue = qtyInputs[item.productId];
+                              const draftQuantity =
+                                draftValue !== undefined && draftValue !== '' ? Number(draftValue) : item.quantity;
+                              const baseQuantity = Number.isNaN(draftQuantity) ? item.quantity : draftQuantity;
+                              const nextQuantity = baseQuantity + 1;
+                              setQtyInputs((prev) => ({ ...prev, [item.productId]: String(nextQuantity) }));
+                              updateQuantity(item.productId, nextQuantity);
+                            }}
+                            aria-label={`Increase quantity for ${displayName}`}
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
 
                       <button
@@ -737,6 +799,12 @@ export default function CartPage() {
           gap: 0.5rem;
         }
 
+        .qty-stepper {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
         .qty-label {
           font-size: 0.875rem;
           font-weight: 600;
@@ -753,6 +821,35 @@ export default function CartPage() {
           font-weight: 600;
           text-align: center;
           transition: all 0.3s ease;
+        }
+
+        .qty-step-btn {
+          width: 32px;
+          height: 32px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          background: #fff;
+          color: #111827;
+          font-family: var(--font-poppins), sans-serif;
+          font-size: 1.1rem;
+          font-weight: 700;
+          line-height: 1;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .qty-step-btn:hover:not(:disabled) {
+          border-color: #667eea;
+          color: #667eea;
+          transform: translateY(-1px);
+        }
+
+        .qty-step-btn:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
         }
 
         .qty-input:focus {
@@ -1083,6 +1180,11 @@ export default function CartPage() {
 
           .item-actions {
             justify-content: center;
+          }
+
+          .quantity-control {
+            flex-direction: column;
+            align-items: center;
           }
         }
       `}</style>

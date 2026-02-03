@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -54,6 +54,7 @@ export default function CheckoutPaymentPage() {
   const [uploading, setUploading] = useState(false);
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
   const [paymentProofPath, setPaymentProofPath] = useState('');
+  const [paymentProofFileName, setPaymentProofFileName] = useState('');
   const [paymentAccountName, setPaymentAccountName] = useState('');
   const [walletCopied, setWalletCopied] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
@@ -62,6 +63,7 @@ export default function CheckoutPaymentPage() {
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
   const [paymentSettingsError, setPaymentSettingsError] = useState('');
   const [paymentSettingsLoading, setPaymentSettingsLoading] = useState(true);
+  const paymentProofInputRef = useRef<HTMLInputElement | null>(null);
 
   const addresses = user?.addresses || [];
 
@@ -84,7 +86,7 @@ export default function CheckoutPaymentPage() {
       } catch (settingsError) {
         console.error('Error loading payment settings:', settingsError);
         if (isMounted) {
-          setPaymentSettingsError('Failed to load payment settings. Using defaults.');
+          setPaymentSettingsError(t('checkout.paymentSettingsLoadFailed'));
         }
       } finally {
         if (isMounted) {
@@ -98,7 +100,7 @@ export default function CheckoutPaymentPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -354,6 +356,10 @@ export default function CheckoutPaymentPage() {
                   setPaymentAccountName('');
                   setPaymentProofUrl('');
                   setPaymentProofPath('');
+                  setPaymentProofFileName('');
+                  if (paymentProofInputRef.current) {
+                    paymentProofInputRef.current.value = '';
+                  }
                 }}
                 style={{
                   padding: '0.5rem 1rem',
@@ -370,7 +376,7 @@ export default function CheckoutPaymentPage() {
           </div>
 
           {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsLoading && (
-            <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>Loading payment details...</p>
+            <p style={{ marginBottom: '0.75rem', color: '#6b7280' }}>{t('checkout.loadingPaymentDetails')}</p>
           )}
           {(paymentMethod === 'touch_n_go' || paymentMethod === 'cod') && paymentSettingsError && (
             <p style={{ marginBottom: '0.75rem', color: '#b91c1c' }}>{paymentSettingsError}</p>
@@ -443,12 +449,35 @@ export default function CheckoutPaymentPage() {
                 }}
               />
 
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => paymentProofInputRef.current?.click()}
+                  style={{
+                    border: '1px solid #d1d5db',
+                    borderRadius: '999px',
+                    background: '#fff',
+                    color: '#111827',
+                    padding: '0.35rem 0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('checkout.choosePaymentProof')}
+                </button>
+                <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+                  {paymentProofFileName || t('checkout.noFileChosen')}
+                </span>
+              </div>
               <input
+                ref={paymentProofInputRef}
                 type="file"
                 accept="image/*"
+                style={{ display: 'none' }}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
+                    setPaymentProofFileName(file.name);
                     handleUploadProof(file);
                   }
                 }}

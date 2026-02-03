@@ -79,7 +79,7 @@ export function CartContextProvider({ children }: { children: React.ReactNode })
 
   const updateQuantity = async (productId: string, quantity: number) => {
     if (quantity < 1) {
-      return removeItem(productId);
+      return;
     }
 
     const nextItems = items.map((item) =>
@@ -119,3 +119,4 @@ export function useCart() {
   }
   return context;
 }
+
