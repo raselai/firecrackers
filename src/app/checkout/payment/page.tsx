@@ -21,7 +21,6 @@ import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
 import { Address } from '@/types/user';
 import {
   calculateEffectiveDeliveryFee,
-  getCodRequiredPaymentAmount,
   getDeliveryAreaName
 } from '@/app/data/deliveryAreas';
 
@@ -51,10 +50,12 @@ export default function CheckoutPaymentPage() {
   const [selectedAddressId, setSelectedAddressId] = useState('');
   const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'touch_n_go' | 'cod'>('touch_n_go');
+  const [codInfoOpen, setCodInfoOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
   const [paymentProofPath, setPaymentProofPath] = useState('');
   const [paymentAccountName, setPaymentAccountName] = useState('');
+  const [walletCopied, setWalletCopied] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [error, setError] = useState('');
   const [orderId] = useState(() => `ORD-${nanoid(10).toUpperCase()}`);
@@ -154,7 +155,6 @@ export default function CheckoutPaymentPage() {
   const totalDiscount = voucherDiscount + registrationDiscount;
   const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
-  const codRequiredPaymentAmount = getCodRequiredPaymentAmount(deliveryFee);
   const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
   const selectedAddress = useMemo<Address | undefined>(() => {
@@ -164,6 +164,28 @@ export default function CheckoutPaymentPage() {
   const paymentQrUrl = paymentSettings?.qrImageUrl || '/images/ewallet-qr.jpg';
   const paymentWalletName = paymentSettings?.walletName || WALLET_NAME;
   const paymentWalletNumber = paymentSettings?.walletNumber || WALLET_NUMBER;
+
+  const handleCopyWalletNumber = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(paymentWalletNumber);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = paymentWalletNumber;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      setWalletCopied(true);
+      setTimeout(() => setWalletCopied(false), 1500);
+    } catch (copyError) {
+      console.error('Failed to copy wallet number:', copyError);
+    }
+  };
 
   const handleUploadProof = async (file: File) => {
     const userId = firebaseUser?.uid || user?.uid;
@@ -309,7 +331,10 @@ export default function CheckoutPaymentPage() {
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
-                onClick={() => setPaymentMethod('touch_n_go')}
+                onClick={() => {
+                  setPaymentMethod('touch_n_go');
+                  setCodInfoOpen(false);
+                }}
                 style={{
                   padding: '0.5rem 1rem',
                   borderRadius: '999px',
@@ -325,6 +350,7 @@ export default function CheckoutPaymentPage() {
                 type="button"
                 onClick={() => {
                   setPaymentMethod('cod');
+                  setCodInfoOpen(true);
                   setPaymentAccountName('');
                   setPaymentProofUrl('');
                   setPaymentProofPath('');
@@ -353,10 +379,7 @@ export default function CheckoutPaymentPage() {
           {paymentMethod === 'cod' && (
             <div style={{ padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', marginBottom: '1rem' }}>
               <p style={{ margin: '0 0 0.35rem', color: '#92400e', fontWeight: 600 }}>
-                {t('checkout.paymentInstructionCod').replace('{amount}', codRequiredPaymentAmount.toFixed(2))}
-              </p>
-              <p style={{ margin: 0, color: '#92400e' }}>
-                {t('checkout.paymentAntiFraudNotice')}
+                {t('checkout.codPaymentNotice')}
               </p>
             </div>
           )}
@@ -373,9 +396,28 @@ export default function CheckoutPaymentPage() {
               />
             </div>
             <div style={{ flex: 1, minWidth: '220px' }}>
-              <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.paymentMethod')}</p>
+              <p style={{ marginBottom: '0.5rem', fontWeight: '600' }}>{t('checkout.bankTitle')}</p>
               <p style={{ marginBottom: '0.25rem' }}>{t('checkout.paymentName')}: {paymentWalletName}</p>
-              <p style={{ marginBottom: '1rem' }}>{t('checkout.paymentWalletNo')}: {paymentWalletNumber}</p>
+              <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <p style={{ margin: 0 }}>
+                  {t('checkout.paymentWalletNo')}: {paymentWalletNumber}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCopyWalletNumber}
+                  style={{
+                    border: '1px solid #d1d5db',
+                    borderRadius: '999px',
+                    background: '#fff',
+                    color: '#111827',
+                    padding: '0.3rem 0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {walletCopied ? t('checkout.walletNoCopied') : t('checkout.copyWalletNo')}
+                </button>
+              </div>
               <p style={{ color: '#6b7280', marginBottom: '1rem', whiteSpace: 'pre-line' }}>
                 {t('checkout.paymentAccountMismatchNotice')}
               </p>
@@ -470,6 +512,56 @@ export default function CheckoutPaymentPage() {
           </button>
         </div>
       </div>
+
+      {codInfoOpen && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem',
+            zIndex: 60
+          }}
+          onClick={() => setCodInfoOpen(false)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              background: '#fff',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              textAlign: 'center'
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>{t('checkout.codPaymentNoticeTitle')}</h3>
+            <p style={{ marginBottom: '1.25rem', color: '#6b7280' }}>
+              {t('checkout.codPaymentNotice')}
+            </p>
+            <button
+              type="button"
+              onClick={() => setCodInfoOpen(false)}
+              style={{
+                padding: '0.6rem 1.4rem',
+                borderRadius: '6px',
+                border: 'none',
+                background: '#f97316',
+                color: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {t('checkout.close')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

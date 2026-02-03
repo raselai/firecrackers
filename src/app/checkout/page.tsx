@@ -15,7 +15,6 @@ import {
 import { Address } from '@/types/user';
 import {
   calculateEffectiveDeliveryFee,
-  getCodRequiredPaymentAmount,
   getDeliveryAreaName
 } from '@/app/data/deliveryAreas';
 
@@ -39,7 +38,6 @@ export default function CheckoutPage() {
   const addresses = user?.addresses || [];
   const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
-  const codRequiredPaymentAmount = getCodRequiredPaymentAmount(deliveryFee);
 
   useEffect(() => {
     if (authLoading) return;
@@ -589,7 +587,7 @@ export default function CheckoutPage() {
           >
             <h3 style={{ marginTop: 0 }}>{t('checkout.codPaymentNoticeTitle')}</h3>
             <p style={{ marginBottom: '1.25rem', color: '#6b7280' }}>
-              {t('checkout.paymentInstructionCod').replace('{amount}', codRequiredPaymentAmount.toFixed(2))}
+              {t('checkout.codPaymentNotice')}
             </p>
             <button
               type="button"

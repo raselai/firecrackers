@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import QRCode from 'qrcode';
 import { useUser } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { useI18n } from '@/i18n/I18nProvider';
@@ -20,6 +21,9 @@ export default function Navbar() {
   const [cartPulse, setCartPulse] = useState(false);
   const [prevCartCount, setPrevCartCount] = useState(cartItems.length);
   const [referralCopied, setReferralCopied] = useState(false);
+  const [isReferralSheetOpen, setIsReferralSheetOpen] = useState(false);
+  const [referralQrCode, setReferralQrCode] = useState('');
+  const [referralQrLoading, setReferralQrLoading] = useState(false);
   const router = useRouter();
   const referralCode =
     typeof user?.referralCode === 'string' ? user.referralCode.trim() : '';
@@ -124,6 +128,64 @@ export default function Navbar() {
       }
     };
   }, [cartItems.length, prevCartCount]);
+
+  useEffect(() => {
+    if (!isReferralSheetOpen || !shouldShowReferral) return;
+    let isActive = true;
+
+    const generateQrCode = async () => {
+      try {
+        setReferralQrLoading(true);
+        const baseUrl =
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+        const referralLink = `${baseUrl}/signup?ref=${referralCode}`;
+        const qrCodeDataUrl = await QRCode.toDataURL(referralLink, {
+          width: 260,
+          margin: 2,
+          color: {
+            dark: '#0f172a',
+            light: '#ffffff'
+          }
+        });
+        if (isActive) {
+          setReferralQrCode(qrCodeDataUrl);
+        }
+      } catch (error) {
+        console.error('Failed to generate referral QR code:', error);
+        if (isActive) {
+          setReferralQrCode('');
+        }
+      } finally {
+        if (isActive) {
+          setReferralQrLoading(false);
+        }
+      }
+    };
+
+    generateQrCode();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isReferralSheetOpen, referralCode, shouldShowReferral]);
+
+  useEffect(() => {
+    if (!isReferralSheetOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsReferralSheetOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isReferralSheetOpen]);
 
   return (
     <nav className="navbar-premium">
@@ -490,20 +552,64 @@ export default function Navbar() {
           <button
             type="button"
             className="mobile-bottom-item mobile-bottom-referral"
-            onClick={handleCopyReferral}
+            onClick={() => setIsReferralSheetOpen(true)}
             aria-label={t('accountProfile.referralCode')}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6H20M4 12H20M4 18H14"/>
             </svg>
-            <span className="mobile-referral-label">{t('accountProfile.referralCode')}</span>
-            <span className="mobile-referral-text">
-              {referralCopied ? t('accountReferrals.copied') : referralCode}
-            </span>
+            <span className="mobile-referral-btn-label">Refer Code</span>
           </button>
         )}
 
       </div>
+
+      {isReferralSheetOpen && shouldShowReferral && (
+        <>
+          <button
+            type="button"
+            className="mobile-referral-sheet-backdrop"
+            aria-label="Close refer code popup"
+            onClick={() => setIsReferralSheetOpen(false)}
+          />
+          <div className="mobile-referral-sheet" role="dialog" aria-modal="true" aria-label="Refer code">
+            <div className="mobile-referral-sheet-handle" />
+            <div className="mobile-referral-sheet-header">
+              <h3>Refer Code</h3>
+              <button
+                type="button"
+                className="mobile-referral-sheet-close"
+                aria-label="Close refer code popup"
+                onClick={() => setIsReferralSheetOpen(false)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6L18 18" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="mobile-referral-sheet-caption">{t('accountProfile.referralCode')}</p>
+            <div className="mobile-referral-sheet-code">{referralCode}</div>
+            <button
+              type="button"
+              className="mobile-referral-copy-btn"
+              onClick={handleCopyReferral}
+            >
+              {referralCopied ? t('accountReferrals.copied') : 'Copy Code'}
+            </button>
+
+            <div className="mobile-referral-sheet-qr">
+              {referralQrLoading ? (
+                <div className="mobile-referral-qr-loading">Generating QR...</div>
+              ) : referralQrCode ? (
+                <img src={referralQrCode} alt="Referral QR code" className="mobile-referral-qr-image" />
+              ) : (
+                <div className="mobile-referral-qr-loading">Unable to load QR code</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </nav>
   );
 }
