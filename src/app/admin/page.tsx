@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import AddProductForm from '@/components/AddProductForm';
@@ -9,12 +9,14 @@ import DashboardOverview from '@/components/DashboardOverview';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '@/lib/productService';
 import { getAllOrders, getOrdersByStatus, updateOrderStatus } from '@/lib/orderService';
 import { getPaymentSettings, updatePaymentSettings } from '@/lib/paymentSettingsService';
+import { fetchAdminUserById, fetchAdminUsers } from '@/lib/adminUserService';
 import { uploadImage, deleteImage } from '@/lib/storage';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useUser } from '@/contexts/AuthContext';
 import { Product } from '@/types/product';
 import { Order } from '@/types/order';
 import { PaymentSettings } from '@/types/paymentSettings';
+import { AdminUserDetail, AdminUserListItem } from '@/types/admin';
 
 type AdminOrderStatus = 'all' | Order['status'];
 
@@ -35,6 +37,14 @@ export default function AdminPanel() {
   const [ordersFilter, setOrdersFilter] = useState<AdminOrderStatus>('all');
   const [orderActionLoading, setOrderActionLoading] = useState<string | null>(null);
   const [soundBlocked, setSoundBlocked] = useState(false);
+  const [users, setUsers] = useState<AdminUserListItem[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [usersSearch, setUsersSearch] = useState('');
+  const [usersCursor, setUsersCursor] = useState<string | undefined>(undefined);
+  const [usersHasMore, setUsersHasMore] = useState(false);
+  const [selectedAdminUser, setSelectedAdminUser] = useState<AdminUserDetail | null>(null);
+  const [userDetailLoading, setUserDetailLoading] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const beepIntervalRef = useRef<number | null>(null);
@@ -181,6 +191,56 @@ export default function AdminPanel() {
       setOrdersError('Failed to load orders.');
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  const loadUsers = async ({
+    reset = false,
+    searchTerm
+  }: {
+    reset?: boolean;
+    searchTerm?: string;
+  } = {}) => {
+    setUsersLoading(true);
+    setUsersError(null);
+
+    try {
+      const response = await fetchAdminUsers({
+        limit: 25,
+        cursor: reset ? undefined : usersCursor,
+        search: searchTerm && searchTerm.length > 0 ? searchTerm : undefined
+      });
+
+      setUsers((prev) => (reset ? response.users : [...prev, ...response.users]));
+      setUsersCursor(response.nextCursor);
+      setUsersHasMore(response.hasMore);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      setUsersError(error instanceof Error ? error.message : 'Failed to load users.');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const handleSearchUsers = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSelectedAdminUser(null);
+    setUsersCursor(undefined);
+    await loadUsers({ reset: true, searchTerm: usersSearch.trim() });
+  };
+
+  const handleOpenUserDetail = async (uid: string) => {
+    setUserDetailLoading(true);
+    setUsersError(null);
+
+    try {
+      const detail = await fetchAdminUserById(uid);
+      setSelectedAdminUser(detail);
+    } catch (error) {
+      console.error('Error loading user detail:', error);
+      setUsersError(error instanceof Error ? error.message : 'Failed to load user detail.');
+    } finally {
+      setUserDetailLoading(false);
     }
   };
 
@@ -537,6 +597,25 @@ export default function AdminPanel() {
             }}
           >
             Orders
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('users');
+              if (users.length === 0 && !usersLoading) {
+                loadUsers({ reset: true });
+              }
+            }}
+            style={{
+              padding: '1rem 2rem',
+              background: activeTab === 'users' ? '#8b5cf6' : 'transparent',
+              color: activeTab === 'users' ? 'white' : '#374151',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              borderBottom: activeTab === 'users' ? '3px solid #8b5cf6' : 'none'
+            }}
+          >
+            Users
           </button>
           <button
             onClick={() => setActiveTab('payment')}
@@ -1602,6 +1681,254 @@ export default function AdminPanel() {
         )}
       </div>
 
+        {/* Users Tab */}
+        {activeTab === 'users' && (
+          <div style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 1.5rem'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginBottom: '1.5rem',
+              paddingBottom: '1.5rem',
+              borderBottom: '1px solid #e2e8f0'
+            }}>
+              <div>
+                <h2 style={{
+                  margin: 0,
+                  marginBottom: '0.5rem',
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  letterSpacing: '-0.025em'
+                }}>
+                  Users
+                </h2>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
+                  View customer profiles, addresses, and referral voucher details
+                </p>
+              </div>
+              <form onSubmit={handleSearchUsers} style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={usersSearch}
+                  onChange={(e) => setUsersSearch(e.target.value)}
+                  placeholder="Search by email, referral code, or UID"
+                  style={{
+                    width: '320px',
+                    maxWidth: '60vw',
+                    padding: '0.625rem 0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px'
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={usersLoading}
+                  style={{
+                    padding: '0.625rem 1rem',
+                    background: '#8b5cf6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: usersLoading ? 'not-allowed' : 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+
+            {usersError && (
+              <div style={{
+                marginBottom: '1rem',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid #fecaca',
+                background: '#fef2f2',
+                color: '#991b1b'
+              }}>
+                {usersError}
+              </div>
+            )}
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: selectedAdminUser ? '1fr 420px' : '1fr',
+              gap: '1.5rem'
+            }}>
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                overflow: 'hidden'
+              }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '780px' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc' }}>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Name</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Email</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Phone</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Referral Code</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Vouchers</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Created</th>
+                        <th style={{ padding: '0.875rem 1rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0', fontSize: '0.75rem', color: '#64748b' }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((adminUser) => (
+                        <tr key={adminUser.uid} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '0.875rem 1rem', fontWeight: 600, color: '#0f172a' }}>
+                            {adminUser.displayName || '-'}
+                          </td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#334155' }}>{adminUser.email || '-'}</td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#334155' }}>{adminUser.phoneNumber || '-'}</td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#334155', fontFamily: 'ui-monospace, monospace' }}>{adminUser.referralCode || '-'}</td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#334155' }}>
+                            {adminUser.vouchers} / {adminUser.vouchersUsed}
+                          </td>
+                          <td style={{ padding: '0.875rem 1rem', color: '#64748b', fontSize: '0.85rem' }}>
+                            {adminUser.createdAt ? new Date(adminUser.createdAt).toLocaleString('en-MY') : '-'}
+                          </td>
+                          <td style={{ padding: '0.875rem 1rem', textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenUserDetail(adminUser.uid)}
+                              disabled={userDetailLoading}
+                              style={{
+                                padding: '0.4rem 0.75rem',
+                                borderRadius: '6px',
+                                border: '1px solid #8b5cf6',
+                                background: 'white',
+                                color: '#6d28d9',
+                                cursor: userDetailLoading ? 'not-allowed' : 'pointer',
+                                fontSize: '0.8rem',
+                                fontWeight: 600
+                              }}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {users.length === 0 && !usersLoading && (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+                            No users found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style={{
+                  padding: '0.875rem 1rem',
+                  borderTop: '1px solid #e2e8f0',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                    {usersLoading ? 'Loading users...' : `${users.length} user(s) loaded`}
+                  </span>
+                  {usersHasMore && (
+                    <button
+                      type="button"
+                      onClick={() => loadUsers({ reset: false, searchTerm: usersSearch.trim() })}
+                      disabled={usersLoading}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        background: 'white',
+                        color: '#334155',
+                        cursor: usersLoading ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      Load more
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {selectedAdminUser && (
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  padding: '1rem',
+                  height: 'fit-content'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h3 style={{ margin: 0, color: '#0f172a' }}>User Profile</h3>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAdminUser(null)}
+                      style={{ border: 'none', background: 'transparent', color: '#64748b', cursor: 'pointer' }}
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div style={{ fontSize: '0.85rem', color: '#334155', display: 'grid', gap: '0.4rem', marginBottom: '1rem' }}>
+                    <div><strong>Name:</strong> {selectedAdminUser.displayName || '-'}</div>
+                    <div><strong>Email:</strong> {selectedAdminUser.email || '-'}</div>
+                    <div><strong>Phone:</strong> {selectedAdminUser.phoneNumber || '-'}</div>
+                    <div><strong>Role:</strong> {selectedAdminUser.role}</div>
+                    <div><strong>Referral code:</strong> {selectedAdminUser.referralCode || '-'}</div>
+                    <div><strong>Referred by:</strong> {selectedAdminUser.referredBy || '-'}</div>
+                    <div><strong>Referral count:</strong> {selectedAdminUser.referralCount}</div>
+                    <div><strong>Available vouchers:</strong> {selectedAdminUser.vouchers}</div>
+                    <div><strong>Used vouchers:</strong> {selectedAdminUser.vouchersUsed}</div>
+                    <div><strong>Registration voucher:</strong> {selectedAdminUser.hasRegistrationVoucher ? 'Available' : 'Not available'}</div>
+                    <div><strong>Registration voucher used:</strong> {selectedAdminUser.registrationVoucherUsed ? 'Yes' : 'No'}</div>
+                    <div><strong>Created:</strong> {selectedAdminUser.createdAt ? new Date(selectedAdminUser.createdAt).toLocaleString('en-MY') : '-'}</div>
+                    <div><strong>Updated:</strong> {selectedAdminUser.updatedAt ? new Date(selectedAdminUser.updatedAt).toLocaleString('en-MY') : '-'}</div>
+                  </div>
+
+                  <div>
+                    <h4 style={{ margin: '0 0 0.5rem', color: '#334155' }}>Addresses ({selectedAdminUser.addresses.length})</h4>
+                    {selectedAdminUser.addresses.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>No saved addresses.</p>
+                    ) : (
+                      <div style={{ display: 'grid', gap: '0.625rem' }}>
+                        {selectedAdminUser.addresses.map((address) => (
+                          <div
+                            key={address.id}
+                            style={{
+                              padding: '0.625rem 0.75rem',
+                              borderRadius: '8px',
+                              border: '1px solid #e2e8f0',
+                              background: '#f8fafc',
+                              fontSize: '0.8rem',
+                              color: '#334155'
+                            }}
+                          >
+                            <div style={{ fontWeight: 600 }}>
+                              {address.label} {address.isDefault ? '(Default)' : ''}
+                            </div>
+                            <div>{address.fullName} - {address.phoneNumber}</div>
+                            <div>{address.streetAddress}, {address.city}, {address.state} {address.postalCode}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Payment Tab */}
         {activeTab === 'payment' && (
           <div style={{
@@ -2280,3 +2607,4 @@ export default function AdminPanel() {
     </div>
   );
 } 
+

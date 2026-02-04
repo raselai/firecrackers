@@ -4,7 +4,9 @@ export interface DeliveryArea {
   fee: number;
 }
 
-export const FREE_DELIVERY_THRESHOLD = 3000;
+export type CheckoutPaymentMethod = 'touch_n_go' | 'cod';
+
+export const FULL_PAYMENT_FREE_DELIVERY_THRESHOLD = 300;
 export const COD_MINIMUM_PAYMENT_WHEN_FREE_DELIVERY = 200;
 
 export const deliveryAreas: DeliveryArea[] = [
@@ -38,10 +40,12 @@ export function getDeliveryAreaName(areaId: string): string {
 
 export function calculateEffectiveDeliveryFee(
   areaId: string,
-  subtotal: number
+  subtotal: number,
+  paymentMethod?: CheckoutPaymentMethod
 ): { baseFee: number; fee: number; isFreeDelivery: boolean } {
   const baseFee = getDeliveryFee(areaId);
-  const isFreeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD;
+  const isFreeDelivery =
+    paymentMethod === 'touch_n_go' && subtotal >= FULL_PAYMENT_FREE_DELIVERY_THRESHOLD;
   const fee = isFreeDelivery ? 0 : baseFee;
 
   return { baseFee, fee, isFreeDelivery };

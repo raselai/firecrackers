@@ -24,6 +24,7 @@ export default function Navbar() {
   const [isReferralSheetOpen, setIsReferralSheetOpen] = useState(false);
   const [referralQrCode, setReferralQrCode] = useState('');
   const [referralQrLoading, setReferralQrLoading] = useState(false);
+  const [isSharingReferral, setIsSharingReferral] = useState(false);
   const router = useRouter();
   const referralCode =
     typeof user?.referralCode === 'string' ? user.referralCode.trim() : '';
@@ -111,6 +112,64 @@ export default function Navbar() {
     }
   };
 
+  const getReferralLink = () => {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    return `${baseUrl}/signup?ref=${referralCode}`;
+  };
+
+  const handleShareReferral = async () => {
+    if (!shouldShowReferral) return;
+
+    const referralLink = getReferralLink();
+    const shareText = `Join BBOOM88 with my referral code ${referralCode}.`;
+
+    try {
+      setIsSharingReferral(true);
+
+      if (!navigator?.share) {
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(`${shareText} ${referralLink}`)}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+        return;
+      }
+
+      if (referralQrCode) {
+        const qrResponse = await fetch(referralQrCode);
+        const qrBlob = await qrResponse.blob();
+        const qrFile = new File([qrBlob], `bboom88-referral-${referralCode}.png`, {
+          type: 'image/png'
+        });
+
+        if (navigator.canShare && navigator.canShare({ files: [qrFile] })) {
+          await navigator.share({
+            title: 'BBOOM88 Referral',
+            text: shareText,
+            url: referralLink,
+            files: [qrFile]
+          });
+          return;
+        }
+      }
+
+      await navigator.share({
+        title: 'BBOOM88 Referral',
+        text: shareText,
+        url: referralLink
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+      console.error('Failed to share referral:', error);
+    } finally {
+      setIsSharingReferral(false);
+    }
+  };
+
   useEffect(() => {
     const currentCount = cartItems.length;
     let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -136,10 +195,7 @@ export default function Navbar() {
     const generateQrCode = async () => {
       try {
         setReferralQrLoading(true);
-        const baseUrl =
-          process.env.NEXT_PUBLIC_SITE_URL ||
-          (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-        const referralLink = `${baseUrl}/signup?ref=${referralCode}`;
+        const referralLink = getReferralLink();
         const qrCodeDataUrl = await QRCode.toDataURL(referralLink, {
           width: 260,
           margin: 2,
@@ -607,6 +663,14 @@ export default function Navbar() {
                 <div className="mobile-referral-qr-loading">Unable to load QR code</div>
               )}
             </div>
+            <button
+              type="button"
+              className="mobile-referral-share-btn"
+              onClick={handleShareReferral}
+              disabled={isSharingReferral || referralQrLoading}
+            >
+              {isSharingReferral ? t('accountReferrals.sharing') : t('accountReferrals.shareQrCode')}
+            </button>
           </div>
         </>
       )}

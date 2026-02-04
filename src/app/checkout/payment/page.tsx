@@ -155,7 +155,11 @@ export default function CheckoutPaymentPage() {
     return calculateRegistrationDiscount(subtotal);
   }, [promotionType, subtotal]);
   const totalDiscount = voucherDiscount + registrationDiscount;
-  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
+  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(
+    selectedDeliveryArea,
+    subtotal,
+    paymentMethod
+  );
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
   const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
@@ -330,6 +334,9 @@ export default function CheckoutPaymentPage() {
         <div style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '1.5rem' }}>
           <div style={{ marginBottom: '1rem' }}>
             <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{t('checkout.paymentMethodLabel')}</p>
+            <p style={{ marginBottom: '0.75rem', color: '#6b7280', fontSize: '0.9rem' }}>
+              {t('checkout.fullPaymentFreeDeliveryHint')}
+            </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
                 type="button"

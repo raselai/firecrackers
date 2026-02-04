@@ -36,7 +36,11 @@ export default function CheckoutPage() {
   const [codInfoOpen, setCodInfoOpen] = useState(false);
 
   const addresses = user?.addresses || [];
-  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
+  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(
+    selectedDeliveryArea,
+    subtotal,
+    paymentMethod
+  );
   const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
 
   useEffect(() => {
@@ -416,6 +420,9 @@ export default function CheckoutPage() {
             {/* Payment Method Selection */}
             <div style={{ marginTop: '1.5rem' }}>
               <p style={{ marginBottom: '0.5rem', fontWeight: 600 }}>{t('checkout.paymentMethodLabel')}</p>
+              <p style={{ marginBottom: '0.75rem', color: '#6b7280', fontSize: '0.9rem' }}>
+                {t('checkout.fullPaymentFreeDeliveryHint')}
+              </p>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"

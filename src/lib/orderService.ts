@@ -212,7 +212,7 @@ export async function createOrder(params: {
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const { baseFee: baseDeliveryFee, fee: deliveryFee, isFreeDelivery } =
-      calculateEffectiveDeliveryFee(deliveryArea, subtotal);
+      calculateEffectiveDeliveryFee(deliveryArea, subtotal, paymentMethod);
     const deliveryAreaName = getDeliveryAreaName(deliveryArea) || deliveryAreaNameFromClient || deliveryArea;
     const codRequiredPaymentAmount = paymentMethod === 'cod'
       ? getCodRequiredPaymentAmount(deliveryFee)
