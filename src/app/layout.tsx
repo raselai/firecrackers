@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Poppins, Playfair_Display, Manrope } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import Navbar from '../components/Navbar';
 import { Providers } from '../components/Providers';
@@ -31,6 +32,8 @@ export const metadata: Metadata = {
   description: 'BBOOM88',
 };
 
+const googleTagId = process.env.NEXT_PUBLIC_GOOGLE_TAG_ID || 'G-WH72YFZP9B';
+
 export default function RootLayout({
   children,
 }: {
@@ -38,6 +41,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {googleTagId ? (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-tag-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${googleTagId}');
+              `}
+            </Script>
+          </>
+        ) : null}
+      </head>
       <body
         className={`${inter.variable} ${poppins.variable} ${playfair.variable} ${manrope.variable}`}
         suppressHydrationWarning={true}
