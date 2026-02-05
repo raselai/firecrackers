@@ -14,6 +14,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
     productCode: '',
     nameZh: '',
     price: '',
+    costPrice: '',
     offerPrice: '',
     description: '',
     descriptionZh: '',
@@ -93,6 +94,11 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
       alert('Price must be greater than 0 if provided');
       return;
     }
+
+    if (formData.costPrice && parseFloat(formData.costPrice) <= 0) {
+      alert('Cost price must be greater than 0 if provided');
+      return;
+    }
     
     // Validate offer price if on sale AND offer price is provided
     if (formData.isOnSale && formData.offerPrice && formData.offerPrice.trim() !== '') {
@@ -127,6 +133,7 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
       productCode: formData.productCode || undefined,
       nameZh: formData.nameZh || undefined,
       price: formData.price ? parseFloat(formData.price) : undefined,
+      costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
       description: formData.description || '',
       descriptionZh: formData.descriptionZh || undefined,
@@ -272,6 +279,26 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
                 placeholder="Optional - Enter price in MYR"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Cost Price (MYR)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.costPrice}
+                onChange={(e) => handleInputChange('costPrice', e.target.value)}
+                placeholder="Internal cost for profit reporting"
                 style={{
                   width: '100%',
                   padding: '0.75rem',
@@ -634,3 +661,4 @@ export default function AddProductForm({ onClose, onSave }: AddProductFormProps)
     </div>
   );
 } 
+

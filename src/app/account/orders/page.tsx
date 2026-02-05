@@ -8,7 +8,7 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { getUserOrders, getUserOrdersByStatus } from '@/lib/orderService';
 import { Order } from '@/types/order';
 
-type OrderStatus = 'all' | 'pending' | 'approved' | 'rejected' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+type OrderStatus = 'all' | 'pending' | 'approved' | 'rejected' | 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'cancelled';
 
 const formatTemplate = (template: string, values: Record<string, string | number>) =>
   template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
@@ -58,6 +58,8 @@ export default function OrdersPage() {
         return 'bg-red-100 text-red-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
+      case 'returned':
+        return 'bg-red-100 text-red-800';
       case 'shipped':
         return 'bg-blue-100 text-blue-800';
       case 'confirmed':
@@ -183,7 +185,7 @@ export default function OrdersPage() {
             {/* Filter Tabs */}
             <div className="bg-white rounded-lg shadow-md mb-6">
               <div className="flex flex-wrap border-b border-gray-200">
-                {(['all', 'pending', 'approved', 'rejected', 'confirmed', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map((status) => (
+                {(['all', 'pending', 'approved', 'rejected', 'confirmed', 'shipped', 'delivered', 'returned', 'cancelled'] as OrderStatus[]).map((status) => (
                   <button
                     key={status}
                     onClick={() => setSelectedStatus(status)}
@@ -345,3 +347,4 @@ export default function OrdersPage() {
     </div>
   );
 }
+

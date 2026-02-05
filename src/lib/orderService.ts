@@ -105,6 +105,8 @@ const mapOrderSnapshot = (orderDoc: { id: string; data: () => Record<string, any
     createdAt: toDateValue(data.createdAt) || new Date(),
     updatedAt: toDateValue(data.updatedAt),
     reviewedAt: toDateValue(data.reviewedAt),
+    recognizedAt: toDateValue(data.recognizedAt),
+    returnedAt: toDateValue(data.returnedAt),
     paymentSubmittedAt: toDateValue(data.paymentSubmittedAt)
   } as Order;
 };
@@ -497,6 +499,7 @@ export async function getUserOrderStats(userId: string) {
       confirmedOrders: orders.filter(o => o.status === 'confirmed').length,
       shippedOrders: orders.filter(o => o.status === 'shipped').length,
       deliveredOrders: orders.filter(o => o.status === 'delivered').length,
+      returnedOrders: orders.filter(o => o.status === 'returned').length,
       totalSpent: orders.reduce((sum, order) => sum + order.totalAmount, 0),
       totalSaved: orders.reduce((sum, order) => sum + order.voucherDiscount, 0)
     };

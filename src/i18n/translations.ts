@@ -334,6 +334,7 @@ export const translations = {
         confirmed: 'Confirmed',
         shipped: 'Shipped',
         delivered: 'Delivered',
+        returned: 'Returned',
         cancelled: 'Cancelled'
       }
     },
@@ -633,6 +634,7 @@ export const translations = {
         confirmed: '???',
         shipped: '???',
         delivered: '???',
+        returned: '???',
         cancelled: '???'
       }
     },

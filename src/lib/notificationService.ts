@@ -55,6 +55,10 @@ const statusCopy: Record<Order['status'], { title: string; message: string }> = 
     title: 'Order delivered',
     message: 'Your order has been delivered. Thank you for shopping with us!'
   },
+  returned: {
+    title: 'Order returned',
+    message: 'Your order has been marked as returned.'
+  },
   cancelled: {
     title: 'Order cancelled',
     message: 'Your order has been cancelled.'
@@ -66,6 +70,7 @@ export async function createOrderStatusNotification(params: {
   orderId: string;
   status: Order['status'];
   rejectionReason?: string;
+  returnReason?: string;
 }): Promise<void> {
   if (!params.userId) {
     return;
@@ -77,6 +82,8 @@ export async function createOrderStatusNotification(params: {
 
   if (params.status === 'rejected' && params.rejectionReason) {
     message = `${orderLabel} was rejected. Reason: ${params.rejectionReason}`;
+  } else if (params.status === 'returned' && params.returnReason) {
+    message = `${orderLabel} was returned. Reason: ${params.returnReason}`;
   }
 
   await addDoc(collection(db, 'notifications'), {
@@ -132,3 +139,4 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
   });
   await batch.commit();
 }
+

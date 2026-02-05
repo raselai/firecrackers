@@ -57,6 +57,8 @@ export default function OrderDetailPage() {
         return 'bg-red-100 text-red-800 border-red-200';
       case 'delivered':
         return 'bg-green-100 text-green-800 border-green-200';
+      case 'returned':
+        return 'bg-red-100 text-red-800 border-red-200';
       case 'shipped':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'confirmed':
@@ -80,6 +82,8 @@ export default function OrderDetailPage() {
       case 'shipped':
         return 2;
       case 'delivered':
+        return 3;
+      case 'returned':
         return 3;
       case 'cancelled':
         return -1;
@@ -162,12 +166,20 @@ export default function OrderDetailPage() {
                 <span className={`inline-block px-4 py-2 rounded-lg text-sm font-medium border-2 ${getStatusColor(order.status)}`}>
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </span>
+                {order.status === 'returned' && (
+                  <div className="mt-2 text-sm text-red-700">
+                    {order.returnReason || 'This order has been returned.'}
+                    {typeof order.returnAmount === 'number' && (
+                      <div className="font-medium">Return amount: RM{order.returnAmount.toFixed(2)}</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Status Timeline */}
-          {order.status !== 'cancelled' && order.status !== 'rejected' && (
+          {order.status !== 'cancelled' && order.status !== 'rejected' && order.status !== 'returned' && (
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-lg font-bold text-gray-900 mb-6">Order Status</h2>
               <div className="relative">
@@ -293,7 +305,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Additional Actions */}
-          {order.status !== 'cancelled' && order.status !== 'rejected' && order.status !== 'delivered' && (
+          {order.status !== 'cancelled' && order.status !== 'rejected' && order.status !== 'delivered' && order.status !== 'returned' && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">Need Help?</h2>
               <p className="text-gray-600 mb-4">

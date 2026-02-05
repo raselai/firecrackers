@@ -14,7 +14,6 @@ import {
   calculateMaxVouchers,
   calculateVoucherDiscount,
   calculateRegistrationDiscount,
-  createOrder,
   validateVoucherUsage
 } from '@/lib/orderService';
 import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
@@ -261,20 +260,39 @@ export default function CheckoutPaymentPage() {
     setPlacingOrder(true);
 
     try {
-      await createOrder({
-        orderId,
-        userId,
-        items,
-        deliveryAddress: selectedAddress,
-        deliveryArea: selectedDeliveryArea,
-        deliveryAreaName,
-        vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
-        promotionType,
-        paymentMethod,
-        paymentAccountName: paymentAccountName.trim() ? paymentAccountName.trim() : undefined,
-        paymentProofUrl: paymentProofUrl || undefined,
-        paymentProofPath: paymentProofPath || undefined
+      const token = await firebaseUser?.getIdToken();
+      if (!token) {
+        throw new Error('Missing auth token.');
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          orderId,
+          userId,
+          items,
+          deliveryAddress: selectedAddress,
+          deliveryArea: selectedDeliveryArea,
+          deliveryAreaName,
+          vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
+          promotionType,
+          paymentMethod,
+          paymentAccountName: paymentAccountName.trim() ? paymentAccountName.trim() : undefined,
+          paymentProofUrl: paymentProofUrl || undefined,
+          paymentProofPath: paymentProofPath || undefined
+        })
       });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Failed to create order.');
+      }
+
+      await response.json();
 
       sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
       localStorage.removeItem('selectedDeliveryArea');
@@ -282,7 +300,7 @@ export default function CheckoutPaymentPage() {
       router.push('/account/orders');
     } catch (orderError) {
       console.error('Error placing order:', orderError);
-      setError(t('checkout.errors.orderFailed'));
+      setError(orderError instanceof Error ? orderError.message : t('checkout.errors.orderFailed'));
     } finally {
       setPlacingOrder(false);
     }

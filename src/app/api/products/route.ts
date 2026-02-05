@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       name: newProduct.name,
       nameZh: newProduct.nameZh || undefined,
       price: newProduct.price || 0, // Default to 0 if no price provided
+      costPrice: typeof newProduct.costPrice === 'number' ? newProduct.costPrice : undefined,
       description: newProduct.description || '',
       descriptionZh: newProduct.descriptionZh || undefined,
       category: newProduct.category,
@@ -131,3 +132,4 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 } 
+

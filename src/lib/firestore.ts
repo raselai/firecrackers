@@ -18,6 +18,7 @@ export interface Product {
   name: string;
   nameZh?: string;
   price: number;
+  costPrice?: number;
   offerPrice?: number; // Sale price when isOnSale is true
   description?: string;
   descriptionZh?: string;
@@ -225,3 +226,4 @@ export const getSeasonalProducts = async (): Promise<Product[]> => {
     throw error;
   }
 }; 
+

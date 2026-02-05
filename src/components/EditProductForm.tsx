@@ -15,6 +15,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
     productCode: '',
     nameZh: '',
     price: '',
+    costPrice: '',
     offerPrice: '',
     description: '',
     descriptionZh: '',
@@ -46,6 +47,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
         productCode: product.productCode || '',
         nameZh: product.nameZh || '',
         price: product.price?.toString() || '',
+        costPrice: product.costPrice?.toString() || '',
         offerPrice: product.offerPrice?.toString() || '',
         description: product.description || '',
         descriptionZh: product.descriptionZh || '',
@@ -124,6 +126,7 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
       ...product, // Keep original ID and other fields
       ...formData,
       price: parseFloat(formData.price),
+      costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
       offerPrice: formData.isOnSale && formData.offerPrice ? parseFloat(formData.offerPrice) : undefined,
       shotCount: formData.shotCount ? parseInt(formData.shotCount) : undefined,
       rating: parseFloat(formData.rating),
@@ -263,6 +266,26 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
                   fontSize: '1rem'
                 }}
                 required
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                Cost Price (MYR)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.costPrice}
+                onChange={(e) => handleInputChange('costPrice', e.target.value)}
+                placeholder="Internal cost for profit reporting"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
               />
             </div>
 
@@ -620,3 +643,4 @@ export default function EditProductForm({ product, onClose, onSave }: EditProduc
     </div>
   );
 } 
+

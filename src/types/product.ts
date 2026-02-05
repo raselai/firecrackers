@@ -4,6 +4,7 @@ export interface Product {
   productCode?: string; // Internal product code (admin only)
   nameZh?: string;
   price: number;
+  costPrice?: number; // Internal cost per unit for profit reporting
   offerPrice?: number; // Sale price when isOnSale is true
   images: string[];
   image?: string; // Single image for display
@@ -31,3 +32,4 @@ export interface Product {
   createdAt?: Date;
   updatedAt?: Date;
 }
+

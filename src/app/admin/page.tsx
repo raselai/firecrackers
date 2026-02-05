@@ -6,10 +6,12 @@ import Image from 'next/image';
 import AddProductForm from '@/components/AddProductForm';
 import EditProductForm from '@/components/EditProductForm';
 import DashboardOverview from '@/components/DashboardOverview';
+import SalesReportPanel from '@/components/admin/SalesReportPanel';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '@/lib/productService';
-import { getAllOrders, getOrdersByStatus, updateOrderStatus } from '@/lib/orderService';
+import { getAllOrders, getOrdersByStatus } from '@/lib/orderService';
 import { getPaymentSettings, updatePaymentSettings } from '@/lib/paymentSettingsService';
 import { fetchAdminUserById, fetchAdminUsers } from '@/lib/adminUserService';
+import { updateAdminOrderStatus } from '@/lib/adminOrderService';
 import { uploadImage, deleteImage } from '@/lib/storage';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useUser } from '@/contexts/AuthContext';
@@ -19,6 +21,18 @@ import { PaymentSettings } from '@/types/paymentSettings';
 import { AdminUserDetail, AdminUserListItem } from '@/types/admin';
 
 type AdminOrderStatus = 'all' | Order['status'];
+type TransitionStatus = Exclude<Order['status'], 'pending'>;
+
+const ORDER_STATUS_TRANSITIONS: Record<Order['status'], TransitionStatus[]> = {
+  pending: ['approved', 'rejected', 'cancelled'],
+  approved: ['confirmed', 'cancelled'],
+  rejected: [],
+  confirmed: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'cancelled'],
+  delivered: ['returned'],
+  returned: [],
+  cancelled: []
+};
 
 export default function AdminPanel() {
   const { isAuthenticated, loading: authLoading, logout, status, authError } = useAdminAuth();
@@ -36,6 +50,9 @@ export default function AdminPanel() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [ordersFilter, setOrdersFilter] = useState<AdminOrderStatus>('all');
   const [orderActionLoading, setOrderActionLoading] = useState<string | null>(null);
+  const [nextOrderStatus, setNextOrderStatus] = useState<TransitionStatus | ''>('');
+  const [transitionReason, setTransitionReason] = useState('');
+  const [transitionReturnAmount, setTransitionReturnAmount] = useState('');
   const [soundBlocked, setSoundBlocked] = useState(false);
   const [users, setUsers] = useState<AdminUserListItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -415,6 +432,8 @@ export default function AdminPanel() {
         return { background: '#dbeafe', color: '#1e40af' };
       case 'delivered':
         return { background: '#dcfce7', color: '#166534' };
+      case 'returned':
+        return { background: '#fee2e2', color: '#991b1b' };
       case 'cancelled':
         return { background: '#fee2e2', color: '#991b1b' };
       case 'pending':
@@ -424,49 +443,58 @@ export default function AdminPanel() {
   };
 
   const handleApproveOrder = async (order: Order) => {
-    if (!confirm(`Approve order ${order.orderId}?`)) {
-      return;
-    }
-
-    setOrderActionLoading(order.orderId);
-    try {
-      await updateOrderStatus({
-        orderId: order.orderId,
-        status: 'approved',
-        reviewedBy: user?.displayName || user?.email || 'Admin'
-      });
-      await loadOrders();
-    } catch (error) {
-      console.error('Error approving order:', error);
-      alert('Failed to approve order. Please try again.');
-    } finally {
-      setOrderActionLoading(null);
-    }
+    await handleTransitionOrderStatus(order, 'approved');
   };
 
   const handleRejectOrder = async (order: Order) => {
-    const reason = window.prompt('Reason for rejection (optional):')?.trim();
+    const reason = window.prompt('Reason for rejection (optional):')?.trim() || '';
+    await handleTransitionOrderStatus(order, 'rejected', { reason });
+  };
 
-    if (!confirm(`Reject order ${order.orderId}?`)) {
+  const handleTransitionOrderStatus = async (
+    order: Order,
+    targetStatus: TransitionStatus,
+    options?: { reason?: string; returnAmount?: number }
+  ) => {
+    if (!confirm(`Update order ${order.orderId} to ${targetStatus}?`)) {
       return;
     }
 
     setOrderActionLoading(order.orderId);
     try {
-      await updateOrderStatus({
+      await updateAdminOrderStatus({
         orderId: order.orderId,
-        status: 'rejected',
+        status: targetStatus,
         reviewedBy: user?.displayName || user?.email || 'Admin',
-        rejectionReason: reason || undefined
+        rejectionReason: targetStatus === 'rejected' ? options?.reason || undefined : undefined,
+        returnReason: targetStatus === 'returned' ? options?.reason || undefined : undefined,
+        returnAmount: targetStatus === 'returned' ? options?.returnAmount : undefined
       });
+      setNextOrderStatus('');
+      setTransitionReason('');
+      setTransitionReturnAmount('');
       await loadOrders();
     } catch (error) {
-      console.error('Error rejecting order:', error);
-      alert('Failed to reject order. Please try again.');
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status. Please try again.');
     } finally {
       setOrderActionLoading(null);
     }
   };
+
+  useEffect(() => {
+    if (!selectedOrder) {
+      setNextOrderStatus('');
+      setTransitionReason('');
+      setTransitionReturnAmount('');
+      return;
+    }
+
+    const transitions = ORDER_STATUS_TRANSITIONS[selectedOrder.status];
+    setNextOrderStatus(transitions[0] || '');
+    setTransitionReason('');
+    setTransitionReturnAmount(selectedOrder.totalAmount.toFixed(2));
+  }, [selectedOrder]);
 
   // Show loading while checking authentication
   if (authLoading || status === 'loading') {
@@ -597,6 +625,20 @@ export default function AdminPanel() {
             }}
           >
             Orders
+          </button>
+          <button
+            onClick={() => setActiveTab('sales')}
+            style={{
+              padding: '1rem 2rem',
+              background: activeTab === 'sales' ? '#8b5cf6' : 'transparent',
+              color: activeTab === 'sales' ? 'white' : '#374151',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              borderBottom: activeTab === 'sales' ? '3px solid #8b5cf6' : 'none'
+            }}
+          >
+            Sales
           </button>
           <button
             onClick={() => {
@@ -905,7 +947,7 @@ export default function AdminPanel() {
               borderRadius: '8px',
               width: 'fit-content'
             }}>
-              {(['all', 'pending', 'approved', 'rejected', 'confirmed', 'shipped', 'delivered', 'cancelled'] as AdminOrderStatus[]).map((statusValue) => {
+              {(['all', 'pending', 'approved', 'rejected', 'confirmed', 'shipped', 'delivered', 'returned', 'cancelled'] as AdminOrderStatus[]).map((statusValue) => {
                 const isActive = ordersFilter === statusValue;
                 const statusColors: Record<string, { active: string; dot: string }> = {
                   all: { active: '#0f172a', dot: '#64748b' },
@@ -915,6 +957,7 @@ export default function AdminPanel() {
                   confirmed: { active: '#ea580c', dot: '#fb923c' },
                   shipped: { active: '#7c3aed', dot: '#a78bfa' },
                   delivered: { active: '#16a34a', dot: '#4ade80' },
+                  returned: { active: '#dc2626', dot: '#f87171' },
                   cancelled: { active: '#6b7280', dot: '#9ca3af' }
                 };
                 return (
@@ -1088,6 +1131,7 @@ export default function AdminPanel() {
                             confirmed: { bg: '#ffedd5', text: '#9a3412', border: '#fdba74' },
                             shipped: { bg: '#ede9fe', text: '#5b21b6', border: '#c4b5fd' },
                             delivered: { bg: '#dcfce7', text: '#166534', border: '#86efac' },
+                            returned: { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
                             cancelled: { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' }
                           };
                           const config = statusConfig[order.status] || statusConfig.pending;
@@ -1341,6 +1385,7 @@ export default function AdminPanel() {
                             confirmed: { bg: '#ffedd5', text: '#9a3412', border: '#fdba74' },
                             shipped: { bg: '#ede9fe', text: '#5b21b6', border: '#c4b5fd' },
                             delivered: { bg: '#dcfce7', text: '#166534', border: '#86efac' },
+                            returned: { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
                             cancelled: { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' }
                           };
                           const config = statusConfig[selectedOrder.status] || statusConfig.pending;
@@ -1625,22 +1670,95 @@ export default function AdminPanel() {
                         </div>
                       </div>
 
-                      {/* Action Buttons for Pending Orders */}
-                      {selectedOrder.status === 'pending' && (
+                      {/* Order Status Transition */}
+                      {ORDER_STATUS_TRANSITIONS[selectedOrder.status].length > 0 && (
                         <div style={{
-                          display: 'flex',
-                          gap: '0.75rem',
                           marginTop: '1.25rem',
                           paddingTop: '1.25rem',
                           borderTop: '1px solid #e2e8f0'
                         }}>
+                          <div style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: '#94a3b8',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            marginBottom: '0.5rem'
+                          }}>
+                            Update Status
+                          </div>
+                          <div style={{ display: 'grid', gap: '0.625rem' }}>
+                            <select
+                              value={nextOrderStatus}
+                              onChange={(e) => setNextOrderStatus(e.target.value as TransitionStatus)}
+                              style={{
+                                padding: '0.5rem 0.625rem',
+                                borderRadius: '6px',
+                                border: '1px solid #d1d5db',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              {ORDER_STATUS_TRANSITIONS[selectedOrder.status].map((statusValue) => (
+                                <option key={statusValue} value={statusValue}>
+                                  {statusValue}
+                                </option>
+                              ))}
+                            </select>
+                            {(nextOrderStatus === 'rejected' || nextOrderStatus === 'returned') && (
+                              <textarea
+                                value={transitionReason}
+                                onChange={(e) => setTransitionReason(e.target.value)}
+                                placeholder={
+                                  nextOrderStatus === 'returned'
+                                    ? 'Reason for return (optional)'
+                                    : 'Reason for rejection (optional)'
+                                }
+                                style={{
+                                  width: '100%',
+                                  minHeight: '70px',
+                                  padding: '0.5rem 0.625rem',
+                                  borderRadius: '6px',
+                                  border: '1px solid #d1d5db',
+                                  fontSize: '0.8rem',
+                                  resize: 'vertical'
+                                }}
+                              />
+                            )}
+                            {nextOrderStatus === 'returned' && (
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={transitionReturnAmount}
+                                onChange={(e) => setTransitionReturnAmount(e.target.value)}
+                                placeholder="Return amount (MYR)"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem 0.625rem',
+                                  borderRadius: '6px',
+                                  border: '1px solid #d1d5db',
+                                  fontSize: '0.85rem'
+                                }}
+                              />
+                            )}
+                          </div>
                           <button
-                            onClick={() => handleApproveOrder(selectedOrder)}
-                            disabled={orderActionLoading === selectedOrder.orderId}
+                            onClick={() => {
+                              if (!nextOrderStatus) return;
+                              const parsedReturnAmount = nextOrderStatus === 'returned'
+                                ? Number(transitionReturnAmount || selectedOrder.totalAmount)
+                                : undefined;
+                              handleTransitionOrderStatus(selectedOrder, nextOrderStatus, {
+                                reason: transitionReason.trim() || undefined,
+                                returnAmount: parsedReturnAmount
+                              });
+                            }}
+                            disabled={orderActionLoading === selectedOrder.orderId || !nextOrderStatus}
                             style={{
-                              flex: 1,
+                              marginTop: '0.625rem',
+                              width: '100%',
                               padding: '0.625rem 1rem',
-                              background: orderActionLoading === selectedOrder.orderId ? '#d1d5db' : '#059669',
+                              background: orderActionLoading === selectedOrder.orderId ? '#d1d5db' : '#2563eb',
                               color: 'white',
                               border: 'none',
                               borderRadius: '8px',
@@ -1650,26 +1768,39 @@ export default function AdminPanel() {
                               transition: 'all 0.15s ease'
                             }}
                           >
-                            {orderActionLoading === selectedOrder.orderId ? 'Processing...' : 'Approve Order'}
+                            {orderActionLoading === selectedOrder.orderId
+                              ? 'Processing...'
+                              : `Set as ${nextOrderStatus}`}
                           </button>
-                          <button
-                            onClick={() => handleRejectOrder(selectedOrder)}
-                            disabled={orderActionLoading === selectedOrder.orderId}
-                            style={{
-                              flex: 1,
-                              padding: '0.625rem 1rem',
-                              background: 'white',
-                              color: '#dc2626',
-                              border: '1px solid #fca5a5',
-                              borderRadius: '8px',
-                              cursor: orderActionLoading === selectedOrder.orderId ? 'not-allowed' : 'pointer',
-                              fontSize: '0.8rem',
-                              fontWeight: 600,
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            Reject Order
-                          </button>
+                        </div>
+                      )}
+
+                      {selectedOrder.returnReason && (
+                        <div style={{
+                          marginBottom: '1.25rem',
+                          padding: '0.75rem',
+                          background: '#fef2f2',
+                          borderRadius: '8px',
+                          border: '1px solid #fecaca'
+                        }}>
+                          <div style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: '#991b1b',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            marginBottom: '0.375rem'
+                          }}>
+                            Return Details
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: '#991b1b' }}>
+                            {selectedOrder.returnReason}
+                            {typeof selectedOrder.returnAmount === 'number' && (
+                              <div style={{ marginTop: '0.25rem', fontWeight: 600 }}>
+                                Return amount: RM {selectedOrder.returnAmount.toFixed(2)}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1680,6 +1811,13 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+        {/* Sales Tab */}
+        {activeTab === 'sales' && (
+          <div style={{ padding: '0 1.5rem' }}>
+            <SalesReportPanel />
+          </div>
+        )}
 
         {/* Users Tab */}
         {activeTab === 'users' && (

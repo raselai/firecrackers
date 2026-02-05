@@ -11,6 +11,7 @@ export interface Order {
   vouchersApplied: number;       // Number of vouchers used
   voucherDiscount: number;       // vouchersApplied * 30 (RM)
   totalAmount: number;           // subtotal - voucherDiscount + deliveryFee
+  discountTotal?: number;        // voucherDiscount + registrationDiscount
 
   // Delivery
   deliveryArea: string;          // Area ID (e.g., 'kuala-lumpur')
@@ -33,11 +34,25 @@ export interface Order {
   promotionType?: 'none' | 'referral' | 'registration';
   registrationDiscount?: number;  // 10% of subtotal when registration voucher used
 
+  // Reporting fields
+  recognizedAt?: Date;
+  reportingCurrency?: 'MYR';
+  reportingTimezone?: 'Asia/Kuala_Lumpur';
+  financialVersion?: number;
+  cogs?: number;
+  deliverySubsidy?: number;
+  grossProfit?: number;
+  grossLoss?: number;
+  costEstimatedItemCount?: number;
+
   // Status
-  status: 'pending' | 'approved' | 'rejected' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'approved' | 'rejected' | 'confirmed' | 'shipped' | 'delivered' | 'returned' | 'cancelled';
   reviewedBy?: string;
   reviewedAt?: Date;
   rejectionReason?: string;
+  returnedAt?: Date;
+  returnReason?: string;
+  returnAmount?: number;
 
   // Notes
   adminNotes?: string;
@@ -54,5 +69,10 @@ export interface OrderItem {
   quantity: number;
   price: number;                 // Price per unit at time of order
   category?: string;             // Product category for voucher eligibility
+  unitCostAtOrder?: number;
+  lineRevenue?: number;
+  lineCost?: number;
+  lineProfit?: number;
+  costEstimated?: boolean;
 }
 
