@@ -20,6 +20,15 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Variables
+
+Create or update `.env.local` with your tracking IDs (optional for Meta Pixel, since a default is already set in code):
+
+```bash
+NEXT_PUBLIC_GOOGLE_TAG_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_META_PIXEL_ID=123456789012345
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
