@@ -16,8 +16,9 @@ import { nanoid } from 'nanoid';
 import { createOrderStatusNotification } from './notificationService';
 import {
   calculateEffectiveDeliveryFee,
+  FIXED_DELIVERY_AREA_ID,
+  FIXED_DELIVERY_AREA_NAME,
   getCodRequiredPaymentAmount,
-  getDeliveryAreaName
 } from '@/app/data/deliveryAreas';
 
 /**
@@ -174,7 +175,7 @@ export async function createOrder(params: {
   userId: string;
   items: OrderItem[];
   deliveryAddress: Address;
-  deliveryArea: string;
+  deliveryArea?: string;
   deliveryAreaName?: string;
   deliveryFee?: number;
   vouchersToUse?: number;
@@ -190,8 +191,7 @@ export async function createOrder(params: {
       userId,
       items,
       deliveryAddress,
-      deliveryArea,
-      deliveryAreaName: deliveryAreaNameFromClient,
+      deliveryArea: deliveryAreaFromClient,
       vouchersToUse = 0,
       promotionType = 'none',
       paymentProofUrl,
@@ -213,9 +213,10 @@ export async function createOrder(params: {
 
     // Calculate subtotal
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const deliveryArea = deliveryAreaFromClient || FIXED_DELIVERY_AREA_ID;
     const { baseFee: baseDeliveryFee, fee: deliveryFee, isFreeDelivery } =
       calculateEffectiveDeliveryFee(deliveryArea, subtotal, paymentMethod);
-    const deliveryAreaName = getDeliveryAreaName(deliveryArea) || deliveryAreaNameFromClient || deliveryArea;
+    const deliveryAreaName = FIXED_DELIVERY_AREA_NAME;
     const codRequiredPaymentAmount = paymentMethod === 'cod'
       ? getCodRequiredPaymentAmount(deliveryFee)
       : undefined;

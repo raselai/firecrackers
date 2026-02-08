@@ -20,7 +20,8 @@ import { generatePaymentProofPath, uploadImage } from '@/lib/storage';
 import { Address } from '@/types/user';
 import {
   calculateEffectiveDeliveryFee,
-  getDeliveryAreaName
+  FIXED_DELIVERY_AREA_ID,
+  FIXED_DELIVERY_AREA_NAME
 } from '@/app/data/deliveryAreas';
 
 const WALLET_NAME = 'Low Chee tong';
@@ -33,7 +34,6 @@ type CheckoutDraft = {
   promotionType: 'none' | 'referral' | 'registration';
   claimedVouchers: number[];
   paymentMethod: 'touch_n_go' | 'cod';
-  selectedDeliveryArea: string;
 };
 
 export default function CheckoutPaymentPage() {
@@ -47,7 +47,6 @@ export default function CheckoutPaymentPage() {
   const [promotionType, setPromotionType] = useState<'none' | 'referral' | 'registration'>('none');
   const [claimedVouchers, setClaimedVouchers] = useState<number[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState('');
-  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'touch_n_go' | 'cod'>('touch_n_go');
   const [codInfoOpen, setCodInfoOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -114,7 +113,6 @@ export default function CheckoutPaymentPage() {
       setPromotionType(parsed.promotionType);
       setClaimedVouchers(parsed.claimedVouchers || []);
       setSelectedAddressId(parsed.selectedAddressId || '');
-      setSelectedDeliveryArea(parsed.selectedDeliveryArea || localStorage.getItem('selectedDeliveryArea') || '');
       setPaymentMethod(parsed.paymentMethod || 'touch_n_go');
     } catch (storageError) {
       console.error('Failed to read checkout draft:', storageError);
@@ -155,11 +153,10 @@ export default function CheckoutPaymentPage() {
   }, [promotionType, subtotal]);
   const totalDiscount = voucherDiscount + registrationDiscount;
   const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(
-    selectedDeliveryArea,
+    FIXED_DELIVERY_AREA_ID,
     subtotal,
     paymentMethod
   );
-  const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
   const totalAmount = Math.max(subtotal - totalDiscount + deliveryFee, 0);
 
   const selectedAddress = useMemo<Address | undefined>(() => {
@@ -276,8 +273,8 @@ export default function CheckoutPaymentPage() {
           userId,
           items,
           deliveryAddress: selectedAddress,
-          deliveryArea: selectedDeliveryArea,
-          deliveryAreaName,
+          deliveryArea: FIXED_DELIVERY_AREA_ID,
+          deliveryAreaName: FIXED_DELIVERY_AREA_NAME,
           vouchersToUse: promotionType === 'referral' ? claimedCount : 0,
           promotionType,
           paymentMethod,
@@ -295,7 +292,6 @@ export default function CheckoutPaymentPage() {
       await response.json();
 
       sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
-      localStorage.removeItem('selectedDeliveryArea');
       await clearCart();
       router.push('/account/orders');
     } catch (orderError) {
@@ -533,12 +529,10 @@ export default function CheckoutPaymentPage() {
               <span>- RM {registrationDiscount.toFixed(2)}</span>
             </div>
           )}
-          {selectedDeliveryArea && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>
-              <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
-            </div>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <span>{t('checkout.deliveryFee')}</span>
+            <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
             <span>{t('checkout.total')}</span>
             <span>RM {totalAmount.toLocaleString()}</span>

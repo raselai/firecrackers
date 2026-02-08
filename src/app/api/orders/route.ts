@@ -6,8 +6,9 @@ import { Address } from '@/types/user';
 import { OrderItem } from '@/types/order';
 import {
   calculateEffectiveDeliveryFee,
+  FIXED_DELIVERY_AREA_ID,
+  FIXED_DELIVERY_AREA_NAME,
   getCodRequiredPaymentAmount,
-  getDeliveryAreaName
 } from '@/app/data/deliveryAreas';
 import { computeOrderFinancials, mapProductCosts } from '@/lib/server/orderFinancials';
 
@@ -16,7 +17,7 @@ type CreateOrderPayload = {
   userId: string;
   items: OrderItem[];
   deliveryAddress: Address;
-  deliveryArea: string;
+  deliveryArea?: string;
   deliveryAreaName?: string;
   vouchersToUse?: number;
   promotionType?: 'none' | 'referral' | 'registration';
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Order items are required.' }, { status: 400 });
     }
 
-    if (!payload.deliveryAddress || !payload.deliveryArea) {
+    if (!payload.deliveryAddress) {
       return NextResponse.json({ error: 'Delivery details are required.' }, { status: 400 });
     }
 
@@ -95,12 +96,13 @@ export async function POST(request: Request) {
     const promotionType = payload.promotionType || 'none';
     const vouchersToUse = payload.vouchersToUse || 0;
 
+    const deliveryArea = FIXED_DELIVERY_AREA_ID;
     const { baseFee: baseDeliveryFee, fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(
-      payload.deliveryArea,
+      deliveryArea,
       subtotal,
       payload.paymentMethod
     );
-    const deliveryAreaName = getDeliveryAreaName(payload.deliveryArea) || payload.deliveryAreaName || payload.deliveryArea;
+    const deliveryAreaName = FIXED_DELIVERY_AREA_NAME;
     const codRequiredPaymentAmount = payload.paymentMethod === 'cod'
       ? getCodRequiredPaymentAmount(deliveryFee)
       : undefined;
@@ -166,7 +168,7 @@ export async function POST(request: Request) {
       totalAmount,
       promotionType,
       registrationDiscount: registrationDiscount > 0 ? registrationDiscount : undefined,
-      deliveryArea: payload.deliveryArea,
+      deliveryArea,
       deliveryAreaName,
       baseDeliveryFee,
       deliveryFee,

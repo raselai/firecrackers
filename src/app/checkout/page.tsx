@@ -15,7 +15,7 @@ import {
 import { Address } from '@/types/user';
 import {
   calculateEffectiveDeliveryFee,
-  getDeliveryAreaName
+  FIXED_DELIVERY_AREA_ID
 } from '@/app/data/deliveryAreas';
 
 const CHECKOUT_DRAFT_KEY = 'checkoutDraft';
@@ -31,17 +31,15 @@ export default function CheckoutPage() {
   const [claimedVouchers, setClaimedVouchers] = useState<number[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'touch_n_go' | 'cod'>('touch_n_go');
   const [error, setError] = useState('');
-  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState<string>('');
   const [addressAlertOpen, setAddressAlertOpen] = useState(false);
   const [codInfoOpen, setCodInfoOpen] = useState(false);
 
   const addresses = user?.addresses || [];
   const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(
-    selectedDeliveryArea,
+    FIXED_DELIVERY_AREA_ID,
     subtotal,
     paymentMethod
   );
-  const deliveryAreaName = getDeliveryAreaName(selectedDeliveryArea);
 
   useEffect(() => {
     if (authLoading) return;
@@ -49,14 +47,6 @@ export default function CheckoutPage() {
       router.push('/login?redirect=/checkout');
     }
   }, [authLoading, firebaseUser, router]);
-
-  // Load delivery area from localStorage
-  useEffect(() => {
-    const savedArea = localStorage.getItem('selectedDeliveryArea');
-    if (savedArea) {
-      setSelectedDeliveryArea(savedArea);
-    }
-  }, []);
 
   useEffect(() => {
     if (addresses.length === 0) {
@@ -141,8 +131,7 @@ export default function CheckoutPage() {
           selectedAddressId,
           promotionType,
           claimedVouchers,
-          paymentMethod,
-          selectedDeliveryArea
+          paymentMethod
         })
       );
     } catch (storageError) {
@@ -481,12 +470,10 @@ export default function CheckoutPage() {
               <span>- RM {registrationDiscount.toFixed(2)}</span>
             </div>
           )}
-          {selectedDeliveryArea && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span>{t('checkout.deliveryFee')} ({deliveryAreaName})</span>
-              <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
-            </div>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <span>{t('checkout.deliveryFee')}</span>
+            <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', marginBottom: '1rem' }}>
             <span>{t('checkout.total')}</span>
             <span>RM {totalAmount.toLocaleString()}</span>

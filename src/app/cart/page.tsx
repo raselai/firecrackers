@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
 import { useUser } from '@/contexts/AuthContext';
 import { useI18n } from '@/i18n/I18nProvider';
-import { calculateEffectiveDeliveryFee, deliveryAreas } from '@/app/data/deliveryAreas';
+import { calculateEffectiveDeliveryFee, FIXED_DELIVERY_AREA_ID } from '@/app/data/deliveryAreas';
 import { fetchProducts } from '@/lib/productService';
 import { getLocalizedProductName } from '@/lib/utils';
 
@@ -17,11 +17,10 @@ export default function CartPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
   const { t, locale } = useI18n();
-  const [selectedDeliveryArea, setSelectedDeliveryArea] = useState('');
   const [localizedProductNames, setLocalizedProductNames] = useState<Record<string, string>>({});
   const [qtyInputs, setQtyInputs] = useState<Record<string, string>>({});
 
-  const { fee: deliveryFee, isFreeDelivery } = calculateEffectiveDeliveryFee(selectedDeliveryArea, subtotal);
+  const { fee: deliveryFee } = calculateEffectiveDeliveryFee(FIXED_DELIVERY_AREA_ID, subtotal);
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
@@ -31,11 +30,6 @@ export default function CartPage() {
       return;
     }
     setCheckingAuth(false);
-    // Restore saved delivery area from localStorage
-    const savedArea = localStorage.getItem('selectedDeliveryArea');
-    if (savedArea) {
-      setSelectedDeliveryArea(savedArea);
-    }
   }, [firebaseUser, authLoading, router]);
 
   useEffect(() => {
@@ -62,8 +56,6 @@ export default function CartPage() {
   }, [locale]);
 
   const handleProceedToCheckout = () => {
-    // Save delivery area to localStorage for checkout page
-    localStorage.setItem('selectedDeliveryArea', selectedDeliveryArea);
     router.push('/checkout');
   };
 
@@ -536,29 +528,10 @@ export default function CartPage() {
                 <span>RM {subtotal.toLocaleString()}</span>
               </div>
 
-              <div className="delivery-area-section">
-                <label htmlFor="delivery-area" className="delivery-label">{t('cart.deliveryArea')}</label>
-                <select
-                  id="delivery-area"
-                  value={selectedDeliveryArea}
-                  onChange={(e) => setSelectedDeliveryArea(e.target.value)}
-                  className="delivery-select"
-                >
-                  <option value="">{t('cart.selectDeliveryArea')}</option>
-                  {deliveryAreas.map((area) => (
-                    <option key={area.id} value={area.id}>
-                      {area.name} - RM {area.fee}
-                    </option>
-                  ))}
-                </select>
+              <div className="summary-row">
+                <span>{t('cart.deliveryFee')}</span>
+                <span>{`RM ${deliveryFee.toLocaleString()}`}</span>
               </div>
-
-              {selectedDeliveryArea && (
-                <div className="summary-row">
-                  <span>{t('cart.deliveryFee')}</span>
-                  <span>{isFreeDelivery ? t('cart.free') : `RM ${deliveryFee.toLocaleString()}`}</span>
-                </div>
-              )}
 
               <div className="summary-divider"></div>
 
@@ -570,7 +543,6 @@ export default function CartPage() {
               <button
                 onClick={handleProceedToCheckout}
                 className="checkout-btn"
-                disabled={!selectedDeliveryArea}
               >
                 {t('cart.proceedToCheckout')}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
