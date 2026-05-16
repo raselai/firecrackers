@@ -59,3 +59,4 @@ export async function deleteProduct(id: string): Promise<boolean> {
     throw error; // Re-throw to let the calling code handle it
   }
 } 
+

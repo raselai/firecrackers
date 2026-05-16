@@ -25,3 +25,4 @@ export const searchStaticProducts = (query: string) => {
     product.description?.toLowerCase().includes(searchTerm)
   );
 }; 
+

@@ -211,7 +211,7 @@ export default function OthersPage({ products }: OthersClientProps) {
             {t('categoryOthers.contactBody')}
           </p>
           <a
-                            href={`https://wa.me/0122150334?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
+                            href={`https://wa.me/601139602190?text=${encodeURIComponent(t('categoryOthers.whatsappMessage'))}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -244,3 +244,4 @@ export default function OthersPage({ products }: OthersClientProps) {
     </div>
   );
 } 
+

@@ -2,11 +2,9 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { PaymentSettings } from '@/types/paymentSettings';
 
-const PAYMENT_SETTINGS_DOC = doc(db, 'settings', 'payment');
-
 export async function getPaymentSettings(): Promise<PaymentSettings | null> {
   try {
-    const snapshot = await getDoc(PAYMENT_SETTINGS_DOC);
+    const snapshot = await getDoc(doc(db, 'settings', 'payment'));
     if (!snapshot.exists()) {
       return null;
     }
@@ -20,7 +18,7 @@ export async function getPaymentSettings(): Promise<PaymentSettings | null> {
 
 export async function updatePaymentSettings(settings: PaymentSettings): Promise<void> {
   try {
-    await setDoc(PAYMENT_SETTINGS_DOC, {
+    await setDoc(doc(db, 'settings', 'payment'), {
       ...settings,
       updatedAt: new Date()
     }, { merge: true });
@@ -29,3 +27,4 @@ export async function updatePaymentSettings(settings: PaymentSettings): Promise<
     throw error;
   }
 }
+

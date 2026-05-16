@@ -148,3 +148,4 @@ export default function DashboardOverview({ products }: DashboardOverviewProps) 
     </div>
   );
 }
+

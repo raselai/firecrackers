@@ -14,3 +14,4 @@ export interface CartSummary {
   voucherDiscount: number;
   totalAmount: number;
 }
+

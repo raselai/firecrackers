@@ -22,3 +22,4 @@ export default async function OthersPage() {
   const products = await fetchProducts();
   return <OthersClient products={products} />;
 }
+

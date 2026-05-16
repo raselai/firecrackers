@@ -29,7 +29,7 @@ Subject: ${formData.subject || 'General Inquiry'}
 
 Message: ${formData.message || 'I would like more information about your lighting solutions.'}`;
     
-    const whatsappUrl = `https://wa.me/0122150334?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/601139602190?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -121,7 +121,7 @@ Message: ${formData.message || 'I would like more information about your lightin
 
             <div className="contact-cta">
               <button 
-                onClick={() => window.open('https://wa.me/0122150334', '_blank')}
+                onClick={() => window.open('https://wa.me/601139602190', '_blank')}
                 className="btn btn-whatsapp"
               >
                 <span>💬</span>
@@ -547,3 +547,4 @@ Message: ${formData.message || 'I would like more information about your lightin
     </div>
   );
 } 
+

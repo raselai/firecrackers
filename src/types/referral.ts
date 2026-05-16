@@ -14,3 +14,4 @@ export interface ReferralStats {
   totalSavings: number;          // usedVouchers * 30
   referrals: Referral[];
 }
+

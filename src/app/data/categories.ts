@@ -14,3 +14,4 @@ export const categories = [
   { name: 'Big hole firework series', href: '/categories/big-hole-firework-series' },
   { name: 'Gift basket', href: '/categories/gift-basket' },
 ];
+

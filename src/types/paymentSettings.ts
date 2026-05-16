@@ -5,3 +5,4 @@ export interface PaymentSettings {
   qrImagePath?: string;
   updatedAt?: Date;
 }
+

@@ -93,3 +93,4 @@ export function organizeImagePath(category: string, productName: string, index: 
   const productSlug = productName.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
   return `${categorySlug}/${productSlug}-${index}.jpg`;
 }
+

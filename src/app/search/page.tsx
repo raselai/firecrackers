@@ -22,3 +22,4 @@ export default async function SearchPage() {
   const products = await fetchProducts();
   return <SearchClient products={products} />;
 }
+
